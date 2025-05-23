@@ -20,6 +20,7 @@ chmod +x ./release.sh
 # ToDo
 
 - [x] Tranliterate text to shavian
+- [ ] On/off switch on popup menu
 - [ ] Only transliterate when page's language is english
 - [ ] Create my own transliteration implementation
 
