@@ -15,6 +15,8 @@ chmod +x ./build.sh
 ./build.sh
 ```
 
+![Enabled Screenshot Showoff](./brave_screenshot_en.wikipedia.org.png)
+
 # ToDo
 
 - [ ] Tranliterate text to shavian
