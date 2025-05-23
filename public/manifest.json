@@ -1,6 +1,6 @@
 {
-  "name": "Repleace text extension",
-  "description": "An extension that repleaces text",
+  "name": "Transcribe to Shavian",
+  "description": "This extension will transliterate all english to Shavian",
   "version": "0.0.1",
   "manifest_version": 3,
   "permissions": ["<all_urls>"],

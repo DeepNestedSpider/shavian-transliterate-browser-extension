@@ -5,6 +5,7 @@
       "name": "shavianize-browser-extension",
       "dependencies": {
         "node": "^22.16.0",
+        "to-shavian": "^0.3.1",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -24,6 +25,8 @@
     "node": ["node@22.16.0", "", { "dependencies": { "node-bin-setup": "^1.0.0" }, "bin": { "node": "bin/node" } }, "sha512-rJlZ29rJLShrkDJrvLUfuxMJT5in2o1C0PhOPjZI9yHnctqk9m85sSyoAdhkN98Xb14NeobmCiIKFWqT2E1+bA=="],
 
     "node-bin-setup": ["node-bin-setup@1.1.4", "", {}, "sha512-vWNHOne0ZUavArqPP5LJta50+S8R261Fr5SvGul37HbEDcowvLjwdvd0ZeSr0r2lTSrPxl6okq9QUw8BFGiAxA=="],
+
+    "to-shavian": ["to-shavian@0.3.1", "", {}, "sha512-9vdbU1OPVk+LBxS1rB9XsBRaxU8uyYyfsO9+ka6ACxYfx6py8jib4AOzDdiCsr8mqnbUwebazsHWKzkX84Itew=="],
 
     "typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
