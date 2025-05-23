@@ -1,5 +1,5 @@
 {
-  "name": "Transcribe to Shavian",
+  "name": "Transliterate to Shavian",
   "description": "This extension will transliterate all english to Shavian",
   "version": "0.0.1",
   "manifest_version": 3,
