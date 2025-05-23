@@ -20,6 +20,6 @@ chmod +x ./build.sh
 # ToDo
 
 - [ ] Tranliterate text to shavian
-- [ ] Only transcribe when page's language is english
+- [ ] Only transliterate when page's language is english
 
 This project was created using `bun init` in bun v1.2.13. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
