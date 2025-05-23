@@ -8,6 +8,3 @@ echo "Copying forcefully all files from './public/' into './dist/'"
 cp ./public/* ./dist/ --force -v
 echo "Copying 'src/popup.html' into './dist'"
 cp ./src/popup.html ./dist/ --force -v
-echo "Packaging up at 'shavianize-extension'"
-cp ./dist -r -f -v ./shavianize-extension
-echo "All done"

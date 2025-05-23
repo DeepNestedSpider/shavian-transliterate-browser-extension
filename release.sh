@@ -2,25 +2,25 @@
 
 set -e
 
-echo "Building popup.ts, content.ts and background.ts into ./dist for target 'browser'"
-bun build ./src/popup.ts ./src/content.ts ./src/background.ts --outdir ./dist --target=browser 
-echo "Copying forcefully all files from './public/' into './dist/'"
-cp ./public/* ./dist/ --force -v
-echo "Copying 'src/popup.html' into './dist'"
-cp ./src/popup.html ./dist/ --force -v
+bash build.sh
 
 echo "Packaging up at 'shavianize-extension'"
 
 if [ ! -d "shavianize-extension" ]; then
+    echo "Creating folder './shavianize-extension'"
     mkdir -p "shavianize-extension"
 fi
 
+echo "Purging 'shavianize-extension' folder contents"
 rm -rf ./shavianize-extension/
+echo "Copying contents of './dist' to './shavianize-extension'"
 cp ./dist -r -f -v ./shavianize-extension
 
+echo "Purging './releases' folder contents"
 rm -rf ./releases/*
-echo "Compressing to tar.gz" 
+
+echo "Compressing to *.tar.gz and storing in 'releases'" 
 env GZIP=-9 tar cvzf ./releases/shavianize-extension.tar.gz ./shavianize-extension
-echo "Compressing to .zip"
+echo "Compressing to *.zip and storing in 'releases'" 
 zip -r ./releases/shavianize-extension.zip ./shavianize-extension/
 echo "All done"
