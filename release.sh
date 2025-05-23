@@ -4,23 +4,23 @@ set -e
 
 bash build.sh
 
-echo "Packaging up at 'shavianize-extension'"
+echo "Packaging up at 'shavian-transliterate-browser-extension'"
 
-if [ ! -d "shavianize-extension" ]; then
-    echo "Creating folder './shavianize-extension'"
-    mkdir -p "shavianize-extension"
+if [ ! -d "shavian-transliterate-browser-extension" ]; then
+    echo "Creating folder 'shavian-transliterate-browser-extension'"
+    mkdir -p "shavian-transliterate-browser-extension"
 fi
 
-echo "Purging 'shavianize-extension' folder contents"
-rm -rf ./shavianize-extension/
-echo "Copying contents of './dist' to './shavianize-extension'"
-cp ./dist -r -f -v ./shavianize-extension
+echo "Purging 'shavian-transliterate-browser-extension' folder contents"
+rm -rf shavian-transliterate-browser-extension
+echo "Copying contents of './dist' to './shavian-transliterate-browser-extension'"
+cp ./dist -r -f -v ./shavian-transliterate-browser-extension
 
 echo "Purging './releases' folder contents"
 rm -rf ./releases/*
 
 echo "Compressing to *.tar.gz and storing in 'releases'" 
-env GZIP=-9 tar cvzf ./releases/shavianize-extension.tar.gz ./shavianize-extension
+env GZIP=-9 tar cvzf ./releases/shavian-transliterate-browser-extension.tar.gz ./shavian-transliterate-browser-extension
 echo "Compressing to *.zip and storing in 'releases'" 
-zip -r ./releases/shavianize-extension.zip ./shavianize-extension/
+zip -r ./releases/shavian-transliterate-browser-extension.zip ./shavian-transliterate-browser-extension/
 echo "All done"

@@ -1,4 +1,4 @@
-# shavianize-browser-extension
+# shavian-transliterate-browser-extension
 
 This project uses to-shavian as the engine, and bun as the packager
 
