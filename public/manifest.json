@@ -1,0 +1,10 @@
+{
+  "name": "Transliterate The Web",
+  "description": "This extension attempts to transliterate all English text to the shavian Alphabet",
+  "version": "0.0.1",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "../src/popup/pupup.html",
+    "default_icon": "../public/icon-128.png"
+  }
+}
