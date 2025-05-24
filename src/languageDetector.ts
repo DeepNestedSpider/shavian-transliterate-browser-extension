@@ -12,31 +12,28 @@
  */
 enum LanguageCheckMode {
   HtmlLang = 'htmlLang',
-  I18nGlobal = 'i18nGlobal',
+  I18nPageText = 'i18nPageText', // Changed from I18nGlobal
 }
 
 /**
  * Retrieves the stored language check mode and transliteration setting from Chrome storage.
- * Defaults to HtmlLang and enabled transliteration if settings are not found or storage is unavailable. 
+ * Defaults to HtmlLang and enabled transliteration if settings are not found or storage is unavailable.
  * @returns A promise that resolves to an object containing the languageCheckMode and transliterationEnabled settings.
  */
 async function getSettings(): Promise<{ languageCheckMode: LanguageCheckMode, transliterationEnabled: boolean }> {
   let languageCheckMode: LanguageCheckMode = LanguageCheckMode.HtmlLang;
   let transliterationEnabled: boolean = true;
 
-  // Check if chrome.storage API is available (i.e., running as an extension) 
+  // Check if chrome.storage API is available (i.e., running as an extension)
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-    
     try {
       const settings = await chrome.storage.sync.get(['languageCheckMode', 'transliterationEnabled']);
-      // Validate and apply languageCheckMode setting 
+      // Validate and apply languageCheckMode setting
       if (settings.languageCheckMode && Object.values(LanguageCheckMode).includes(settings.languageCheckMode)) {
-        
         languageCheckMode = settings.languageCheckMode as LanguageCheckMode;
       }
-      // Apply transliterationEnabled setting 
+      // Apply transliterationEnabled setting
       if (typeof settings.transliterationEnabled === 'boolean') {
-        
         transliterationEnabled = settings.transliterationEnabled;
       }
     } catch (error) {
@@ -58,9 +55,8 @@ async function checkAndTransliterate(): Promise<void> {
   let isEnglish = false;
   let detectedLang = 'unknown';
 
-  // If transliteration is disabled by the user, exit early. 
+  // If transliteration is disabled by the user, exit early.
   if (!transliterationEnabled) {
-    
     console.log("Shavian transliteration is disabled by user settings.");
     return;
   }
@@ -73,36 +69,44 @@ async function checkAndTransliterate(): Promise<void> {
         detectedLang = lang;
         isEnglish = lang.toLowerCase().startsWith('en');
         if (isEnglish) {
-          
           console.log("HTML 'lang' attribute indicates English.");
         }
       }
       break;
-
-    case LanguageCheckMode.I18nGlobal:
-      // Check if chrome.i18n API is available 
+    case LanguageCheckMode.I18nPageText: // Changed from I18nGlobal
+      // Check if chrome.i18n API is available
       if (typeof chrome !== 'undefined' && chrome.i18n) {
-        
-        const uiLanguage = chrome.i18n.getUILanguage();
-        if (uiLanguage) {
-          
-          detectedLang = uiLanguage;
-          isEnglish = uiLanguage.toLowerCase().startsWith('en');
-          if (isEnglish) {
-            
-            console.log("Chrome i18n API detected English UI language.");
+        // Sample text from the page (e.g., first 500 characters of body text)
+        const textContent = document.body ? document.body.innerText.substring(0, 500) : '';
+        if (textContent.length > 0) {
+          try {
+            const detectionResult = await chrome.i18n.detectLanguage(textContent);
+            if (detectionResult && detectionResult.languages.length > 0) {
+              const primaryLanguage = detectionResult.languages[0];
+              detectedLang = primaryLanguage.language;
+              isEnglish = primaryLanguage.language.toLowerCase().startsWith('en') && primaryLanguage.percentage > 70; // Consider English if confidence is high
+              if (isEnglish) {
+                console.log(`Chrome i18n API detected English page text (${detectedLang} with ${primaryLanguage.percentage}% confidence).`);
+              } else {
+                console.log(`Chrome i18n API detected page text as ${detectedLang} (${primaryLanguage.percentage}% confidence).`);
+              }
+            } else {
+              console.warn('chrome.i18n.detectLanguage() returned no language. Proceeding without English detection.');
+            }
+          } catch (error) {
+            console.error('Error detecting language using chrome.i18n.detectLanguage:', error);
           }
         } else {
-          console.warn('chrome.i18n.getUILanguage() returned no language. Proceeding without English detection.');
+          console.warn('No text content found to detect language from. Proceeding without English detection.');
         }
       } else {
-        console.warn('chrome.i18n API is not available. Cannot perform global i18n language check. Proceeding without English detection.');
+        console.warn('chrome.i18n API is not available. Cannot perform page text i18n language check. Proceeding without English detection.');
       }
       break;
 
     default:
       console.warn(`An unrecognized language check mode was encountered: ${languageCheckMode}. Falling back to HtmlLang mode.`);
-      // Default to HTML Lang if an unknown mode is encountered 
+      // Default to HTML Lang if an unknown mode is encountered
       const defaultHtmlElement = document.documentElement;
       const defaultLang = defaultHtmlElement.getAttribute('lang');
       if (defaultLang) {
@@ -112,13 +116,14 @@ async function checkAndTransliterate(): Promise<void> {
       break;
   }
 
-  // If English is detected, invoke the transliteration script 
+  // If English is detected, invoke the transliteration script
   if (isEnglish) {
     console.log(`Detected language is English (${detectedLang}). Initializing shavianTransliterator.ts...`);
     // Dynamically import and execute the transliteration logic
     // Using `import()` for cleaner separation and potential future code splitting
     try {
-      await import('./shavianTransliterator'); // This will execute the side effects (shavianizePage, MutationObserver)
+      await import('./shavianTransliterator');
+      // This will execute the side effects (shavianizePage, MutationObserver)
       console.log('shavianTransliterator.ts was successfully invoked.');
     } catch (e) {
       console.error('Failed to load or execute shavianTransliterator.ts', e);

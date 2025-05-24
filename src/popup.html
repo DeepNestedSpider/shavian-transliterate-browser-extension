@@ -17,6 +17,12 @@
         margin-bottom: 20px;
         color: #2c3e50;
       }
+      /* New style for the H2 title */
+      h2 {
+        font-size: 1.1em;
+        margin-bottom: 15px;
+        color: #2c3e50;
+      }
       .mode-option {
         margin-bottom: 10px;
       }
@@ -121,6 +127,7 @@
     </style>
   </head>
   <body>
+    <h2>Transliteration Settings</h2>
     <div class="mode-option">
       <label class="switch">
         <input type="checkbox" id="transliterationToggle" />
@@ -151,14 +158,15 @@
       <label>
         <input
           type="radio"
-          id="i18nGlobal"
+          id="i18nPageText"
           name="languageMode"
-          value="i18nGlobal"
+          value="i18nPageText"
         />
-        Chrome i18n Global
+        Chrome i18n Page Text Detection
       </label>
       <p style="font-size: 0.8em; color: #666; margin-left: 25px">
-        Detects language using the browser's UI language via 'chrome.i18n' API.
+        Detects language by sampling the page's visible text content using
+        'chrome.i18n.detectLanguage'.
       </p>
     </div>
 
