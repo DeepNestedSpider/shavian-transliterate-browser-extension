@@ -75,14 +75,16 @@ async function checkAndTransliterate(): Promise<void> {
       // Check if chrome.i18n API is available
       if (typeof chrome !== 'undefined' && chrome.i18n) {
         // Sample text from the page (e.g., first 500 characters of body text)
-        const textContent = document.body ? document.body.innerText.substring(0, 500) : '';
+        const textContent = document.body ?
+          document.body.innerText.substring(0, 500) : '';
         if (textContent.length > 0) {
           try {
             const detectionResult = await chrome.i18n.detectLanguage(textContent);
             if (detectionResult && detectionResult.languages.length > 0) {
               const primaryLanguage = detectionResult.languages[0];
               detectedLang = primaryLanguage.language;
-              isEnglish = primaryLanguage.language.toLowerCase().startsWith('en') && primaryLanguage.percentage > 70; // Consider English if confidence is high
+              isEnglish = primaryLanguage.language.toLowerCase().startsWith('en') && primaryLanguage.percentage > 70;
+              // Consider English if confidence is high
               if (isEnglish) {
                 console.log(`Chrome i18n API detected English page text (${detectedLang} with ${primaryLanguage.percentage}% confidence).`);
               } else {
@@ -120,8 +122,7 @@ async function checkAndTransliterate(): Promise<void> {
     // Dynamically import and execute the transliteration logic
     // Using `import()` for cleaner separation and potential future code splitting
     try {
-      await import('./shavianTransliterator');
-      // This will execute the side effects (shavianizePage, MutationObserver)
+      await import('./shavianTransliterator'); // This will execute the side effects (shavianizePage, MutationObserver)
       console.log('shavianTransliterator.ts was successfully invoked.');
     } catch (e) {
       console.error('Failed to load or execute shavianTransliterator.ts', e);
@@ -130,6 +131,39 @@ async function checkAndTransliterate(): Promise<void> {
     console.log(`Detected language is not English (${detectedLang}). shavianTransliterator.ts will not be invoked.`);
   }
 }
+
+// Function to handle the force transliteration (new)
+async function handleForceTransliteration(): Promise<void> {
+  console.log("Force transliteration requested. Initializing shavianTransliterator.ts...");
+  try {
+    const shavianTransliterator = await import('./shavianTransliterator');
+    // Assuming shavianTransliterator.ts exports a function like `shavianizePage`
+    // If it executes directly on import, simply importing it again will re-run it.
+    // If it has a specific export, call that:
+    if (typeof (shavianTransliterator as any).shavianizePage === 'function') {
+      (shavianTransliterator as any).shavianizePage();
+    } else {
+      // If it only executes on import, then simply re-importing is enough.
+      // You might need to adjust shavianTransliterator.ts to expose a function
+      // if you want precise control over when it runs after the initial load.
+    }
+    console.log('Forced shavian transliteration complete.');
+  } catch (e) {
+    console.error('Failed to load or execute shavianTransliterator.ts for force transliteration', e);
+  }
+}
+
+// Listen for messages from the popup (new)
+if (typeof chrome !== 'undefined' && chrome.runtime) {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'forceTransliteration') {
+      handleForceTransliteration();
+      sendResponse({ status: 'transliteration initiated' });
+      return true; // Indicates that the response is sent asynchronously
+    }
+  });
+}
+
 
 // Execute the language check and transliteration process when the script loads
 checkAndTransliterate();

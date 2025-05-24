@@ -32,9 +32,10 @@ chmod +x ./release.sh
   - [x] Use HTML provided language.
   - [x] Use Chrome built-in language recognition.
 - [x] Offer a way to turn off the transliteration.
-- [ ] Setup automatic IPA recognition and avoidance
+- [x] Setup automatic IPA recognition and avoidance
 - [x] Setup unchanged word recognition and splitting
 - [x] Setup code snipet avoidance
+- [x] Offer force transliteration button to user
 
 ## Medium Term
 

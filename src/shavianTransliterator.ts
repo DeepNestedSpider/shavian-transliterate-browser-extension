@@ -1,4 +1,3 @@
-// src/shavianTransliterator.ts
 import toShavian from 'to-shavian';
 
 console.log("Shavian Transliteration Content Script loaded.");
