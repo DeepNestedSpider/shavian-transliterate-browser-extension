@@ -1,6 +1,4 @@
 /**
- * popup.ts
- *
  * This script manages the user interface for the extension's popup.
  * It allows users to select their preferred language detection mode
  * and toggle Shavian transliteration, saving these settings using chrome.storage.sync.

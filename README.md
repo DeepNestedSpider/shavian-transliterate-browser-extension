@@ -32,6 +32,12 @@ chmod +x ./release.sh
   - [x] Use HTML provided language.
   - [x] Use Chrome built-in language recognition.
 - [x] Offer a way to turn off the transliteration.
+- [ ] Setup automatic IPA recognition and avoidance
+- [ ] Setup unchanged word recognition and splitting
+- [ ] Setup code snipet avoidance
+
+## Medium Term
+
 - [ ] Setup options for transliteration library.
 - [ ] Create my own transliteration implementation.
   - Use a Phonetic Dictionary from English to IPA.
@@ -42,6 +48,7 @@ chmod +x ./release.sh
 ## Long-term goals
 
 - [ ] Refactor the code and expand comments.
+- [ ] Avoid transliterating code snipets.
 - [ ] Add custom font support.
 
 ## Thinkpad for Logic:

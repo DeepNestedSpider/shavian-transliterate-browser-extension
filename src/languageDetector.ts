@@ -1,6 +1,4 @@
 /**
- * languageDetector.ts
- *
  * This script is responsible for determining the document's language
  * based on user settings and initiating Shavian transliteration if the
  * detected language is English and transliteration is enabled.
