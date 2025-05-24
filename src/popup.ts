@@ -12,7 +12,7 @@
  */
 enum LanguageCheckMode {
   HtmlLang = 'htmlLang',
-  I18nPageText = 'i18nPageText', // Changed from I18nGlobal
+  I18nPageText = 'i18nPageText',
 }
 
 /**
@@ -41,7 +41,6 @@ async function loadSettings(): Promise<void> {
     } else {
       // Default to I18nPageText if no setting is found, it's invalid, or it's the default
       i18nPageTextRadio.checked = true;
-      // Changed from i18nGlobalRadio
     }
 
     // Set the state of the transliteration toggle
@@ -65,9 +64,8 @@ async function saveSettings(reloadPage: boolean = false): Promise<void> {
   // Determine the selected language check mode
   if (htmlLangRadio.checked) {
     selectedMode = LanguageCheckMode.HtmlLang;
-  } else if (i18nPageTextRadio.checked) { // Changed from i18nGlobalRadio
+  } else if (i18nPageTextRadio.checked) {
     selectedMode = LanguageCheckMode.I18nPageText;
-    // Changed from I18nGlobal
   } else {
     // This case should ideally not be hit if radio buttons are properly set.
     showStatusMessage('Please select a language mode.', 'error');

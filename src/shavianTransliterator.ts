@@ -40,7 +40,7 @@ function shavianizePage(): void {
         }
         // Reject empty or whitespace-only text nodes 
         if (node.nodeValue === null || node.nodeValue.trim().length === 0) {
-          
+
           return NodeFilter.FILTER_REJECT;
         }
         return NodeFilter.FILTER_ACCEPT;
@@ -50,7 +50,7 @@ function shavianizePage(): void {
 
   let node: Node | null;
   while ((node = walker.nextNode())) {
-    
+
     if (node.nodeType === Node.TEXT_NODE && node.nodeValue !== null) {
       const originalValue = node.nodeValue;
       // Split the text by spaces, process each word, and then rejoin 
@@ -58,7 +58,7 @@ function shavianizePage(): void {
       let shavianizedSegments: string[] = [];
 
       for (const segment of words) {
-        
+
         if (segment.match(/^\s+$/)) {
           // If it's a whitespace segment, keep it as is 
           shavianizedSegments.push(segment);
@@ -71,7 +71,7 @@ function shavianizePage(): void {
       const finalShavianizedValue = shavianizedSegments.join('');
       // Only update the DOM if a change actually occurred 
       if (finalShavianizedValue !== originalValue) {
-        
+
         node.nodeValue = finalShavianizedValue;
         changesMade = true;
       }
@@ -79,7 +79,7 @@ function shavianizePage(): void {
   }
 
   if (changesMade) {
-    
+
     console.log("Page shavianization complete. Changes were made.");
   } else {
     console.log("Page shavianization complete. No changes were made.");
@@ -109,13 +109,13 @@ const debouncedShavianize = debounce(shavianizePage, 500);
 
 // Set up a MutationObserver to re-shavianize content when the DOM changes 
 const observer = new MutationObserver((mutationsList, observer) => {
-  
+
   let relevantChange = false;
   for (const mutation of mutationsList) {
     // Check if the change is a childList modification (nodes added/removed) 
     // or characterData modification (text content changed) 
     if (mutation.type === 'childList' || mutation.type === 'characterData') {
-      
+
       relevantChange = true;
       break;
     }
@@ -129,7 +129,7 @@ const observer = new MutationObserver((mutationsList, observer) => {
 
 // Start observing the body (or html element) for changes 
 observer.observe(document.body || document.documentElement, {
-  
+
   childList: true,   // Observe direct children of the target 
   subtree: true,     // Observe all descendants of the target 
   characterData: true // Observe changes to the text content of nodes 
@@ -138,7 +138,7 @@ console.log("MutationObserver started for dynamic content.");
 
 // Re-shavianize when the tab becomes visible again (e.g., after switching tabs) 
 document.addEventListener('visibilitychange', () => {
-  
+
   if (document.visibilityState === 'visible') {
     console.log("Page became visible, re-shavianizing...");
     debouncedShavianize();

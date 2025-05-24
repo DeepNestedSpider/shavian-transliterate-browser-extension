@@ -32,13 +32,17 @@ chmod +x ./release.sh
   - [x] Use HTML provided language.
   - [x] Use Chrome built-in language recognition.
 - [x] Offer a way to turn off the transliteration.
+- [ ] Setup options for transliteration library.
+- [ ] Create my own transliteration implementation.
+  - Use a Phonetic Dictionary from English to IPA.
+  - [ ] Offer transliteration for IPA.
+  - Transliterate from IPA to Shavian
+- [ ] Work on the UI design
 
 ## Long-term goals
 
-- [ ] Create my own transliteration implementation.
-  - Use a Phonetic Dictionary from English to IPA.
-  - Transliterate from IPA to Shavian
-- [ ] Offer transliteration for IPA.
+- [ ] Refactor the code and expand comments.
+- [ ] Add custom font support.
 
 ## Thinkpad for Logic:
 
