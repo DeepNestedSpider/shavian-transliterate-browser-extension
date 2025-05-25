@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build:dist": "bun run scripts/build.ts"
+    "build:dist": "bun run scripts/build.ts",
+    "increment-version": "bun run scripts/version.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
