@@ -17,40 +17,45 @@ chmod +x ./release.sh
 
 # ToDo
 
-## Minimum viable product
+## Implemented Features:
 
-- [x] Effectively transliterate pages to Shavian alphabet.
+- [x] Transliteration by `npm to-shavian`
+- [x] Avoidance of text that should not be transliterated such as:
+  - [x] Code Snippets: `<code>`,`<pre>`, `<xmp>`
+  - [x] User Input Spaces: `<input>`, `<textarea>`
+  - [x] Embeded code: `<script>`, `<style>`, `<noscript>`, `<iframe>`
+  - [x] Non english scripts: (IPA, Turkish, etc) (alpha implementation)
+- [x] Recognize non-changed words and attempt to split them with `Intl.Segmenter`
+- [x] HTML Language recognition. (lang attribute)
+- [x] Chrome i18n Page Detection
+- [x] Preference popup options:
+  - [x] Disable transliteration
+  - [x] Website language detection method:
+    - [x] HTML Lang
+    - [x] Chrome i18n Page Detection
+    - [x] Force Transliteration
 
-## Short-term goals
+## High Priority and Low Complexity
 
-- [x] modularize system:
-  - [x] English transliteration.
-  - [x] Text language recognition.
-- [x] Set up language recognition
-- [x] Set up a method to store preferences. (extension popup)
-- [x] Offer a select menu with language recognition options as follow:
-  - [x] Use HTML provided language.
-  - [x] Use Chrome built-in language recognition.
-- [x] Offer a way to turn off the transliteration.
-- [x] Setup automatic IPA recognition and avoidance
-- [x] Setup unchanged word recognition and splitting
-- [x] Setup code snipet avoidance
-- [x] Offer force transliteration button to user
+Nothing Really
 
-## Medium Term
+## High Priority and High Complexity
 
-- [ ] Setup options for transliteration library.
+- [ ] Modularize Transliteration (to facilitate Engine integration)
+- [ ] Translate 'dechifro-transliterator' Python's Code to JavaScript
+- [ ] Work on the UI design
+
+## Low Priority and Low Complexity
+
+- [ ] Refactor the code and expand comments.
+- [ ] Add custom font support.
+
+## Low Priority and High Complexity
+
 - [ ] Create my own transliteration implementation.
   - Use a Phonetic Dictionary from English to IPA.
   - [ ] Offer transliteration for IPA.
   - Transliterate from IPA to Shavian
-- [ ] Work on the UI design
-
-## Long-term goals
-
-- [ ] Refactor the code and expand comments.
-- [ ] Avoid transliterating code snipets.
-- [ ] Add custom font support.
 
 ## Thinkpad for Logic:
 
@@ -59,6 +64,3 @@ chmod +x ./release.sh
 3.  `languageDetector.ts` retrieves configuration and tries to match the HTML language or browser UI language to English.
 4.  If English is detected and transliteration is enabled, `languageDetector.ts` dynamically imports and executes `shavianTransliterator.ts`.
 5.  `shavianTransliterator.ts` uses `to-shavian` to transliterate all relevant text elements on the website and sets up a `MutationObserver` for dynamic content.
-
-This project was created using `bun init` in bun v1.2.13.
-[Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
