@@ -6,7 +6,7 @@ bun run build:dist
 
 echo "Packaging up at 'shavian-transliterate-browser-extension'"
 
-if [ ! -d "shavian-transliterate-browser-extension" ]; then [cite: 105]
+if [ ! -d "shavian-transliterate-browser-extension" ]; then 
     echo "Creating folder 'shavian-transliterate-browser-extension'"
     mkdir -p "shavian-transliterate-browser-extension"
 fi
