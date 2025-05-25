@@ -37,17 +37,16 @@ chmod +x ./release.sh
 
 ## High Priority and Low Complexity
 
-Nothing Really
+- [ ] Work on the UI design
 
 ## High Priority and High Complexity
 
 - [ ] Modularize Transliteration (to facilitate Engine integration)
 - [ ] Translate 'dechifro-transliterator' Python's Code to JavaScript
-- [ ] Work on the UI design
 
 ## Low Priority and Low Complexity
 
-- [ ] Refactor the code and expand comments.
+- [ ] Modify the build process so that it doesn't require a bash script.
 - [ ] Add custom font support.
 
 ## Low Priority and High Complexity
