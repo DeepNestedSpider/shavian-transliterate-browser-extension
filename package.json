@@ -3,9 +3,13 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "build:dist": "bun run scripts/build.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/chrome": "^0.0.323"
+    "@types/chrome": "^0.0.323",
+    "@types/node": "^20.0.0"
   },
   "peerDependencies": {
     "typescript": "^5"

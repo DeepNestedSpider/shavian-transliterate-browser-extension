@@ -2,7 +2,7 @@
 
 set -e
 
-bash build-dist.sh
+bun run build:dist
 
 echo "Packaging up at 'shavian-transliterate-browser-extension'"
 

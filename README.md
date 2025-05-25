@@ -1,24 +1,49 @@
-# shavian-transliterate-browser-extension
+# What is this?
 
-This project uses to-shavian as the engine, and bun as the packager
+This project bundles to a browser extension that transliterates all the relevant content of a webpage
 
-To install dependencies:
+# Why does this exist?
+
+1. All the other implementations that i found for this same thing use ancient code, and they follow the manifest 2 specification.
+2. I wanted to try out Bunn
+3. I wanted to try out TypeScript/JavaScript
+4. I wanted to make a Browser Extension
+
+# Build Process
+
+## Linux
+
+### Install bun
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+
+[Source](https://bun.sh/)
+
+### Install Project's Dependencies
 
 ```bash
 bun install
 ```
 
-To build a release:
+### Build to `./dist/`
 
 ```bash
-chmod +x ./release.sh
-./release.sh
+bun run build:dist
+```
+
+### Build and archive to `*.zip` and `*.tar.gz`
+
+```bash
+./build-release.sh
 ```
 
 # ToDo
 
 ## Implemented Features:
 
+- [x] Build process mostly contained in bun (release packaging still contained in `./build-release.\*` scripts)
 - [x] Transliteration by `npm to-shavian`
 - [x] Avoidance of text that should not be transliterated such as:
   - [x] Code Snippets: `<code>`,`<pre>`, `<xmp>`
@@ -46,7 +71,6 @@ chmod +x ./release.sh
 
 ## Low Priority and Low Complexity
 
-- [ ] Modify the build process so that it doesn't require a bash script.
 - [ ] Add custom font support.
 
 ## Low Priority and High Complexity
@@ -63,3 +87,11 @@ chmod +x ./release.sh
 3.  `languageDetector.ts` retrieves configuration and tries to match the HTML language or browser UI language to English.
 4.  If English is detected and transliteration is enabled, `languageDetector.ts` dynamically imports and executes `shavianTransliterator.ts`.
 5.  `shavianTransliterator.ts` uses `to-shavian` to transliterate all relevant text elements on the website and sets up a `MutationObserver` for dynamic content.
+
+## This project was developed using:
+
+PC: SteamDeck
+OS: Bazzite/Distrobox/Archlinux btw
+Bundler: Bun
+Transliteration Engines: `to-shavian`
+Text Editor: NeoVim + AstronVim + AstroCommunity
