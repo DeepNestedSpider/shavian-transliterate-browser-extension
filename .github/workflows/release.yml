@@ -1,0 +1,48 @@
+name: Release CI
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # This workflow will run whenever a tag starting with 'v' (e.g., v0.0.1) is pushed.
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest # Use a Linux runner for Bun and shell scripts
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest # Or specify a precise version like '1.x'
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build and Package Release
+        run: |
+          chmod +x ./build-release.sh # Make the script executable
+          ./build-release.sh
+
+      - name: Get current version from manifest
+        id: get_version
+        run: |
+          VERSION=$(jq -r '.version' ./public/manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./releases/shavian-transliterate-browser-extension.tar.gz
+            ./releases/shavian-transliterate-browser-extension.zip
+          name: Release ${{ steps.get_version.outputs.version }}
+          tag_name: ${{ github.ref_name }} # Uses the pushed tag name (e.g., v0.0.X)
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is automatically provided by GitHub Actions
