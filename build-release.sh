@@ -6,7 +6,7 @@ bun run build:dist
 
 echo "Packaging up at 'shavian-transliterate-browser-extension'"
 
-if [ ! -d "shavian-transliterate-browser-extension" ]; then 
+if [ ! -d "shavian-transliterate-browser-extension" ]; then
     echo "Creating folder 'shavian-transliterate-browser-extension'"
     mkdir -p "shavian-transliterate-browser-extension"
 fi
@@ -18,6 +18,8 @@ cp -r -f -v ./dist/* ./shavian-transliterate-browser-extension/ # Copy contents,
 
 echo "Purging './releases' folder contents"
 rm -rf ./releases/*
+
+mkdir -p ./releases
 
 echo "Compressing to *.tar.gz and storing in 'releases'"
 env GZIP=-9 tar cvzf ./releases/shavian-transliterate-browser-extension.tar.gz ./shavian-transliterate-browser-extension
