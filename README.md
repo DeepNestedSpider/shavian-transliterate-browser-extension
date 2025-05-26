@@ -141,14 +141,12 @@ bun run build:dist
 │       ├── icon-128.png
 │       ├── icon-16.png
 │       └── icon-48.png
-├── releases/                         # Release archives
-│   ├── shavian-transliterate-browser-extension.tar.gz
-│   └── shavian-transliterate-browser-extension.zip
 ├── scripts/                          # Build and utility scripts
 │   ├── build.ts
 │   └── version.ts
 ├── showcase/
-│   └── wikipedia-video.webm
+│   ├── wikipedia-video.gif
+│   └── wikipedia-video.mp4
 ├── src/                              # TypeScript source code
 │   ├── content.ts                    # Content script entry point
 │   ├── languageDetector.ts           # Language detection utilities
@@ -162,20 +160,20 @@ bun run build:dist
 │   │   └── transliterationEngine.ts  # Main transliteration logic
 │   ├── dictionaries/
 │   │   ├── index.ts                  # Dictionary exports
-│   │   ├── readlex.ts                # Readlexicon dictionary
+│   │   └── readlex.ts                # Readlexicon dictionary
 │   └── types/                        # TypeScript type definitions
-├── tests/                            # Test files
-│   ├── basic.test.ts
-│   ├── dechifro-regression.test.ts
-│   ├── function-words.test.ts
-│   ├── math.test.ts
-│   ├── new-dechifro.test.ts
-│   ├── pos-tagger-integration.test.ts
-│   ├── readlexicon-regression.test.ts
-│   ├── readlexicon.test.ts
-│   ├── refactored.test.ts
-│   ├── simple-debug.test.ts
-│   └── simple-readlexicon.test.ts
+└── tests/                            # Test files
+    ├── basic.test.ts
+    ├── dechifro-regression.test.ts
+    ├── function-words.test.ts
+    ├── math.test.ts
+    ├── new-dechifro.test.ts
+    ├── pos-tagger-integration.test.ts
+    ├── readlexicon-regression.test.ts
+    ├── readlexicon.test.ts
+    ├── refactored.test.ts
+    ├── simple-debug.test.ts
+    └── simple-readlexicon.test.ts
 ```
 
 ### How It Works
