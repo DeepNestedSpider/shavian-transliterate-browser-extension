@@ -45,12 +45,18 @@ export class ReadlexiconTransliterator {
 
   async transliterate(text: string): Promise<string> {
     await this.ready();
-    return this.engine.transliterate(text);
+    let result = this.engine.transliterate(text);
+    // Replace quotes with Shavian equivalents
+    result = this.replaceQuotes(result);
+    return result;
   }
 
   async transliterateWord(word: string): Promise<string> {
     await this.ready();
-    return this.engine.transliterateWord(word);
+    let result = this.engine.transliterateWord(word);
+    // Replace quotes with Shavian equivalents
+    result = this.replaceQuotes(result);
+    return result;
   }
 
   async addToDictionary(word: string, transliteration: string): Promise<void> {
@@ -72,6 +78,26 @@ export class ReadlexiconTransliterator {
     const tokens: POSTaggedToken[] = posTagSentence(text);
     // Use the new POS-aware method in the engine
     // @ts-ignore: method exists in our extended engine
-    return this.engine.transliterateWithPOSTags(tokens);
+    let result = this.engine.transliterateWithPOSTags(tokens);
+    // Replace quotes with Shavian equivalents
+    result = this.replaceQuotes(result);
+    return result;
+  }
+
+  /**
+   * Replace standard and curly quotes with Shavian equivalents ‹ and ›
+   * Logs input and output for debugging.
+   */
+  private replaceQuotes(text: string): string {
+    // Match straight and curly double quotes
+    const quoteRegex = /["“”]/g;
+    let open = true;
+    const replaced = text.replace(quoteRegex, () => (open = !open) ? '‹' : '›');
+    // Debug log
+    if (text !== replaced) {
+      console.log('[Shavian Quote Replace] Before:', text);
+      console.log('[Shavian Quote Replace] After:', replaced);
+    }
+    return replaced;
   }
 }
