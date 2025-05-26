@@ -7,8 +7,9 @@
     "build:dist": "bun run scripts/build.ts",
     "increment-version": "bun run scripts/version.ts",
     "convert-dict": "bun run scripts/convert-dict.js",
-    "test": "bun run tests/test-refactored.ts",
-    "test:all": "for f in tests/*.ts; do echo \"Running $f\"; bun run \"$f\"; done",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage",
     "clean": "rm -rf dist/ temp/ *.tmp temp_* *_backup *.backup"
   },
   "devDependencies": {

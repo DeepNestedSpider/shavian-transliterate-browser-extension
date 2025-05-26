@@ -85,18 +85,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 5. Add all changes to staging (including built files)
+# 5. Add all changes to staging (excluding releases folder since it's in .gitignore)
 echo "📋 Adding changes to Git staging..."
 git add ./public/manifest.json
-git add ./releases/
 
-# 6. Commit the version bump and releases
+# 6. Commit the version bump
 echo "💾 Committing version v$NEW_VERSION..."
 git commit -m "Release v$NEW_VERSION
 
-- Bump version to v$NEW_VERSION
-- Add release packages
-- Built extension files"
+- Bump version to v$NEW_VERSION"
 
 # 7. Create a Git tag
 echo "🏷️  Creating Git tag v$NEW_VERSION..."

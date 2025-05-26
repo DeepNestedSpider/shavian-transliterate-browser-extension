@@ -1,0 +1,3 @@
+[test]
+# Test configuration for Bun
+timeout = 30000
