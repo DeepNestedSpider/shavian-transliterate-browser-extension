@@ -7,7 +7,7 @@ import { posTagSentence } from './core/posTagger';
 import type { POSTaggedToken } from './core/posTagger';
 
 export interface DechifroTransliteratorConfig {
-  dictionary?: 'amer' | 'brit' | 'vs1';
+  dictionary?: 'amer' | 'brit' | 'vs1' | 'readlex';
 }
 
 export class DechifroTransliterator {
@@ -16,7 +16,7 @@ export class DechifroTransliterator {
 
   constructor(config: DechifroTransliteratorConfig = {}) {
     this.engine = new DechifroEngine();
-    this.initializationPromise = this.loadDictionary(config.dictionary || 'amer');
+    this.initializationPromise = this.loadDictionary('readlex');
   }
 
   /**
@@ -26,35 +26,19 @@ export class DechifroTransliterator {
     await this.initializationPromise;
   }
 
-  private async loadDictionary(dictionary: 'amer' | 'brit' | 'vs1'): Promise<void> {
+  private async loadDictionary(dictionary: 'amer' | 'brit' | 'vs1' | 'readlex'): Promise<void> {
     try {
       let dictionaryData: Record<string, string>;
-      
-      switch (dictionary) {
-        case 'amer':
-          const { amerDict } = await import('./dictionaries/amer');
-          dictionaryData = amerDict;
-          break;
-        case 'brit':
-          const { britDict } = await import('./dictionaries/brit');
-          dictionaryData = britDict;
-          break;
-        case 'vs1':
-          const { vs1Dict } = await import('./dictionaries/vs1');
-          dictionaryData = vs1Dict;
-          break;
-        default:
-          throw new Error(`Unknown dictionary: ${dictionary}`);
-      }
-
+      // Always use readlexDict regardless of input
+      const { readlexDict } = await import('./dictionaries/readlex');
+      dictionaryData = readlexDict;
       // Load the dictionary into the engine
       for (const [key, value] of Object.entries(dictionaryData)) {
         this.engine.addToDictionary(key, value);
       }
-      
-      console.log(`Loaded ${dictionary} dictionary with ${this.engine.getDictionarySize()} entries`);
+      console.log(`Loaded readlex dictionary with ${this.engine.getDictionarySize()} entries`);
     } catch (error) {
-      console.error(`Failed to load ${dictionary} dictionary:`, error);
+      console.error(`Failed to load readlex dictionary:`, error);
       throw error;
     }
   }

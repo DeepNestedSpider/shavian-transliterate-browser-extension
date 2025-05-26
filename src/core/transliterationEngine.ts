@@ -303,8 +303,8 @@ export class TransliterationEngineFactory {
       case 'dechifro':
         if (!this.dechifroInstance) {
           // Dynamically import dictionary data
-          const { amerDict } = await import('../dictionaries/amer');
-          this.dechifroInstance = new DechifroEngine(amerDict);
+          const { readlexDict } = await import('../dictionaries/readlex');
+          this.dechifroInstance = new DechifroEngine(readlexDict);
         }
         return this.dechifroInstance;
 
