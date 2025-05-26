@@ -93,6 +93,7 @@ This browser extension was created to address several limitations in existing Sh
 2. **Learning opportunity**: Explore Bun, TypeScript, and modern browser extension development
 3. **Better user experience**: Provide a more reliable and feature-rich transliteration tool
 4. **Performance**: Leverage modern web APIs for faster, more efficient transliteration
+5. **Accuracy**: Existing implementations provided unsatisfactory results
 
 ### Development Setup
 
@@ -121,37 +122,60 @@ bun run build:dist
 
 # Production release (creates .zip and .tar.gz archives)
 ./build-release.sh        # Linux/macOS
-./build-release.bat       # Windows (CMD)
-./build-release.ps1       # Windows (PowerShell)
 ```
 
 ### Project Architecture
 
 ```
 📁 Project Structure
-├── 📂 src/                          # TypeScript source code
-│   ├── 📂 core/                     # Core transliteration engines
-│   │   ├── domTransliterator.ts     # DOM manipulation utilities
-│   │   └── transliterationEngine.ts # Main transliteration logic
-│   ├── 📂 dictionaries/             # Language dictionaries
-│   │   ├── amer.ts                  # American English dictionary
-│   │   ├── brit.ts                  # British English dictionary
-│   │   ├── vs1.ts                   # Alternative dictionary
-│   │   └── index.ts                 # Dictionary exports
-│   ├── 📂 types/                    # TypeScript type definitions
-│   ├── content.ts                   # Content script entry point
-│   ├── popup.ts                     # Extension popup logic
-│   ├── popup.html                   # Extension popup UI
-│   ├── languageDetector.ts          # Language detection utilities
-│   ├── shavianTransliterator.ts     # Main transliterator
-│   └── readlexiconTransliterator.ts    # Alternative transliterator
-├── 📂 public/                       # Static assets
-│   ├── manifest.json               # Extension manifest
-│   └── 📂 icons/                   # Extension icons
-├── 📂 scripts/                      # Build and utility scripts
-├── 📂 tests/                        # Test files
-├── 📂 dist/                         # Built extension (generated)
-└── 📂 releases/                     # Release archives
+├── build-release.sh                  # Release build script
+├── bun.lock                          # Bun lockfile
+├── bunfig.toml                       # Bun configuration
+├── github-release.sh                 # GitHub release script
+├── package.json                      # Project metadata and scripts
+├── README.md                         # Project documentation
+├── tsconfig.json                     # TypeScript configuration
+├── public/
+│   ├── manifest.json                 # Extension manifest
+│   └── icons/
+│       ├── icon-128.png
+│       ├── icon-16.png
+│       └── icon-48.png
+├── releases/                         # Release archives
+│   ├── shavian-transliterate-browser-extension.tar.gz
+│   └── shavian-transliterate-browser-extension.zip
+├── scripts/                          # Build and utility scripts
+│   ├── build.ts
+│   └── version.ts
+├── showcase/
+│   └── wikipedia-video.webm
+├── src/                              # TypeScript source code
+│   ├── content.ts                    # Content script entry point
+│   ├── languageDetector.ts           # Language detection utilities
+│   ├── popup.html                    # Extension popup UI
+│   ├── popup.ts                      # Extension popup logic
+│   ├── readlexiconTransliterator.ts  # Alternative transliterator
+│   ├── shavianTransliterator.ts      # Main transliterator
+│   ├── core/
+│   │   ├── domTransliterator.ts      # DOM manipulation utilities
+│   │   ├── posTagger.ts              # POS tagging utilities
+│   │   └── transliterationEngine.ts  # Main transliteration logic
+│   ├── dictionaries/
+│   │   ├── index.ts                  # Dictionary exports
+│   │   ├── readlex.ts                # Readlexicon dictionary
+│   └── types/                        # TypeScript type definitions
+├── tests/                            # Test files
+│   ├── basic.test.ts
+│   ├── dechifro-regression.test.ts
+│   ├── function-words.test.ts
+│   ├── math.test.ts
+│   ├── new-dechifro.test.ts
+│   ├── pos-tagger-integration.test.ts
+│   ├── readlexicon-regression.test.ts
+│   ├── readlexicon.test.ts
+│   ├── refactored.test.ts
+│   ├── simple-debug.test.ts
+│   └── simple-readlexicon.test.ts
 ```
 
 ### How It Works
@@ -165,7 +189,7 @@ bun run build:dist
    - Dynamically imports `shavianTransliterator.ts`
    - Initializes transliteration engine
 4. **Text Processing**: `shavianTransliterator.ts` processes text using:
-   - Custom readlexicon transliterator for advanced cases
+   - Custom readlexicon transliterator
    - DOM manipulation to update page content
 5. **Dynamic Updates**: `MutationObserver` monitors for new content and transliterates it automatically
 
@@ -214,7 +238,6 @@ bun run test:all
 #### High Complexity
 - ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
 - ✅ **Readlexicon Integration**: Port Python readlexicon-transliterator to JavaScript
-- [ ] **Advanced Language Detection**: Machine learning-based language identification
 
 ### 🔮 Future Vision (Long Term)
 
@@ -222,14 +245,11 @@ bun run test:all
 - [ ] **Custom Font Support**: Allow users to specify preferred Shavian fonts
 - [ ] **Keyboard Shortcuts**: Hotkeys for quick transliteration toggle
 - [ ] **Export Features**: Save transliterated content as files
+- [ ] **Both ways transliteration**: Transliterate shavian to Latin Alphabet
 
 #### High Complexity
-- [ ] **Custom Transliteration Engine**: Build proprietary transliterator with:
-  - English to IPA phonetic conversion
-  - IPA to Shavian mapping
-  - Advanced pronunciation rules
-- [ ] **Multi-language Support**: Extend beyond English to other languages
-- [ ] **Real-time Collaboration**: Share transliterated content with others
+- [ ] **Multi-language Support**: Extend beyond English to other languages that have alternate scripts
+- [ ] **User input transliteration (both ways)**: Share transliterated content with others
 
 ## 🏗️ Technical Details
 
@@ -254,9 +274,9 @@ bun run test:all
 
 ### Performance Characteristics
 
-- **Memory Usage**: ~2-5MB typical, ~10MB with large pages
-- **CPU Impact**: Minimal (<1% on modern systems)
-- **Load Time**: <100ms initialization on most pages
+- **Memory Usage**: Reevaluating this data
+- **CPU Impact**: Reevaluating this data
+- **Load Time**: Reevaluating this data
 - **Network**: No external requests (all processing local)
 
 ## 🤝 Contributing
