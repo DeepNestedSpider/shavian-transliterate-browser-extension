@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page for Shavian Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .controls {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shavian Transliteration Test Page</h1>
+    
+    <div class="controls">
+        <h3>Extension Controls</h3>
+        <p>If the extension is loaded, it should automatically detect this English page and transliterate the text.</p>
+        <button onclick="forceTransliterate()">Force Transliteration</button>
+        <button onclick="reloadPage()">Reload Page</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Common Words Test</h2>
+        <p>This paragraph contains common English words that should be in our test dictionary:</p>
+        <p><strong>hello world test the and a to of in is it you that he was for are with as i his they be at one have this from</strong></p>
+        <p>These words should transliterate using the dechifro engine if it's working properly.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Regular Text Test</h2>
+        <p>This is a normal paragraph with regular English text. The extension should automatically transliterate this content when the page loads if English is detected.</p>
+        <p>Here are some more words to test: hello, world, test, time, make, like, could, would, should, people, great, right, good, work, life, way, day, get, come, know, think, see, look, use, find, give, tell, ask, try, call, need, feel, become, leave, put, mean, keep, let, begin, seem, help, talk, turn, start, might, show, hear, play, run, move, live, believe, hold, bring, happen, write, provide, sit, stand, lose, pay, meet, include, continue, set, learn, change, lead, understand, watch, follow, stop, create, speak, read, allow, add, spend, grow, open, walk, win, offer, remember, love, consider, appear, buy, wait, serve, die, send, expect, build, stay, fall, cut, reach, kill, remain.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Mixed Content Test</h2>
+        <p>This section has <code>code snippets</code> that should NOT be transliterated.</p>
+        <pre>function example() {
+    console.log("This code should not be transliterated");
+}</pre>
+        <p>But this regular text should be transliterated: The quick brown fox jumps over the lazy dog.</p>
+    </div>
+
+    <script>
+        function forceTransliterate() {
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                chrome.runtime.sendMessage({action: 'forceTransliteration'}, (response) => {
+                    console.log('Force transliteration response:', response);
+                });
+            } else {
+                alert('Extension not detected or chrome.runtime not available');
+            }
+        }
+
+        function reloadPage() {
+            location.reload();
+        }
+
+        // Log when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Test page loaded. Extension should detect English and start transliteration.');
+        });
+    </script>
+</body>
+</html>

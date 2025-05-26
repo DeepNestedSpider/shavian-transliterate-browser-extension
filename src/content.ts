@@ -1,1 +1,5 @@
-const languageMatcher = require('./languageDetector.ts')
+/**
+ * Content script entry point
+ * Initializes language detection and transliteration
+ */
+import './languageDetector';

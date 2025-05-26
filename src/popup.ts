@@ -14,125 +14,240 @@ enum LanguageCheckMode {
 }
 
 /**
- * References to DOM elements in the popup.
+ * Enum for transliteration engine types.
  */
-const htmlLangRadio = document.getElementById('htmlLang') as HTMLInputElement;
-const i18nPageTextRadio = document.getElementById('i18nPageText') as HTMLInputElement;
-const saveButton = document.getElementById('saveButton') as HTMLButtonElement;
-const statusMessage = document.getElementById('statusMessage') as HTMLParagraphElement;
-const transliterationToggle = document.getElementById('transliterationToggle') as HTMLInputElement;
-const forceTransliterationButton = document.getElementById('forceTransliterationButton') as HTMLButtonElement; // NEW ELEMENT REFERENCE
-
-/**
- * Loads the current language check mode and transliteration enabled setting
- * from chrome.storage.sync and updates the UI accordingly.
- */
-async function loadSettings(): Promise<void> {
-  try {
-    // Attempt to retrieve settings from Chrome storage
-    const settings = await chrome.storage.sync.get(['languageCheckMode', 'transliterationEnabled']);
-    const currentMode = settings.languageCheckMode as LanguageCheckMode | undefined;
-    const transliterationEnabled = settings.transliterationEnabled as boolean | undefined;
-    // Set the selected radio button based on the loaded mode
-    if (currentMode === LanguageCheckMode.HtmlLang) {
-      htmlLangRadio.checked = true;
-    } else {
-      // Default to I18nPageText if no setting is found, it's invalid, or it's the default
-      i18nPageTextRadio.checked = true;
-    }
-
-    // Set the state of the transliteration toggle
-    transliterationToggle.checked = transliterationEnabled !== false; // Default to true if not explicitly set to false
-  } catch (error) {
-    console.error('Error loading settings:', error);
-    showStatusMessage('Error loading settings.', 'error');
-  }
+enum TransliterationEngine {
+  ToShavian = 'to-shavian',
+  Dechifro = 'dechifro',
 }
 
 /**
- * Saves the selected language check mode and transliteration toggle state
- * to chrome.storage.sync.
- *
- * @param {boolean} [reloadPage=false] - Whether to reload the active tab after saving settings.
+ * Interface for popup settings
  */
-async function saveSettings(reloadPage: boolean = false): Promise<void> {
-  let selectedMode: LanguageCheckMode;
-  // Determine the selected language check mode
-  if (htmlLangRadio.checked) {
-    selectedMode = LanguageCheckMode.HtmlLang;
-  } else if (i18nPageTextRadio.checked) {
-    selectedMode = LanguageCheckMode.I18nPageText;
-  } else {
-    // This case should ideally not be hit if radio buttons are properly set.
-    showStatusMessage('Please select a language mode.', 'error');
-    return;
+interface PopupSettings {
+  languageCheckMode: LanguageCheckMode;
+  transliterationEnabled: boolean;
+  transliterationEngine: TransliterationEngine;
+}
+
+/**
+ * Default settings for the extension
+ */
+const DEFAULT_SETTINGS: PopupSettings = {
+  languageCheckMode: LanguageCheckMode.HtmlLang,
+  transliterationEnabled: true,
+  transliterationEngine: TransliterationEngine.ToShavian,
+};
+
+/**
+ * Class responsible for managing popup settings and UI interactions
+ */
+class PopupManager {
+  private languageModeSelect: HTMLSelectElement;
+  private saveButton: HTMLButtonElement;
+  private statusMessage: HTMLParagraphElement;
+  private transliterationToggle: HTMLInputElement;
+  private forceTransliterationButton: HTMLButtonElement;
+  private transliterationEngineSelect: HTMLSelectElement;
+  private refreshButton: HTMLButtonElement;
+  private resetDefaultsButton: HTMLButtonElement;
+
+  constructor() {
+    // Initialize DOM element references
+    this.languageModeSelect = this.getElement('languageModeSelect') as HTMLSelectElement;
+    this.saveButton = this.getElement('saveButton') as HTMLButtonElement;
+    this.statusMessage = this.getElement('statusMessage') as HTMLParagraphElement;
+    this.transliterationToggle = this.getElement('transliterationToggle') as HTMLInputElement;
+    this.forceTransliterationButton = this.getElement('forceTransliterationButton') as HTMLButtonElement;
+    this.transliterationEngineSelect = this.getElement('transliterationEngineSelect') as HTMLSelectElement;
+    this.refreshButton = this.getElement('refreshButton') as HTMLButtonElement;
+    this.resetDefaultsButton = this.getElement('resetDefaultsButton') as HTMLButtonElement;
+
+    this.setupEventListeners();
   }
 
-  const isTransliterationEnabled = transliterationToggle.checked;
-  try {
-    // Save settings to Chrome storage
-    await chrome.storage.sync.set({
-      languageCheckMode: selectedMode,
-      transliterationEnabled: isTransliterationEnabled
-    });
-    showStatusMessage('Settings saved successfully!', 'success');
-    console.log(`Language check mode set to: ${selectedMode}, Transliteration enabled: ${isTransliterationEnabled}`);
-    if (reloadPage) {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        if (tabs[0] && tabs[0].id) {
-          chrome.tabs.reload(tabs[0].id);
-        }
+  /**
+   * Helper method to get DOM elements with error handling
+   */
+  private getElement(id: string): HTMLElement {
+    const element = document.getElementById(id);
+    if (!element) {
+      throw new Error(`Element with ID '${id}' not found`);
+    }
+    return element;
+  }
+
+  /**
+   * Sets up all event listeners for the popup
+   */
+  private setupEventListeners(): void {
+    // Load settings when popup opens
+    document.addEventListener('DOMContentLoaded', () => this.loadSettings());
+
+    // Save settings
+    this.saveButton.addEventListener('click', () => this.saveSettings(false));
+    this.transliterationToggle.addEventListener('change', () => this.saveSettings(true));
+    
+    // Engine and mode changes
+    this.transliterationEngineSelect.addEventListener('change', () => this.saveEngineSettings());
+    this.languageModeSelect.addEventListener('change', () => this.saveLanguageModeSettings());
+
+    // Action buttons
+    this.forceTransliterationButton.addEventListener('click', () => this.forceTransliteration());
+    this.refreshButton.addEventListener('click', () => this.refreshPage());
+    this.resetDefaultsButton.addEventListener('click', () => this.resetToDefaults());
+  }
+
+  /**
+   * Loads current settings from Chrome storage and updates UI
+   */
+  async loadSettings(): Promise<void> {
+    try {
+      const settings = await chrome.storage.sync.get([
+        'languageCheckMode', 
+        'transliterationEnabled', 
+        'transliterationEngine'
+      ]);
+
+      // Update UI with loaded settings or defaults
+      this.languageModeSelect.value = settings.languageCheckMode || DEFAULT_SETTINGS.languageCheckMode;
+      this.transliterationToggle.checked = settings.transliterationEnabled !== false;
+      this.transliterationEngineSelect.value = settings.transliterationEngine || DEFAULT_SETTINGS.transliterationEngine;
+
+      console.log('Settings loaded successfully:', settings);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      this.showStatusMessage('Error loading settings.', 'error');
+    }
+  }
+
+  /**
+   * Saves language mode and transliteration toggle settings
+   */
+  async saveSettings(reloadPage: boolean = false): Promise<void> {
+    try {
+      const settings = {
+        languageCheckMode: this.languageModeSelect.value as LanguageCheckMode,
+        transliterationEnabled: this.transliterationToggle.checked,
+      };
+
+      await chrome.storage.sync.set(settings);
+      this.showStatusMessage('Settings saved successfully!', 'success');
+      
+      console.log('Settings saved:', settings);
+
+      if (reloadPage) {
+        await this.refreshPage();
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      this.showStatusMessage('Error saving settings.', 'error');
+    }
+  }
+
+  /**
+   * Saves transliteration engine setting
+   */
+  async saveEngineSettings(): Promise<void> {
+    try {
+      await chrome.storage.sync.set({ 
+        transliterationEngine: this.transliterationEngineSelect.value 
       });
+      this.showStatusMessage('Engine setting saved!', 'success');
+    } catch (error) {
+      console.error('Error saving engine setting:', error);
+      this.showStatusMessage('Error saving engine setting.', 'error');
     }
+  }
 
-  } catch (error) {
-    console.error('Error saving settings:', error);
-    showStatusMessage('Error saving settings.', 'error');
+  /**
+   * Saves language mode setting
+   */
+  async saveLanguageModeSettings(): Promise<void> {
+    try {
+      await chrome.storage.sync.set({ 
+        languageCheckMode: this.languageModeSelect.value 
+      });
+      this.showStatusMessage('Language mode saved!', 'success');
+    } catch (error) {
+      console.error('Error saving language mode:', error);
+      this.showStatusMessage('Error saving language mode.', 'error');
+    }
+  }
+
+  /**
+   * Forces transliteration on the current active tab
+   */
+  async forceTransliteration(): Promise<void> {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      if (tab?.id) {
+        await chrome.tabs.sendMessage(tab.id, { action: 'forceTransliteration' });
+        this.showStatusMessage('Forcing transliteration on current page...', 'success');
+      } else {
+        this.showStatusMessage('No active tab found.', 'error');
+      }
+    } catch (error) {
+      console.error('Error forcing transliteration:', error);
+      this.showStatusMessage('Error forcing transliteration.', 'error');
+    }
+  }
+
+  /**
+   * Refreshes the current active tab
+   */
+  async refreshPage(): Promise<void> {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      if (tab?.id !== undefined) {
+        await chrome.tabs.reload(tab.id);
+        this.showStatusMessage('Page refreshed!', 'success');
+      } else {
+        this.showStatusMessage('No active tab found.', 'error');
+      }
+    } catch (error) {
+      console.error('Error refreshing page:', error);
+      this.showStatusMessage('Error refreshing page.', 'error');
+    }
+  }
+
+  /**
+   * Resets all settings to default values
+   */
+  async resetToDefaults(): Promise<void> {
+    try {
+      await chrome.storage.sync.set(DEFAULT_SETTINGS);
+
+      // Update UI to reflect defaults
+      this.transliterationToggle.checked = DEFAULT_SETTINGS.transliterationEnabled;
+      this.transliterationEngineSelect.value = DEFAULT_SETTINGS.transliterationEngine;
+      this.languageModeSelect.value = DEFAULT_SETTINGS.languageCheckMode;
+
+      this.showStatusMessage('Settings reset to default.', 'success');
+      console.log('Settings reset to defaults:', DEFAULT_SETTINGS);
+    } catch (error) {
+      console.error('Error resetting settings:', error);
+      this.showStatusMessage('Error resetting settings.', 'error');
+    }
+  }
+
+  /**
+   * Displays a status message to the user
+   */
+  private showStatusMessage(message: string, type: 'success' | 'error'): void {
+    this.statusMessage.textContent = message;
+    this.statusMessage.style.color = type === 'success' ? '#27ae60' : '#e74c3c';
+    this.statusMessage.className = type;
+
+    // Clear message after 3 seconds
+    setTimeout(() => {
+      this.statusMessage.textContent = '';
+      this.statusMessage.className = '';
+    }, 3000);
   }
 }
 
-/**
- * Sends a message to the active tab's content script to force transliteration.
- */
-async function forceTransliteration(): Promise<void> {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab && tab.id) {
-      await chrome.tabs.sendMessage(tab.id, { action: 'forceTransliteration' });
-      showStatusMessage('Forcing transliteration on current page...', 'success');
-    } else {
-      showStatusMessage('No active tab found.', 'error');
-    }
-  } catch (error) {
-    console.error('Error forcing transliteration:', error);
-    showStatusMessage('Error forcing transliteration.', 'error');
-  }
-}
-
-
-/**
- * Displays a status message to the user in the popup.
- * @param message The message to display.
- * @param type The type of message ('success' or 'error') to apply styling.
- */
-function showStatusMessage(message: string, type: 'success' | 'error'): void {
-  statusMessage.textContent = message;
-  statusMessage.style.color = (type === 'success') ? '#27ae60' : '#e74c3c';
-
-  // Clear message after a few seconds
-  setTimeout(() => {
-    statusMessage.textContent = '';
-  }, 3000);
-}
-
-/**
- * Event Listeners:
- * - When the DOM content is fully loaded, load the current settings.
- * - When the save button is clicked, save the new settings.
- * - When the transliteration toggle changes, save the new settings and reload the page.
- * - When the force transliteration button is clicked, trigger force transliteration.
- */
-document.addEventListener('DOMContentLoaded', loadSettings);
-saveButton.addEventListener('click', () => saveSettings(false)); // Save without reloading for radio buttons
-transliterationToggle.addEventListener('change', () => saveSettings(true)); // Save and reload for the toggle
-forceTransliterationButton.addEventListener('click', forceTransliteration); // NEW EVENT LISTENER
+// Initialize popup manager when script loads
+new PopupManager();

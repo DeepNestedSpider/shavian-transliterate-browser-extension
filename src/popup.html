@@ -6,180 +6,184 @@
     <title>Language Mode Settings</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        min-width: 250px;
-        background-color: #f4f4f4;
-        color: #333;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        padding: 24px 18px 18px 18px;
+        min-width: 270px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e3e9f3 100%);
+        color: #222;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px 0 rgba(60,60,90,0.10);
+      }
+      h1, h2 {
+        font-weight: 600;
+        margin-bottom: 18px;
+        color: #2c3e50;
+        letter-spacing: 0.5px;
       }
       h1 {
-        font-size: 1.2em;
-        margin-bottom: 20px;
-        color: #2c3e50;
-      }
-      h2 {
-        font-size: 1.1em;
-        margin-bottom: 15px;
-        color: #2c3e50;
-      }
-      .mode-option {
+        font-size: 1.18em;
         margin-bottom: 10px;
       }
-      .mode-option label {
+      h2 {
+        font-size: 1.05em;
+        margin-bottom: 10px;
+      }
+      .big-toggle {
         display: flex;
         align-items: center;
-        cursor: pointer;
-      }
-      .mode-option input[type="radio"] {
-        margin-right: 8px;
-        transform: scale(1.1);
-      }
-      button {
-        background-color: #4caf50;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 1em;
-        margin-top: 20px;
+        justify-content: center;
+        margin-bottom: 18px;
         width: 100%;
       }
-      button:hover {
-        background-color: #45a049;
-      }
-      #forceTransliterationButton {
-        /* New style for the force button */
-        background-color: #007bff; /* A different color for distinction */
-      }
-      #forceTransliterationButton:hover {
-        background-color: #0056b3;
-      }
-      .status-message {
-        margin-top: 15px;
-        font-size: 0.9em;
-        text-align: center;
-        color: #e74c3c; /* Red for error, green for success */
-      }
-      /* Styles for the toggle switch */
-      .switch {
+      .big-switch {
         position: relative;
         display: inline-block;
-        width: 34px;
-        height: 20px;
-        margin-right: 10px;
+        width: 100%;
+        max-width: 220px;
+        height: 48px;
+        margin: 0 auto;
       }
-
-      .switch input {
+      .big-switch input {
         opacity: 0;
         width: 0;
         height: 0;
       }
-
-      .slider {
+      .big-slider {
         position: absolute;
         cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        -webkit-transition: 0.4s;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: #cfd8dc;
         transition: 0.4s;
-        border-radius: 20px;
+        border-radius: 48px;
       }
-
-      .slider:before {
+      .big-slider:before {
         position: absolute;
         content: "";
-        height: 16px;
-        width: 16px;
-        left: 2px;
-        bottom: 2px;
-        background-color: white;
-        -webkit-transition: 0.4s;
+        height: 40px;
+        width: 40px;
+        left: 4px;
+        bottom: 4px;
+        background: #fff;
         transition: 0.4s;
         border-radius: 50%;
+        box-shadow: 0 1px 4px 0 rgba(60,60,90,0.10);
       }
-
-      input:checked + .slider {
-        background-color: #4caf50;
+      .big-switch input:checked + .big-slider {
+        background: linear-gradient(90deg, #4caf50 60%, #43a047 100%);
       }
-
-      input:focus + .slider {
-        box-shadow: 0 0 1px #4caf50;
+      .big-switch input:checked + .big-slider:before {
+        transform: translateX(88px);
       }
-
-      input:checked + .slider:before {
-        -webkit-transform: translateX(14px);
-        -ms-transform: translateX(14px);
-        transform: translateX(14px);
+      .big-slider.round {
+        border-radius: 48px;
       }
-
-      /* Rounded sliders */
-      .slider.round {
-        border-radius: 20px;
-      }
-
-      .slider.round:before {
+      .big-slider.round:before {
         border-radius: 50%;
+      }
+      .toggle-label {
+        font-size: 1.13em;
+        font-weight: 500;
+        margin-left: 18px;
+        color: #222;
+      }
+      #transliterationEngineSelect, #languageModeSelect {
+        margin: 10px 0 18px 0;
+        width: 100%;
+        padding: 7px 10px;
+        border-radius: 6px;
+        border: 1px solid #b0bec5;
+        font-size: 1em;
+        background: #f7fafc;
+        color: #222;
+        box-shadow: 0 1px 4px 0 rgba(60,60,90,0.04);
+      }
+      button {
+        background: linear-gradient(90deg, #4caf50 60%, #43a047 100%);
+        color: white;
+        padding: 10px 0;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1em;
+        margin-top: 18px;
+        width: 100%;
+        font-weight: 500;
+        box-shadow: 0 1px 4px 0 rgba(60,60,90,0.08);
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: linear-gradient(90deg, #43a047 60%, #388e3c 100%);
+      }
+      #forceTransliterationButton {
+        background: linear-gradient(90deg, #1976d2 60%, #1565c0 100%);
+        margin-top: 10px;
+      }
+      #forceTransliterationButton:hover {
+        background: linear-gradient(90deg, #1565c0 60%, #0d47a1 100%);
+      }
+      #refreshButton {
+        background: linear-gradient(90deg, #ff9800 60%, #f57c00 100%);
+        margin-top: 10px;
+      }
+      #refreshButton:hover {
+        background: linear-gradient(90deg, #f57c00 60%, #e65100 100%);
+      }
+      #resetDefaultsButton {
+        background: linear-gradient(90deg, #b0bec5 60%, #78909c 100%);
+        color: #222;
+        margin-top: 10px;
+      }
+      #resetDefaultsButton:hover {
+        background: linear-gradient(90deg, #78909c 60%, #546e7a 100%);
+      }
+      .status-message {
+        margin-top: 15px;
+        font-size: 0.97em;
+        text-align: center;
+        color: #388e3c;
+        min-height: 1.2em;
+      }
+      .status-message.error {
+        color: #e74c3c;
       }
       hr {
         border: 0;
         height: 1px;
-        background: #ddd;
-        margin: 20px 0;
+        background: #e0e0e0;
+        margin: 18px 0 18px 0;
+      }
+      .desc {
+        font-size: 0.93em;
+        color: #607d8b;
+        margin-left: 30px;
+        margin-top: 2px;
+        margin-bottom: 0;
       }
     </style>
   </head>
   <body>
-    <h2>Transliteration Settings</h2>
-    <div class="mode-option">
-      <label class="switch">
+    <h2>Shavian Transliteration Extension</h2>
+    <div class="big-toggle">
+      <label class="big-switch">
         <input type="checkbox" id="transliterationToggle" />
-        <span class="slider round"></span>
+        <span class="big-slider round"></span>
       </label>
-      Enable Shavian Transliteration
+      <span class="toggle-label">Enable Shavian Transliteration</span>
     </div>
+    <select id="transliterationEngineSelect">
+      <option value="to-shavian">To-Shavian (Default)</option>
+      <option value="dechifro">Dechifro Engine</option>
+    </select>
+    <select id="languageModeSelect">
+      <option value="htmlLang">HTML <code>lang</code> Attribute</option>
+      <option value="i18nPageText">Chrome i18n Page Text Detection</option>
+    </select>
+    <button id="refreshButton">Refresh</button>
     <hr />
-    <h1>Select Language Check Mode</h1>
-
-    <div class="mode-option">
-      <label>
-        <input
-          type="radio"
-          id="htmlLang"
-          name="languageMode"
-          value="htmlLang"
-        />
-        HTML Lang Attribute
-      </label>
-      <p style="font-size: 0.8em; color: #666; margin-left: 25px">
-        Uses the 'lang' attribute of the main HTML document (e.g., &lt;html
-        lang="en"&gt;).
-      </p>
-    </div>
-
-    <div class="mode-option">
-      <label>
-        <input
-          type="radio"
-          id="i18nPageText"
-          name="languageMode"
-          value="i18nPageText"
-        />
-        Chrome i18n Page Text Detection
-      </label>
-      <p style="font-size: 0.8em; color: #666; margin-left: 25px">
-        Detects language by sampling the page's visible text content using
-        'chrome.i18n.detectLanguage'.
-      </p>
-    </div>
-
+    <button id="resetDefaultsButton" style="background: linear-gradient(90deg, #b0bec5 60%, #78909c 100%); color: #222; margin-top: 10px;">Reset to Default Settings</button>
     <button id="saveButton">Save Settings</button>
     <button id="forceTransliterationButton">Force Transliteration</button>
     <p id="statusMessage" class="status-message"></p>
-
     <script src="popup.js"></script>
   </body>
 </html>

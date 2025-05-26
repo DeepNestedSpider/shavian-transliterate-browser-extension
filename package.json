@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build:dist": "bun run scripts/build.ts",
-    "increment-version": "bun run scripts/version.ts"
+    "increment-version": "bun run scripts/version.ts",
+    "convert-dict": "bun run scripts/convert-dict.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
