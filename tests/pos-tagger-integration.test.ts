@@ -1,6 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { posTagSentence } from "../src/core/posTagger";
-import { ReadlexiconTransliterator } from "../src/dechifroTransliterator";
+import { ReadlexiconTransliterator } from "../src/readlexiconTransliterator";
 
 describe("POS Tagger Integration with ReadlexiconTransliterator", () => {
   test("should transliterate heteronyms using POS tags", async () => {

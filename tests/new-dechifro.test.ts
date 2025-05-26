@@ -1,5 +1,7 @@
 /**
  * Test script for the ReadlexiconEngine
+ * 
+ * DEPRECATED: Use readlexicon.test.ts or other readlexicon-based tests instead
  */
 
 import { describe, test, expect, beforeAll } from "bun:test";

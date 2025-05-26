@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Script to convert .dict files to TypeScript objects for bundling
- * Based on dechifro's shaw.py dictionary loading logic
+ * Based on readlexicon's dictionary loading logic
  */
 
 const fs = require('fs');
@@ -48,7 +48,7 @@ export const ${path.basename(dictFilePath, '.dict')}Dict: Record<string, string>
 }
 
 // Convert all dictionary files
-const dictDir = path.join(__dirname, '..', 'dechifro\'s-engine', 'dechifro-transliterator');
+const dictDir = path.join(__dirname, '..', 'readlexicon-dictionaries');
 const outputDir = path.join(__dirname, '..', 'src', 'dictionaries');
 
 // Ensure output directory exists
