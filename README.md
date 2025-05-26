@@ -176,20 +176,26 @@ bun run build:dist
     └── simple-readlexicon.test.ts
 ```
 
-### How It Works
+## How It Works
 
-1. **Initialization**: `manifest.json` loads `content.ts` as a content script
-2. **Language Detection**: `languageDetector.ts` analyzes page language using:
-   - HTML `lang` attributes
-   - Chrome i18n API
-   - User configuration
-3. **Conditional Loading**: If English is detected and transliteration is enabled:
-   - Dynamically imports `shavianTransliterator.ts`
-   - Initializes transliteration engine
-4. **Text Processing**: `shavianTransliterator.ts` processes text using:
-   - Custom readlexicon transliterator
-   - DOM manipulation to update page content
-5. **Dynamic Updates**: `MutationObserver` monitors for new content and transliterates it automatically
+1. **Extension Initialization**: The browser loads the extension using `manifest.json`, which injects `content.ts` as the main content script into web pages.
+2. **Language & Content Detection**: 
+   - `languageDetector.ts` determines if the page (or specific elements) are in English using HTML `lang` attributes, Chrome's i18n API, and user preferences.
+   - The script also checks for elements that should be excluded from transliteration (e.g., `<code>`, `<pre>`, `<input>`, `<textarea>`, `<script>`, `<style>`, `<iframe>`, etc.) using DOM queries and filtering logic in `core/domTransliterator.ts`.
+3. **User Configuration**: The popup UI (`popup.html`/`popup.ts`) allows users to toggle transliteration, select detection modes, and set per-site preferences. These settings are stored and accessed by the content script.
+4. **Transliteration Engine Selection**: 
+   - If English content is detected and transliteration is enabled, the content script dynamically loads the main transliteration engine (`shavianTransliterator.ts`).
+   - For advanced or alternative transliteration, the `readlexiconTransliterator.ts` module is used, leveraging the `dictionaries/readlex.ts` data and `core/transliterationEngine.ts` logic.
+5. **Text Processing & Replacement**:
+   - The selected transliteration engine processes eligible text nodes, using `Intl.Segmenter` for accurate word boundaries and `core/posTagger.ts` for part-of-speech tagging when needed.
+   - The transliterated Shavian text replaces the original content in the DOM, preserving structure and avoiding excluded elements.
+6. **Dynamic Content Handling**: 
+   - A `MutationObserver` (in `content.ts` and/or `core/domTransliterator.ts`) watches for new or changed DOM nodes, ensuring that dynamically loaded or updated content is also transliterated in real time.
+7. **Performance & Modularity**: 
+   - The codebase is modular, with clear separation between content detection, transliteration logic, dictionary data, and UI.
+   - All processing is done locally for privacy and speed; no external requests are made during transliteration.
+
+This architecture ensures accurate, efficient, and user-configurable transliteration of English web content into the Shavian script, while minimizing disruption to page functionality and user experience.
 
 ## 🧪 Testing
 
