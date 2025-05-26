@@ -292,10 +292,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **[Shaw Alphabet](https://www.shavian.info/)**: For preserving and promoting the Shavian script
-- **[to-shavian](https://www.npmjs.com/package/to-shavian)**: Primary transliteration library
-- **[Readlexicon Project](https://github.com/Shavian-info/readlex)**: Inspiration for advanced transliteration techniques
-- **Community**: Shavian alphabet enthusiasts and contributors
+- **[Shaw Alphabet](https://www.shavian.info/)**: For preserving and promoting the Shavian script. 
+- **[to-shavian](https://www.npmjs.com/package/to-shavian)**: Old transliteration library. (Deprecated) 
+- **[Readlexicon Project](https://github.com/Shavian-info/readlex)**: Transliteration Dictionary Origin. 
+- **[Dechifro's Project](https://www.dechifro.org/)**: Transliteration Engine Logic Inspiration. 
+- **Community**: Shavian alphabet enthusiasts and contributors. 
 
 ## 📞 Support
 
