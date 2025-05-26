@@ -294,7 +294,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **[Shaw Alphabet](https://www.shavian.info/)**: For preserving and promoting the Shavian script
 - **[to-shavian](https://www.npmjs.com/package/to-shavian)**: Primary transliteration library
-- **[Readlexicon Project](https://readlexicon.org/)**: Inspiration for advanced transliteration techniques
+- **[Readlexicon Project](https://github.com/Shavian-info/readlex)**: Inspiration for advanced transliteration techniques
 - **Community**: Shavian alphabet enthusiasts and contributors
 
 ## 📞 Support
