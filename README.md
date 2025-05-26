@@ -214,8 +214,8 @@ bun run test:all
 - [ ] **Performance Optimization**: Reduce memory usage and improve speed
 
 #### High Complexity
-- [ ] **Modular Transliteration System**: Plugin-based architecture for multiple engines
-- [ ] **Dechifro Integration**: Port Python dechifro-transliterator to JavaScript
+- ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
+- ✅ **Dechifro Integration**: Port Python dechifro-transliterator to JavaScript
 - [ ] **Advanced Language Detection**: Machine learning-based language identification
 
 ### 🔮 Future Vision (Long Term)
@@ -283,7 +283,7 @@ We welcome contributions! Here's how you can help:
 - 🐛 **Bug Fixes**: Check the issues page for known problems
 - ✨ **Features**: Implement items from the roadmap
 - 📚 **Documentation**: Improve README, add code comments
-- 🧪 **Testing**: Add more comprehensive test coverage
+- ✅ **Testing**: Add more comprehensive test coverage
 - 🎨 **UI/UX**: Enhance the popup interface and user experience
 
 ## 📄 License
