@@ -36,7 +36,41 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Other
 "dechifro's-engine"
 
-# Releases
+# Temporary files
+temp/
+*.tmp
+temp_*
+*.backup
+*_backup
+*_new.*
+
+# Test files (prevent scattered test files in root)
+test-*.js
+test-*.ts
+test-*.html
+*-test.js
+*-test.ts
+test_*
+*_test.*
+
+# Screenshots and images (unless in proper directories)
+*.png
+*.jpg
+*.jpeg
+*.gif
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.jpeg
+!public/**/*.gif
+!src/**/*.png
+!src/**/*.jpg
+!src/**/*.jpeg
+!src/**/*.gif
+
+# Generated/compiled files
+*.js.map
+*.d.ts.map
+
+# Releases and builds
 releases
 shavian-transliterate-browser-extension
-customscripts

@@ -39,6 +39,41 @@ bun run build:dist
 ./build-release.sh
 ```
 
+## Development Scripts
+
+### Available Commands
+
+```bash
+# Build the extension
+bun run build:dist
+
+# Run tests
+bun run test          # Run main test
+bun run test:all      # Run all tests
+
+# Version management
+bun run increment-version
+
+# Dictionary conversion (from dechifro format)
+bun run convert-dict
+
+# Clean temporary files
+bun run clean
+```
+
+### Project Structure
+
+```
+src/                 # Source TypeScript files
+  core/             # Core transliteration engines
+  dictionaries/     # Generated dictionary files
+  types/           # Type definitions
+tests/              # Test files
+scripts/            # Build and utility scripts
+public/             # Static assets (manifest, icons)
+dist/               # Built extension (generated)
+```
+
 # ToDo
 
 ## Implemented Features:
