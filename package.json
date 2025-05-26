@@ -10,6 +10,7 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
+    "test:verbose": "bun test --verbose",
     "clean": "rm -rf dist/ temp/ *.tmp temp_* *_backup *.backup"
   },
   "devDependencies": {
@@ -21,6 +22,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "compromise": "^14.14.4",
     "node": "^22.16.0",
     "to-shavian": "^0.3.1"
   }

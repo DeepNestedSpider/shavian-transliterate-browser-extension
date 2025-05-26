@@ -36,7 +36,7 @@ interface PopupSettings {
 const DEFAULT_SETTINGS: PopupSettings = {
   languageCheckMode: LanguageCheckMode.HtmlLang,
   transliterationEnabled: true,
-  transliterationEngine: TransliterationEngine.ToShavian,
+  transliterationEngine: TransliterationEngine.Dechifro,
 };
 
 /**

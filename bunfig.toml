@@ -1,3 +1,7 @@
 [test]
 # Test configuration for Bun
 timeout = 30000
+coverage = false
+
+[test.env]
+NODE_ENV = "test"

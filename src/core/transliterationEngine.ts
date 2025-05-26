@@ -2,6 +2,7 @@
  * Core transliteration engine interface and factory
  */
 import toShavian from 'to-shavian';
+import type { POSTaggedToken } from './posTagger';
 
 export interface TransliterationEngine {
   transliterate(text: string): string;
@@ -141,6 +142,9 @@ export class DechifroEngine implements TransliterationEngine {
     return words.map(segment => {
       if (segment.match(/^\s+$/)) {
         return segment;
+      } else if (segment.match(/^[.,:;!?"'()\[\]{}<>-]+$/)) {
+        // Punctuation (including commas and more): do not transliterate, do not attach to previous word
+        return segment;
       } else if (segment.length > 0) {
         const result = this.transliterateWord(segment);
         // Update previous word context (only for actual words, not punctuation)
@@ -153,95 +157,126 @@ export class DechifroEngine implements TransliterationEngine {
     }).join('');
   }
 
-  transliterateWord(word: string): string {
-    if (!word || word.trim() === '') return word;
+  /**
+   * Transliterate a sentence using an array of POS-tagged tokens.
+   * Each token should have { text, pos }.
+   */
+  transliterateWithPOSTags(tokens: POSTaggedToken[]): string {
+    this.previousWord = '';
+    this.previousPos = '';
+    return tokens.map(token => {
+      if (token.text.match(/^\s+$/)) {
+        return token.text;
+      } else if (token.text.length > 0) {
+        const result = this.transliterateWord(token.text, token.pos);
+        if (token.text.match(/\w/)) {
+          this.previousWord = token.text.toLowerCase();
+          this.previousPos = token.pos;
+        }
+        return result;
+      }
+      return token.text;
+    }).join('');
+  }
 
+  /**
+   * Transliterate a single word, optionally using a POS tag for heteronyms.
+   */
+  transliterateWord(word: string, pos?: string): string {
+    if (!word || word.trim() === '') return word;
     const originalWord = word;
     const clean = word.toLowerCase().replace(/[^\w']/g, '');
 
     // 1. Function words check (highest priority)
     if (clean in this.functionWords) {
-      return this.functionWords[clean]!;
+      return this.functionWords[clean]!.replace(/^:+|:+$/g, '');
     }
 
     // 2. Handle "to" after specific function words (befto logic)
     if (clean === 'to' && this.previousWord in this.beftoMap) {
-      return this.beftoMap[this.previousWord]!;
+      return this.beftoMap[this.previousWord]!.replace(/^:+|:+$/g, '');
     }
 
-    // 3. Check for direct dictionary match first (including contractions with underscore)
+    // 3. Prefer POS-specific dictionary entry if POS is provided
+    if (pos && this.dictionary.has(clean + '_' + pos)) {
+      const result = this.dictionary.get(clean + '_' + pos);
+      if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+    }
+
+    // 4. Check for direct dictionary match first (including contractions with underscore)
     if (this.dictionary.has(clean + '_')) {
       const result = this.dictionary.get(clean + '_');
-      if (result) return result.replace(/^\.+|\.+$/g, '');
+      if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
     }
 
-    // 4. Check direct dictionary match
+    // 5. Check direct dictionary match
     let result = this.dictionary.get(clean);
     if (result) {
-      return result.replace(/^\.+|\.+$/g, '');
+      return result.replace(/^[.:]+|[.:]+$/g, '');
     }
 
-    // 5. Handle contractions with suffix patterns from dictionary
+    // 6. Handle contractions with suffix patterns from dictionary
     if (word.includes("'")) {
       const parts = word.split("'");
       if (parts.length === 2 && parts[0] && parts[1]) {
         const base = parts[0].toLowerCase();
         const suffix = "'" + parts[1].toLowerCase();
-        
         // Look for suffix pattern in dictionary
         const suffixKey = '$' + suffix;
         if (this.dictionary.has(suffixKey)) {
           const baseTransliteration = this.transliterateWord(base);
           const suffixTransliteration = this.dictionary.get(suffixKey)!;
-          return baseTransliteration + suffixTransliteration.replace(/^\.+|\.+$/g, '').replace(/^'/, '');
+          return (baseTransliteration + suffixTransliteration.replace(/^[.:]+|[.:]+$/g, '').replace(/^'/, '')).replace(/^:+|:+$/g, '');
         }
       }
     }
 
-    // 6. Prefix rule: ^prefix
+    // 7. Prefix rule: ^prefix
     for (const [key, value] of this.dictionary.entries()) {
       if (key.startsWith('^')) {
         const prefix = key.slice(1);
         if (clean.startsWith(prefix)) {
-          return value + this.transliterateWord(clean.slice(prefix.length));
+          return (value + this.transliterateWord(clean.slice(prefix.length))).replace(/^:+|:+$/g, '');
         }
       }
     }
 
-    // 7. Suffix rule: $suffix (for non-contraction suffixes)
+    // 8. Suffix rule: $suffix (for non-contraction suffixes)
     for (const [key, value] of this.dictionary.entries()) {
       if (key.startsWith('$') && !key.includes("'")) {
         const suffix = key.slice(1);
         if (clean.endsWith(suffix)) {
-          return this.transliterateWord(clean.slice(0, clean.length - suffix.length)) + value.replace(/^\.+|\.+$/g, '');
+          return (this.transliterateWord(clean.slice(0, clean.length - suffix.length)) + value.replace(/^[.:]+|[.:]+$/g, '')).replace(/^:+|:+$/g, '');
         }
       }
     }
 
-    // 8. Always dot: Capitalized word in dict
+    // 9. Always dot: Capitalized word in dict
     if (this.dictionary.has(originalWord)) {
       result = this.dictionary.get(originalWord);
-      if (result) return '·' + result.replace(/^\.+|\.+$/g, '');
+      if (result) return ('·' + result.replace(/^[.:]+|[.:]+$/g, '')).replace(/^:+|:+$/g, '');
     }
 
-    // 9. Part-of-speech specific entries (word_POS)
-    const posVariants = ['_VB', '_NN', '_NNS', '_JJ', '_RB'];
-    for (const pos of posVariants) {
-      if (this.dictionary.has(clean + pos)) {
-        result = this.dictionary.get(clean + pos);
-        if (result) return result.replace(/^\.+|\.+$/g, '');
+    // 10. Part-of-speech specific entries (word_POS) if not already checked
+    if (!pos) {
+      const posVariants = ['_VB', '_NN', '_NNS', '_JJ', '_RB'];
+      for (const p of posVariants) {
+        if (this.dictionary.has(clean + p)) {
+          result = this.dictionary.get(clean + p);
+          if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+        }
       }
     }
 
-    // 10. Handle word ending variations for better matching
+    // 11. Handle word ending variations for better matching
     if (this.dictionary.has(clean + '.')) {
       result = this.dictionary.get(clean + '.');
-      if (result) return result.replace(/^\.+|\.+$/g, '');
+      if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
     }
 
-    // 11. Fallback to to-shavian
+    // 12. Fallback to to-shavian
     result = toShavian(word).replace(/ /g, '');
-    return result || word;
+    return (result || word).replace(/^:+|:+$/g, '');
   }
 
   addToDictionary(word: string, transliteration: string): void {
@@ -279,12 +314,12 @@ export class TransliterationEngineFactory {
   }
 
   static async getEngineFromSettings(): Promise<TransliterationEngine> {
-    let engineType: EngineType = 'to-shavian';
+    let engineType: EngineType = 'dechifro';
     
     if (typeof chrome !== 'undefined' && chrome.storage) {
       try {
         const settings = await chrome.storage.sync.get(['transliterationEngine']);
-        engineType = settings.transliterationEngine || 'to-shavian';
+        engineType = settings.transliterationEngine || 'dechifro';
       } catch (error) {
         console.warn('Failed to get engine settings, using default:', error);
       }

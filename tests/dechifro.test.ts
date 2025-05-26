@@ -23,18 +23,18 @@ describe('DechifroTransliterator', () => {
 
   test('should transliterate basic phrases with American dictionary', async () => {
     const testCases = [
-      { input: 'Hello world', expected: expect.any(String) },
-      { input: 'The quick brown fox jumps over the lazy dog', expected: expect.any(String) },
-      { input: 'JavaScript is awesome', expected: expect.any(String) },
-      { input: 'I love programming', expected: expect.any(String) },
-      { input: 'Shavian alphabet rocks!', expected: expect.any(String) }
+      'Hello world',
+      'The quick brown fox jumps over the lazy dog',
+      'JavaScript is awesome',
+      'I love programming',
+      'Shavian alphabet rocks!'
     ];
 
-    for (const testCase of testCases) {
-      const result = await dechifroAmer.transliterate(testCase.input);
-      expect(result).toEqual(testCase.expected);
+    for (const input of testCases) {
+      const result = await dechifroAmer.transliterate(input);
       expect(result).toBeTruthy();
       expect(typeof result).toBe('string');
+      expect(result.length).toBeGreaterThan(0);
     }
   });
 
@@ -42,27 +42,30 @@ describe('DechifroTransliterator', () => {
     const result = await dechifroAmer.transliterate("Don't forget to test contractions");
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
   });
 
   test('should handle numbers and units with American dictionary', async () => {
     const result = await dechifroAmer.transliterate('Testing 123 numbers and units like 5 ms');
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
   });
 
   test('should handle proper names with American dictionary', async () => {
     const result = await dechifroAmer.transliterate('Proper names like John and Mary should be dotted');
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
   });
 
   test('should transliterate British spellings with British dictionary', async () => {
     const ukTests = ['colour', 'centre', 'realise'];
-    
     for (const test of ukTests) {
       const result = await dechifroUK.transliterate(test);
       expect(result).toBeTruthy();
       expect(typeof result).toBe('string');
+      expect(result.length).toBeGreaterThan(0);
     }
   });
 

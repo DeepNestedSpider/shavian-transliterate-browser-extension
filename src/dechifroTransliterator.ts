@@ -3,6 +3,8 @@
  * This is for compatibility with existing tests and API usage
  */
 import { DechifroEngine } from './core/transliterationEngine';
+import { posTagSentence } from './core/posTagger';
+import type { POSTaggedToken } from './core/posTagger';
 
 export interface DechifroTransliteratorConfig {
   dictionary?: 'amer' | 'brit' | 'vs1';
@@ -75,5 +77,17 @@ export class DechifroTransliterator {
   async getDictionarySize(): Promise<number> {
     await this.ready();
     return this.engine.getDictionarySize();
+  }
+
+  /**
+   * Transliterate a sentence using POS tags (for heteronyms).
+   * Uses compromise POS tagger internally.
+   */
+  async transliterateWithPOS(text: string): Promise<string> {
+    await this.ready();
+    const tokens: POSTaggedToken[] = posTagSentence(text);
+    // Use the new POS-aware method in the engine
+    // @ts-ignore: method exists in our extended engine
+    return this.engine.transliterateWithPOSTags(tokens);
   }
 }

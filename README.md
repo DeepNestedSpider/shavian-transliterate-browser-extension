@@ -6,6 +6,8 @@
 [![Bun](https://img.shields.io/badge/Bun-1.x-black.svg)](https://bun.sh/)
 [![GitHub](https://img.shields.io/badge/GitHub-DeepNestedSpider-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
 
+![Screenshot of the extension popup and transliteration](./tests/v0.0.6.png)
+
 A modern browser extension that automatically transliterates English text on web pages into the [Shavian alphabet](https://en.wikipedia.org/wiki/Shavian_alphabet) (𐑖𐑱𐑝𐑾𐑯). Built with TypeScript, Bun, and modern web standards using Manifest V3.
 
 ## ✨ Features
