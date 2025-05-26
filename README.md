@@ -292,7 +292,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **[Shaw Alphabet](https://www.shavian.info/)**: For preserving and promoting the Shavian script
 - **[to-shavian](https://www.npmjs.com/package/to-shavian)**: Primary transliteration library
-- **[Dechifro Project](https://github.com/dechifro)**: Inspiration for advanced transliteration techniques
+- **[Dechifro Project](https://dechifro.org/)**: Inspiration for advanced transliteration techniques
 - **Community**: Shavian alphabet enthusiasts and contributors
 
 ## 📞 Support
