@@ -1,3 +1,7 @@
+# Backup of local README.md before merge conflict resolution
+
+---
+
 # 𐑖𐑱𐑝𐑾𐑯 𐑑𐑮𐑨𐑯𐑕𐑤𐑦𐑑𐑼𐑱𐑑 - Shavian Transliterate Browser Extension
 
 [![Version](https://img.shields.io/badge/version-0.0.3-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
@@ -6,7 +10,7 @@
 [![Bun](https://img.shields.io/badge/Bun-1.x-black.svg)](https://bun.sh/)
 [![GitHub](https://img.shields.io/badge/GitHub-DeepNestedSpider-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
 
-![Screenshot of the extension popup and transliteration](./brave_screenshot_www.shavian.info.png)
+![Video Showcase on wikipedia](./showcase/wikipedia-video.webm)
 
 A modern browser extension that automatically transliterates English text on web pages into the [Shavian alphabet](https://en.wikipedia.org/wiki/Shavian_alphabet) (𐑖𐑱𐑝𐑾𐑯). Built with TypeScript, Bun, and modern web standards using Manifest V3.
 
@@ -16,7 +20,7 @@ A modern browser extension that automatically transliterates English text on web
 - **Real-time conversion**: Automatically transliterates English text to Shavian script as pages load
 - **Dynamic content support**: Monitors and transliterates content added via JavaScript using MutationObserver
 - **Smart text recognition**: Uses `Intl.Segmenter` for accurate word boundary detection
-- **Multiple transliteration engines**: Supports both `to-shavian` library and custom readlexicon-based transliterator
+- **Advanced transliteration engine**: Uses the readlexicon-based transliterator for accurate pronunciation-to-script conversion
 
 ### 🧠 Smart Content Detection
 - **Language detection**: Recognizes English content using HTML `lang` attributes and Chrome's i18n API
@@ -32,7 +36,6 @@ A modern browser extension that automatically transliterates English text on web
   - HTML lang attribute detection
   - Chrome i18n page detection
   - Force transliteration (override detection)
-- **Per-site preferences**: Remember settings for individual websites
 
 ### 🎨 Modern Architecture
 - **Manifest V3 compliant**: Built for the latest browser extension standards
@@ -94,6 +97,7 @@ This browser extension was created to address several limitations in existing Sh
 2. **Learning opportunity**: Explore Bun, TypeScript, and modern browser extension development
 3. **Better user experience**: Provide a more reliable and feature-rich transliteration tool
 4. **Performance**: Leverage modern web APIs for faster, more efficient transliteration
+5. **Accuracy**: Existing implementations provided unsatisfactory results
 
 ### Development Setup
 
@@ -122,37 +126,60 @@ bun run build:dist
 
 # Production release (creates .zip and .tar.gz archives)
 ./build-release.sh        # Linux/macOS
-./build-release.bat       # Windows (CMD)
-./build-release.ps1       # Windows (PowerShell)
 ```
 
 ### Project Architecture
 
 ```
 📁 Project Structure
-├── 📂 src/                          # TypeScript source code
-│   ├── 📂 core/                     # Core transliteration engines
-│   │   ├── domTransliterator.ts     # DOM manipulation utilities
-│   │   └── transliterationEngine.ts # Main transliteration logic
-│   ├── 📂 dictionaries/             # Language dictionaries
-│   │   ├── amer.ts                  # American English dictionary
-│   │   ├── brit.ts                  # British English dictionary
-│   │   ├── vs1.ts                   # Alternative dictionary
-│   │   └── index.ts                 # Dictionary exports
-│   ├── 📂 types/                    # TypeScript type definitions
-│   ├── content.ts                   # Content script entry point
-│   ├── popup.ts                     # Extension popup logic
-│   ├── popup.html                   # Extension popup UI
-│   ├── languageDetector.ts          # Language detection utilities
-│   ├── shavianTransliterator.ts     # Main transliterator
-│   └── readlexiconTransliterator.ts    # Alternative transliterator
-├── 📂 public/                       # Static assets
-│   ├── manifest.json               # Extension manifest
-│   └── 📂 icons/                   # Extension icons
-├── 📂 scripts/                      # Build and utility scripts
-├── 📂 tests/                        # Test files
-├── 📂 dist/                         # Built extension (generated)
-└── 📂 releases/                     # Release archives
+├── build-release.sh                  # Release build script
+├── bun.lock                          # Bun lockfile
+├── bunfig.toml                       # Bun configuration
+├── github-release.sh                 # GitHub release script
+├── package.json                      # Project metadata and scripts
+├── README.md                         # Project documentation
+├── tsconfig.json                     # TypeScript configuration
+├── public/
+│   ├── manifest.json                 # Extension manifest
+│   └── icons/
+│       ├── icon-128.png
+│       ├── icon-16.png
+│       └── icon-48.png
+├── releases/                         # Release archives
+│   ├── shavian-transliterate-browser-extension.tar.gz
+│   └── shavian-transliterate-browser-extension.zip
+├── scripts/                          # Build and utility scripts
+│   ├── build.ts
+│   └── version.ts
+├── showcase/
+│   └── wikipedia-video.webm
+├── src/                              # TypeScript source code
+│   ├── content.ts                    # Content script entry point
+│   ├── languageDetector.ts           # Language detection utilities
+│   ├── popup.html                    # Extension popup UI
+│   ├── popup.ts                      # Extension popup logic
+│   ├── readlexiconTransliterator.ts  # Alternative transliterator
+│   ├── shavianTransliterator.ts      # Main transliterator
+│   ├── core/
+│   │   ├── domTransliterator.ts      # DOM manipulation utilities
+│   │   ├── posTagger.ts              # POS tagging utilities
+│   │   └── transliterationEngine.ts  # Main transliteration logic
+│   ├── dictionaries/
+│   │   ├── index.ts                  # Dictionary exports
+│   │   ├── readlex.ts                # Readlexicon dictionary
+│   └── types/                        # TypeScript type definitions
+├── tests/                            # Test files
+│   ├── basic.test.ts
+│   ├── dechifro-regression.test.ts
+│   ├── function-words.test.ts
+│   ├── math.test.ts
+│   ├── new-dechifro.test.ts
+│   ├── pos-tagger-integration.test.ts
+│   ├── readlexicon-regression.test.ts
+│   ├── readlexicon.test.ts
+│   ├── refactored.test.ts
+│   ├── simple-debug.test.ts
+│   └── simple-readlexicon.test.ts
 ```
 
 ### How It Works
@@ -166,8 +193,7 @@ bun run build:dist
    - Dynamically imports `shavianTransliterator.ts`
    - Initializes transliteration engine
 4. **Text Processing**: `shavianTransliterator.ts` processes text using:
-   - `to-shavian` library for standard transliteration
-   - Custom readlexicon transliterator for advanced cases
+   - Custom readlexicon transliterator
    - DOM manipulation to update page content
 5. **Dynamic Updates**: `MutationObserver` monitors for new content and transliterates it automatically
 
@@ -193,7 +219,7 @@ bun run test:all
 ### ✅ Completed Features
 
 - ✅ **Modern Build System**: Bun-based build process with TypeScript
-- ✅ **Core Transliteration**: Integration with `to-shavian` library
+- ✅ **Core Transliteration**: Integration with readlexicon-based transliterator
 - ✅ **Smart Content Filtering**: Avoids transliterating inappropriate content:
   - Code blocks (`<code>`, `<pre>`, `<xmp>`)
   - User input fields (`<input>`, `<textarea>`)
@@ -216,7 +242,6 @@ bun run test:all
 #### High Complexity
 - ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
 - ✅ **Readlexicon Integration**: Port Python readlexicon-transliterator to JavaScript
-- [ ] **Advanced Language Detection**: Machine learning-based language identification
 
 ### 🔮 Future Vision (Long Term)
 
@@ -224,14 +249,11 @@ bun run test:all
 - [ ] **Custom Font Support**: Allow users to specify preferred Shavian fonts
 - [ ] **Keyboard Shortcuts**: Hotkeys for quick transliteration toggle
 - [ ] **Export Features**: Save transliterated content as files
+- [ ] **Both ways transliteration**: Transliterate shavian to Latin Alphabet
 
 #### High Complexity
-- [ ] **Custom Transliteration Engine**: Build proprietary transliterator with:
-  - English to IPA phonetic conversion
-  - IPA to Shavian mapping
-  - Advanced pronunciation rules
-- [ ] **Multi-language Support**: Extend beyond English to other languages
-- [ ] **Real-time Collaboration**: Share transliterated content with others
+- [ ] **Multi-language Support**: Extend beyond English to other languages that have alternate scripts
+- [ ] **User input transliteration (both ways)**: Share transliterated content with others
 
 ## 🏗️ Technical Details
 
@@ -240,7 +262,7 @@ bun run test:all
 #### Core Runtime
 - **Bun**: Modern JavaScript runtime and package manager
 - **TypeScript 5.x**: Type-safe JavaScript with latest features
-- **to-shavian ^0.3.1**: Primary transliteration engine
+- **compromise**: Natural language processing library for POS tagging
 
 #### Development
 - **@types/chrome**: Chrome extension API type definitions
@@ -256,9 +278,9 @@ bun run test:all
 
 ### Performance Characteristics
 
-- **Memory Usage**: ~2-5MB typical, ~10MB with large pages
-- **CPU Impact**: Minimal (<1% on modern systems)
-- **Load Time**: <100ms initialization on most pages
+- **Memory Usage**: Reevaluating this data
+- **CPU Impact**: Reevaluating this data
+- **Load Time**: Reevaluating this data
 - **Network**: No external requests (all processing local)
 
 ## 🤝 Contributing
@@ -293,8 +315,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **[Shaw Alphabet](https://www.shavian.info/)**: For preserving and promoting the Shavian script
-- **[to-shavian](https://www.npmjs.com/package/to-shavian)**: Primary transliteration library
-- **[Readlexicon Project](https://github.com/Shavian-info/readlex)**: Inspiration for advanced transliteration techniques
+- **[Readlexicon Project](https://readlexicon.org/)**: Inspiration for advanced transliteration techniques
 - **Community**: Shavian alphabet enthusiasts and contributors
 
 ## 📞 Support
@@ -309,3 +330,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ❤️ on Steam Deck running Bazzite/Archlinux using NeoVim + AstronVim**
 
 *This extension is not affiliated with the Shaw Estate or any official Shavian alphabet organization.*
+
