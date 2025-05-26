@@ -212,11 +212,11 @@ bun run test:all
 - [ ] **UI/UX Improvements**: Enhanced popup design and user experience
 - [ ] **Better Error Handling**: Graceful fallbacks for edge cases
 - [ ] **Performance Optimization**: Reduce memory usage and improve speed
+- [ ] **Size Reduction**: Deprecate the To-Shavian Library to save size as the custom integrated engine works better.
 
 #### High Complexity
 - ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
-- ✅ **Readlexicon Integration**: Port Python readlexicon-transliterator to JavaScript
-- [ ] **Advanced Language Detection**: Machine learning-based language identification
+- ✅ **Readlexicon Integration**: Port readlexicon `*.dict` to Typescript object. 
 
 ### 🔮 Future Vision (Long Term)
 
