@@ -4,13 +4,13 @@
 
 import { describe, test, expect, beforeAll } from "bun:test";
 import { ReadlexiconEngine } from '../src/core/transliterationEngine';
-import { amerDict } from '../src/dictionaries/amer';
+import { readlexDict } from '../src/dictionaries/readlex';
 
 describe('ReadlexiconEngine Function Word Heuristics', () => {
   let engine: ReadlexiconEngine;
 
   beforeAll(() => {
-    engine = new ReadlexiconEngine(amerDict);
+    engine = new ReadlexiconEngine(readlexDict);
   });
 
   test('should handle basic "to" transliteration', () => {
@@ -62,14 +62,14 @@ describe('ReadlexiconEngine Function Word Heuristics', () => {
   });
 
   test('should transliterate "to" alone correctly', () => {
-    const freshEngine = new ReadlexiconEngine(amerDict);
+    const freshEngine = new ReadlexiconEngine(readlexDict);
     const result = freshEngine.transliterateWord('to');
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');
   });
 
   test('should handle "have to" sequence correctly', () => {
-    const haveToEngine = new ReadlexiconEngine(amerDict);
+    const haveToEngine = new ReadlexiconEngine(readlexDict);
     const result = haveToEngine.transliterate('have to');
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');

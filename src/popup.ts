@@ -17,7 +17,6 @@ enum LanguageCheckMode {
  * Enum for transliteration engine types.
  */
 enum TransliterationEngine {
-  ToShavian = 'to-shavian',
   Readlexicon = 'readlexicon',
 }
 

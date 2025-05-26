@@ -6,7 +6,7 @@
 [![Bun](https://img.shields.io/badge/Bun-1.x-black.svg)](https://bun.sh/)
 [![GitHub](https://img.shields.io/badge/GitHub-DeepNestedSpider-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
 
-![Screenshot of the extension popup and transliteration](./brave_screenshot_www.shavian.info.png)
+![Video Showcase on wikipedia](./showcase/wikipedia-video.webm)
 
 A modern browser extension that automatically transliterates English text on web pages into the [Shavian alphabet](https://en.wikipedia.org/wiki/Shavian_alphabet) (𐑖𐑱𐑝𐑾𐑯). Built with TypeScript, Bun, and modern web standards using Manifest V3.
 
@@ -16,7 +16,7 @@ A modern browser extension that automatically transliterates English text on web
 - **Real-time conversion**: Automatically transliterates English text to Shavian script as pages load
 - **Dynamic content support**: Monitors and transliterates content added via JavaScript using MutationObserver
 - **Smart text recognition**: Uses `Intl.Segmenter` for accurate word boundary detection
-- **Multiple transliteration engines**: Supports both `to-shavian` library and custom readlexicon-based transliterator
+- **Advanced transliteration engine**: Uses the readlexicon-based transliterator for accurate pronunciation-to-script conversion
 
 ### 🧠 Smart Content Detection
 - **Language detection**: Recognizes English content using HTML `lang` attributes and Chrome's i18n API
@@ -32,7 +32,6 @@ A modern browser extension that automatically transliterates English text on web
   - HTML lang attribute detection
   - Chrome i18n page detection
   - Force transliteration (override detection)
-- **Per-site preferences**: Remember settings for individual websites
 
 ### 🎨 Modern Architecture
 - **Manifest V3 compliant**: Built for the latest browser extension standards
@@ -166,7 +165,6 @@ bun run build:dist
    - Dynamically imports `shavianTransliterator.ts`
    - Initializes transliteration engine
 4. **Text Processing**: `shavianTransliterator.ts` processes text using:
-   - `to-shavian` library for standard transliteration
    - Custom readlexicon transliterator for advanced cases
    - DOM manipulation to update page content
 5. **Dynamic Updates**: `MutationObserver` monitors for new content and transliterates it automatically
@@ -193,7 +191,7 @@ bun run test:all
 ### ✅ Completed Features
 
 - ✅ **Modern Build System**: Bun-based build process with TypeScript
-- ✅ **Core Transliteration**: Integration with `to-shavian` library
+- ✅ **Core Transliteration**: Integration with readlexicon-based transliterator
 - ✅ **Smart Content Filtering**: Avoids transliterating inappropriate content:
   - Code blocks (`<code>`, `<pre>`, `<xmp>`)
   - User input fields (`<input>`, `<textarea>`)
@@ -240,7 +238,7 @@ bun run test:all
 #### Core Runtime
 - **Bun**: Modern JavaScript runtime and package manager
 - **TypeScript 5.x**: Type-safe JavaScript with latest features
-- **to-shavian ^0.3.1**: Primary transliteration engine
+- **compromise**: Natural language processing library for POS tagging
 
 #### Development
 - **@types/chrome**: Chrome extension API type definitions
@@ -293,7 +291,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **[Shaw Alphabet](https://www.shavian.info/)**: For preserving and promoting the Shavian script
-- **[to-shavian](https://www.npmjs.com/package/to-shavian)**: Primary transliteration library
 - **[Readlexicon Project](https://readlexicon.org/)**: Inspiration for advanced transliteration techniques
 - **Community**: Shavian alphabet enthusiasts and contributors
 

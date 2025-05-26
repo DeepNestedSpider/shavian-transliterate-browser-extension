@@ -7,7 +7,8 @@ import { posTagSentence } from './core/posTagger';
 import type { POSTaggedToken } from './core/posTagger';
 
 export interface ReadlexiconTransliteratorConfig {
-  dictionary?: 'amer' | 'brit' | 'vs1' | 'readlex';
+  // Configuration options for the transliterator
+  // Note: Only readlex dictionary is supported
 }
 
 export class ReadlexiconTransliterator {
@@ -16,7 +17,7 @@ export class ReadlexiconTransliterator {
 
   constructor(config: ReadlexiconTransliteratorConfig = {}) {
     this.engine = new ReadlexiconEngine();
-    this.initializationPromise = this.loadDictionary('readlex');
+    this.initializationPromise = this.loadDictionary();
   }
 
   /**
@@ -26,14 +27,12 @@ export class ReadlexiconTransliterator {
     await this.initializationPromise;
   }
 
-  private async loadDictionary(dictionary: 'amer' | 'brit' | 'vs1' | 'readlex'): Promise<void> {
+  private async loadDictionary(): Promise<void> {
     try {
-      let dictionaryData: Record<string, string>;
-      // Always use readlexDict regardless of input
+      // Load the readlex dictionary
       const { readlexDict } = await import('./dictionaries/readlex');
-      dictionaryData = readlexDict;
       // Load the dictionary into the engine
-      for (const [key, value] of Object.entries(dictionaryData)) {
+      for (const [key, value] of Object.entries(readlexDict)) {
         this.engine.addToDictionary(key, value);
       }
       console.log(`Loaded readlex dictionary with ${this.engine.getDictionarySize()} entries`);

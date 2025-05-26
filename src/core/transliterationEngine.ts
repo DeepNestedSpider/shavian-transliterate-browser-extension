@@ -1,7 +1,6 @@
 /**
  * Core transliteration engine interface and factory
  */
-import toShavian from 'to-shavian';
 import type { POSTaggedToken } from './posTagger';
 
 export interface TransliterationEngine {
@@ -9,45 +8,7 @@ export interface TransliterationEngine {
   transliterateWord(word: string): string;
 }
 
-export type EngineType = 'to-shavian' | 'readlexicon';
-
-export class ToShavianEngine implements TransliterationEngine {
-  private segmenter = new Intl.Segmenter('en-US', { granularity: 'word' });
-
-  transliterate(text: string): string {
-    const words = text.split(/(\s+)/);
-    return words.map(segment => {
-      if (segment.match(/^\s+$/)) {
-        return segment;
-      } else if (segment.length > 0) {
-        return this.transliterateWord(segment);
-      }
-      return segment;
-    }).join('');
-  }
-
-  transliterateWord(word: string): string {
-    let shavianized = toShavian(word);
-    shavianized = shavianized.replace(/ /g, '');
-
-    if (shavianized === word && word.length > 1) {
-      console.log(`Word "${word}" was not altered by to-shavian. Attempting segmentation.`);
-      const segments = this.segmenter.segment(word);
-      let reShavianized = '';
-      for (const segment of segments) {
-        if (segment.isWordLike) {
-          reShavianized += toShavian(segment.segment).replace(/ /g, '');
-        } else {
-          reShavianized += segment.segment;
-        }
-      }
-      if (reShavianized !== word) {
-        return reShavianized;
-      }
-    }
-    return shavianized;
-  }
-}
+export type EngineType = 'readlexicon';
 
 export class ReadlexiconEngine implements TransliterationEngine {
   private dictionary: Map<string, string> = new Map();
@@ -274,9 +235,8 @@ export class ReadlexiconEngine implements TransliterationEngine {
       if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
     }
 
-    // 12. Fallback to to-shavian
-    result = toShavian(word).replace(/ /g, '');
-    return (result || word).replace(/^:+|:+$/g, '');
+    // 12. Fallback - return original word if no transliteration found
+    return word;
   }
 
   addToDictionary(word: string, transliteration: string): void {
@@ -289,17 +249,10 @@ export class ReadlexiconEngine implements TransliterationEngine {
 }
 
 export class TransliterationEngineFactory {
-  private static toShavianInstance: ToShavianEngine | null = null;
   private static readlexiconInstance: ReadlexiconEngine | null = null;
 
   static async createEngine(type: EngineType): Promise<TransliterationEngine> {
     switch (type) {
-      case 'to-shavian':
-        if (!this.toShavianInstance) {
-          this.toShavianInstance = new ToShavianEngine();
-        }
-        return this.toShavianInstance;
-
       case 'readlexicon':
         if (!this.readlexiconInstance) {
           // Dynamically import dictionary data
