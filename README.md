@@ -1,7 +1,3 @@
-# Backup of local README.md before merge conflict resolution
-
----
-
 # 𐑖𐑱𐑝𐑾𐑯 𐑑𐑮𐑨𐑯𐑕𐑤𐑦𐑑𐑼𐑱𐑑 - Shavian Transliterate Browser Extension
 
 [![Version](https://img.shields.io/badge/version-0.0.3-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
