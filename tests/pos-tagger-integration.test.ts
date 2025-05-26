@@ -1,10 +1,10 @@
 import { describe, test, expect } from "bun:test";
 import { posTagSentence } from "../src/core/posTagger";
-import { DechifroTransliterator } from "../src/dechifroTransliterator";
+import { ReadlexiconTransliterator } from "../src/dechifroTransliterator";
 
-describe("POS Tagger Integration with DechifroTransliterator", () => {
+describe("POS Tagger Integration with ReadlexiconTransliterator", () => {
   test("should transliterate heteronyms using POS tags", async () => {
-    const transliterator = new DechifroTransliterator({ dictionary: "amer" });
+    const transliterator = new ReadlexiconTransliterator({ dictionary: "amer" });
     // "lead" as a noun (NN) and verb (VB)
     const sentence = "They will lead the parade with lead pipes.";
     const posTagged = posTagSentence(sentence);

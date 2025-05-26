@@ -9,7 +9,7 @@ export interface TransliterationEngine {
   transliterateWord(word: string): string;
 }
 
-export type EngineType = 'to-shavian' | 'dechifro';
+export type EngineType = 'to-shavian' | 'readlexicon';
 
 export class ToShavianEngine implements TransliterationEngine {
   private segmenter = new Intl.Segmenter('en-US', { granularity: 'word' });
@@ -49,7 +49,7 @@ export class ToShavianEngine implements TransliterationEngine {
   }
 }
 
-export class DechifroEngine implements TransliterationEngine {
+export class ReadlexiconEngine implements TransliterationEngine {
   private dictionary: Map<string, string> = new Map();
   private previousWord: string = '';
   private previousPos: string = '';
@@ -289,8 +289,8 @@ export class DechifroEngine implements TransliterationEngine {
 }
 
 export class TransliterationEngineFactory {
-  private static dechifroInstance: DechifroEngine | null = null;
   private static toShavianInstance: ToShavianEngine | null = null;
+  private static readlexiconInstance: ReadlexiconEngine | null = null;
 
   static async createEngine(type: EngineType): Promise<TransliterationEngine> {
     switch (type) {
@@ -300,13 +300,13 @@ export class TransliterationEngineFactory {
         }
         return this.toShavianInstance;
 
-      case 'dechifro':
-        if (!this.dechifroInstance) {
+      case 'readlexicon':
+        if (!this.readlexiconInstance) {
           // Dynamically import dictionary data
           const { readlexDict } = await import('../dictionaries/readlex');
-          this.dechifroInstance = new DechifroEngine(readlexDict);
+          this.readlexiconInstance = new ReadlexiconEngine(readlexDict);
         }
-        return this.dechifroInstance;
+        return this.readlexiconInstance;
 
       default:
         throw new Error(`Unknown engine type: ${type}`);
@@ -314,12 +314,12 @@ export class TransliterationEngineFactory {
   }
 
   static async getEngineFromSettings(): Promise<TransliterationEngine> {
-    let engineType: EngineType = 'dechifro';
+    let engineType: EngineType = 'readlexicon';
     
     if (typeof chrome !== 'undefined' && chrome.storage) {
       try {
         const settings = await chrome.storage.sync.get(['transliterationEngine']);
-        engineType = settings.transliterationEngine || 'dechifro';
+        engineType = settings.transliterationEngine || 'readlexicon';
       } catch (error) {
         console.warn('Failed to get engine settings, using default:', error);
       }

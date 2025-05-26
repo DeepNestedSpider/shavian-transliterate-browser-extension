@@ -1,16 +1,16 @@
 /**
- * Test script for DechifroEngine function word heuristics
+ * Test script for ReadlexiconEngine function word heuristics
  */
 
 import { describe, test, expect, beforeAll } from "bun:test";
-import { DechifroEngine } from '../src/core/transliterationEngine';
+import { ReadlexiconEngine } from '../src/core/transliterationEngine';
 import { amerDict } from '../src/dictionaries/amer';
 
-describe('DechifroEngine Function Word Heuristics', () => {
-  let engine: DechifroEngine;
+describe('ReadlexiconEngine Function Word Heuristics', () => {
+  let engine: ReadlexiconEngine;
 
   beforeAll(() => {
-    engine = new DechifroEngine(amerDict);
+    engine = new ReadlexiconEngine(amerDict);
   });
 
   test('should handle basic "to" transliteration', () => {
@@ -62,14 +62,14 @@ describe('DechifroEngine Function Word Heuristics', () => {
   });
 
   test('should transliterate "to" alone correctly', () => {
-    const freshEngine = new DechifroEngine(amerDict);
+    const freshEngine = new ReadlexiconEngine(amerDict);
     const result = freshEngine.transliterateWord('to');
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');
   });
 
   test('should handle "have to" sequence correctly', () => {
-    const haveToEngine = new DechifroEngine(amerDict);
+    const haveToEngine = new ReadlexiconEngine(amerDict);
     const result = haveToEngine.transliterate('have to');
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');

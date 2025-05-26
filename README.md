@@ -16,7 +16,7 @@ A modern browser extension that automatically transliterates English text on web
 - **Real-time conversion**: Automatically transliterates English text to Shavian script as pages load
 - **Dynamic content support**: Monitors and transliterates content added via JavaScript using MutationObserver
 - **Smart text recognition**: Uses `Intl.Segmenter` for accurate word boundary detection
-- **Multiple transliteration engines**: Supports both `to-shavian` library and custom dechifro-based transliterator
+- **Multiple transliteration engines**: Supports both `to-shavian` library and custom readlexicon-based transliterator
 
 ### 🧠 Smart Content Detection
 - **Language detection**: Recognizes English content using HTML `lang` attributes and Chrome's i18n API
@@ -110,7 +110,7 @@ bun run test:all      # Run all available tests
 
 # Development utilities
 bun run increment-version    # Bump version numbers
-bun run convert-dict        # Convert dechifro dictionary format
+bun run convert-dict        # Convert readlexicon dictionary format
 bun run clean              # Remove temporary and build files
 ```
 
@@ -145,7 +145,7 @@ bun run build:dist
 │   ├── popup.html                   # Extension popup UI
 │   ├── languageDetector.ts          # Language detection utilities
 │   ├── shavianTransliterator.ts     # Main transliterator
-│   └── dechifroTransliterator.ts    # Alternative transliterator
+│   └── readlexiconTransliterator.ts    # Alternative transliterator
 ├── 📂 public/                       # Static assets
 │   ├── manifest.json               # Extension manifest
 │   └── 📂 icons/                   # Extension icons
@@ -167,7 +167,7 @@ bun run build:dist
    - Initializes transliteration engine
 4. **Text Processing**: `shavianTransliterator.ts` processes text using:
    - `to-shavian` library for standard transliteration
-   - Custom dechifro transliterator for advanced cases
+   - Custom readlexicon transliterator for advanced cases
    - DOM manipulation to update page content
 5. **Dynamic Updates**: `MutationObserver` monitors for new content and transliterates it automatically
 
@@ -176,7 +176,7 @@ bun run build:dist
 The project includes comprehensive tests for different transliteration scenarios:
 
 - `test-refactored.ts` - Main test suite
-- `test-dechifro.ts` - Dechifro transliterator tests
+- `test-readlexicon.ts` - Readlexicon transliterator tests
 - `test-function-words.ts` - Function word handling tests
 - `test-simple-*.ts` - Various simple test cases
 
@@ -215,7 +215,7 @@ bun run test:all
 
 #### High Complexity
 - ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
-- ✅ **Dechifro Integration**: Port Python dechifro-transliterator to JavaScript
+- ✅ **Readlexicon Integration**: Port Python readlexicon-transliterator to JavaScript
 - [ ] **Advanced Language Detection**: Machine learning-based language identification
 
 ### 🔮 Future Vision (Long Term)
@@ -294,7 +294,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **[Shaw Alphabet](https://www.shavian.info/)**: For preserving and promoting the Shavian script
 - **[to-shavian](https://www.npmjs.com/package/to-shavian)**: Primary transliteration library
-- **[Dechifro Project](https://dechifro.org/)**: Inspiration for advanced transliteration techniques
+- **[Readlexicon Project](https://dechifro.org/)**: Inspiration for advanced transliteration techniques
 - **Community**: Shavian alphabet enthusiasts and contributors
 
 ## 📞 Support

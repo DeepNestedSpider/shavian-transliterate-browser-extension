@@ -66,6 +66,10 @@ test_*
 !src/**/*.jpg
 !src/**/*.jpeg
 !src/**/*.gif
+# Allow screenshots in the root directory
+!brave_screenshot_*.png
+!chromewebstorescreen*.png
+!Shavian.png
 
 # Generated/compiled files
 *.js.map

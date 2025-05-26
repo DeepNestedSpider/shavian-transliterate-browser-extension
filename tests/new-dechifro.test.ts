@@ -1,15 +1,15 @@
 /**
- * Test script for the new DechifroEngine
+ * Test script for the ReadlexiconEngine
  */
 
 import { describe, test, expect, beforeAll } from "bun:test";
 import { TransliterationEngineFactory } from '../src/core/transliterationEngine';
 
-describe('New DechifroEngine', () => {
+describe('ReadlexiconEngine', () => {
   let engine: any;
 
   beforeAll(async () => {
-    engine = await TransliterationEngineFactory.createEngine('dechifro');
+    engine = await TransliterationEngineFactory.createEngine('readlexicon');
   });
 
   test('should create engine instance successfully', () => {

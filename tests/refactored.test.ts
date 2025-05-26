@@ -7,11 +7,11 @@ import { TransliterationEngineFactory } from '../src/core/transliterationEngine'
 
 describe('Refactored Architecture', () => {
   let toShavianEngine: any;
-  let dechifroEngine: any;
+  let readlexiconEngine: any;
 
   beforeAll(async () => {
     toShavianEngine = await TransliterationEngineFactory.createEngine('to-shavian');
-    dechifroEngine = await TransliterationEngineFactory.createEngine('dechifro');
+    readlexiconEngine = await TransliterationEngineFactory.createEngine('readlexicon');
   });
 
   test('should import TransliterationEngineFactory successfully', async () => {
@@ -39,13 +39,13 @@ describe('Refactored Architecture', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 
-  test('should create Dechifro engine successfully', () => {
-    expect(dechifroEngine).toBeDefined();
+  test('should create Readlexicon engine successfully', () => {
+    expect(readlexiconEngine).toBeDefined();
   });
 
-  test('should transliterate text with Dechifro engine', () => {
+  test('should transliterate text with Readlexicon engine', () => {
     const testText = 'Hello world';
-    const result = dechifroEngine.transliterate(testText);
+    const result = readlexiconEngine.transliterate(testText);
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');
     expect(result.length).toBeGreaterThan(0);
@@ -60,12 +60,12 @@ describe('Refactored Architecture', () => {
 
     testInputs.forEach(input => {
       const toShavianResult = toShavianEngine.transliterate(input);
-      const dechifroResult = dechifroEngine.transliterate(input);
+      const readlexiconResult = readlexiconEngine.transliterate(input);
       
       expect(toShavianResult).toBeTruthy();
-      expect(dechifroResult).toBeTruthy();
+      expect(readlexiconResult).toBeTruthy();
       expect(typeof toShavianResult).toBe('string');
-      expect(typeof dechifroResult).toBe('string');
+      expect(typeof readlexiconResult).toBe('string');
     });
   });
 
@@ -74,6 +74,6 @@ describe('Refactored Architecture', () => {
     
     expect(() => toShavianEngine.transliterate(testText)).not.toThrow();
     expect(() => toShavianEngine.transliterateWord('hello')).not.toThrow();
-    expect(() => dechifroEngine.transliterate(testText)).not.toThrow();
+    expect(() => readlexiconEngine.transliterate(testText)).not.toThrow();
   });
 });

@@ -18,7 +18,7 @@ enum LanguageCheckMode {
  */
 enum TransliterationEngine {
   ToShavian = 'to-shavian',
-  Dechifro = 'dechifro',
+  Readlexicon = 'readlexicon',
 }
 
 /**
@@ -36,7 +36,7 @@ interface PopupSettings {
 const DEFAULT_SETTINGS: PopupSettings = {
   languageCheckMode: LanguageCheckMode.HtmlLang,
   transliterationEnabled: true,
-  transliterationEngine: TransliterationEngine.Dechifro,
+  transliterationEngine: TransliterationEngine.Readlexicon,
 };
 
 /**
