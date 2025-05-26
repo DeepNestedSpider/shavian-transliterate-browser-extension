@@ -1,7 +1,7 @@
 {
   "name": "Transliterate to Shavian",
   "description": "This extension will transliterate all English text to Shavian",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "manifest_version": 3,
   "action": {
     "default_popup": "popup.html",
