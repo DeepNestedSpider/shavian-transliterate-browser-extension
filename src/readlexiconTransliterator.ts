@@ -96,7 +96,7 @@ export class ReadlexiconTransliterator {
    */
   async transliterateWithPOS(text: string): Promise<string> {
     await this.ready();
-    const tokens: POSTaggedToken[] = posTagSentence(text);
+    const tokens: POSTaggedToken[] = await posTagSentence(text);
     // Use the new POS-aware method in the engine
     // @ts-ignore: method exists in our extended engine
     let result = this.engine.transliterateWithPOSTags(tokens);

@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "compromise": "^14.14.4",
-    "node": "^22.16.0"
+    "node": "^22.16.0",
+    "wordpos": "^2.1.0"
   }
 }

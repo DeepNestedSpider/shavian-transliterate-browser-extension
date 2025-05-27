@@ -7,6 +7,7 @@ import { handleWordPunctuation, isPunctuationProcessed, extractOriginalWord } fr
 export interface TransliterationEngine {
   transliterate(text: string): string;
   transliterateWord(word: string): string;
+  transliterateWithPOS?(text: string): Promise<string>;
   reverseTransliterate(text: string): string;
   reverseTransliterateWord(word: string): string;
 }
@@ -14,7 +15,7 @@ export interface TransliterationEngine {
 export type EngineType = 'readlexicon';
 
 export class ReadlexiconEngine implements TransliterationEngine {
-  private dictionary: Map<string, string> = new Map();
+  private dictionary: Map<string, string> | any = new Map();
   private reverseDictionary: Map<string, string> = new Map();
   private previousWord: string = '';
   private previousPos: string = '';
@@ -86,20 +87,36 @@ export class ReadlexiconEngine implements TransliterationEngine {
     five: '𐑓𐑲𐑝', // "five" -> "𐑓𐑲𐑝" (fyv)
   };
 
-  constructor(dictionaryData?: Record<string, string>) {
+  constructor(dictionaryData?: any) {
     if (dictionaryData) {
       this.loadDictionary(dictionaryData);
     }
   }
 
-  private loadDictionary(data: Record<string, string>): void {
-    for (const [key, value] of Object.entries(data)) {
-      this.dictionary.set(key.toLowerCase(), value);
+  private loadDictionary(data: any): void {
+    // Handle new POS-aware dictionary format
+    if (data && typeof data.getTransliteration === 'function') {
+      // New format with POS support
+      this.dictionary = data;
+      
       // Build reverse dictionary for Shavian to English transliteration
-      // Clean the Shavian value and use as key
-      const cleanShavian = value.replace(/^[.:]+|[.:]+$/g, '');
-      if (cleanShavian) {
-        this.reverseDictionary.set(cleanShavian, key.toLowerCase());
+      this.reverseDictionary = new Map();
+      for (const [key, value] of Object.entries(data.basic)) {
+        const cleanShavian = (value as string).replace(/^[.:]+|[.:]+$/g, '');
+        if (cleanShavian) {
+          this.reverseDictionary.set(cleanShavian, key.toLowerCase());
+        }
+      }
+    } else {
+      // Legacy format compatibility
+      this.dictionary = new Map();
+      for (const [key, value] of Object.entries(data as Record<string, string>)) {
+        this.dictionary.set(key.toLowerCase(), value);
+        // Build reverse dictionary for Shavian to English transliteration
+        const cleanShavian = value.replace(/^[.:]+|[.:]+$/g, '');
+        if (cleanShavian) {
+          this.reverseDictionary.set(cleanShavian, key.toLowerCase());
+        }
       }
     }
 
@@ -138,6 +155,21 @@ export class ReadlexiconEngine implements TransliterationEngine {
         return segment;
       })
       .join('');
+  }
+
+  /**
+   * POS-aware transliteration using wordpos package
+   */
+  async transliterateWithPOS(text: string): Promise<string> {
+    const { posTagSentence } = await import('./posTagger');
+    
+    try {
+      const tokens = await posTagSentence(text);
+      return this.transliterateWithPOSTags(tokens);
+    } catch (error) {
+      console.warn('POS tagging failed, falling back to basic transliteration:', error);
+      return this.transliterate(text);
+    }
   }
 
   /**
@@ -219,90 +251,130 @@ export class ReadlexiconEngine implements TransliterationEngine {
       return this.beftoMap[this.previousWord]!.replace(/^:+|:+$/g, '');
     }
 
-    // 3. Prefer POS-specific dictionary entry if POS is provided
-    if (pos && this.dictionary.has(clean + '_' + pos)) {
-      const result = this.dictionary.get(clean + '_' + pos);
-      if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
-    }
-
-    // 4. Check for direct dictionary match first (including contractions with underscore)
-    if (this.dictionary.has(clean + '_')) {
-      const result = this.dictionary.get(clean + '_');
-      if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
-    }
-
-    // 5. Check direct dictionary match
-    let result = this.dictionary.get(clean);
-    if (result) {
-      return result.replace(/^[.:]+|[.:]+$/g, '');
-    }
-
-    // 6. Handle contractions with suffix patterns from dictionary
-    if (word.includes("'")) {
-      const parts = word.split("'");
-      if (parts.length === 2 && parts[0] && parts[1]) {
-        const base = parts[0].toLowerCase();
-        const suffix = "'" + parts[1].toLowerCase();
-        // Look for suffix pattern in dictionary
-        const suffixKey = '$' + suffix;
-        if (this.dictionary.has(suffixKey)) {
-          const baseTransliteration = this.transliterateWord(base);
-          const suffixTransliteration = this.dictionary.get(suffixKey)!;
-          return (
-            baseTransliteration +
-            suffixTransliteration.replace(/^[.:]+|[.:]+$/g, '').replace(/^'/, '')
-          ).replace(/^:+|:+$/g, '');
+    // Check if we have new POS-aware dictionary format
+    if (this.dictionary && typeof this.dictionary.getTransliteration === 'function') {
+      // 3. Try POS-specific lookup first if POS is provided
+      const result = this.dictionary.getTransliteration(clean, pos);
+      if (result) {
+        return result.replace(/^[.:]+|[.:]+$/g, '');
+      }
+      
+      // 4. Fallback to basic lookup without POS
+      const basicResult = this.dictionary.getTransliteration(clean);
+      if (basicResult) {
+        return basicResult.replace(/^[.:]+|[.:]+$/g, '');
+      }
+      
+      // 5. Handle contractions with suffix patterns
+      if (word.includes("'")) {
+        const parts = word.split("'");
+        if (parts.length === 2 && parts[0] && parts[1]) {
+          const base = parts[0].toLowerCase();
+          const suffix = "'" + parts[1].toLowerCase();
+          // Look for suffix pattern in basic dictionary
+          const suffixKey = '$' + suffix;
+          const suffixResult = this.dictionary.getTransliteration(suffixKey);
+          if (suffixResult) {
+            const baseTransliteration = this.transliterateWord(base);
+            return (
+              baseTransliteration +
+              suffixResult.replace(/^[.:]+|[.:]+$/g, '').replace(/^'/, '')
+            ).replace(/^:+|:+$/g, '');
+          }
         }
       }
-    }
+      
+      // TODO: Handle prefix/suffix rules for new format
+      // For now, fallback to original word
+      return word;
+      
+    } else if (this.dictionary && typeof this.dictionary.has === 'function') {
+      // Legacy Map-based dictionary format
+      // 3. Prefer POS-specific dictionary entry if POS is provided
+      if (pos && this.dictionary.has(clean + '_' + pos)) {
+        const result = this.dictionary.get(clean + '_' + pos);
+        if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+      }
 
-    // 7. Prefix rule: ^prefix
-    for (const [key, value] of this.dictionary.entries()) {
-      if (key.startsWith('^')) {
-        const prefix = key.slice(1);
-        if (clean.startsWith(prefix)) {
-          return (value + this.transliterateWord(clean.slice(prefix.length))).replace(
-            /^:+|:+$/g,
-            ''
-          );
+      // 4. Check for direct dictionary match first (including contractions with underscore)
+      if (this.dictionary.has(clean + '_')) {
+        const result = this.dictionary.get(clean + '_');
+        if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+      }
+
+      // 5. Check direct dictionary match
+      let result = this.dictionary.get(clean);
+      if (result) {
+        return result.replace(/^[.:]+|[.:]+$/g, '');
+      }
+
+      // 6. Handle contractions with suffix patterns from dictionary
+      if (word.includes("'")) {
+        const parts = word.split("'");
+        if (parts.length === 2 && parts[0] && parts[1]) {
+          const base = parts[0].toLowerCase();
+          const suffix = "'" + parts[1].toLowerCase();
+          // Look for suffix pattern in dictionary
+          const suffixKey = '$' + suffix;
+          if (this.dictionary.has(suffixKey)) {
+            const baseTransliteration = this.transliterateWord(base);
+            const suffixTransliteration = this.dictionary.get(suffixKey)!;
+            return (
+              baseTransliteration +
+              suffixTransliteration.replace(/^[.:]+|[.:]+$/g, '').replace(/^'/, '')
+            ).replace(/^:+|:+$/g, '');
+          }
         }
       }
-    }
 
-    // 8. Suffix rule: $suffix (for non-contraction suffixes)
-    for (const [key, value] of this.dictionary.entries()) {
-      if (key.startsWith('$') && !key.includes("'")) {
-        const suffix = key.slice(1);
-        if (clean.endsWith(suffix)) {
-          return (
-            this.transliterateWord(clean.slice(0, clean.length - suffix.length)) +
-            value.replace(/^[.:]+|[.:]+$/g, '')
-          ).replace(/^:+|:+$/g, '');
+      // 7. Prefix rule: ^prefix
+      for (const [key, value] of this.dictionary.entries()) {
+        if (key.startsWith('^')) {
+          const prefix = key.slice(1);
+          if (clean.startsWith(prefix)) {
+            return (value + this.transliterateWord(clean.slice(prefix.length))).replace(
+              /^:+|:+$/g,
+              ''
+            );
+          }
         }
       }
-    }
 
-    // 9. Always dot: Capitalized word in dict
-    if (this.dictionary.has(originalWord)) {
-      result = this.dictionary.get(originalWord);
-      if (result) return ('·' + result.replace(/^[.:]+|[.:]+$/g, '')).replace(/^:+|:+$/g, '');
-    }
-
-    // 10. Part-of-speech specific entries (word_POS) if not already checked
-    if (!pos) {
-      const posVariants = ['_VB', '_NN', '_NNS', '_JJ', '_RB'];
-      for (const p of posVariants) {
-        if (this.dictionary.has(clean + p)) {
-          result = this.dictionary.get(clean + p);
-          if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+      // 8. Suffix rule: $suffix (for non-contraction suffixes)
+      for (const [key, value] of this.dictionary.entries()) {
+        if (key.startsWith('$') && !key.includes("'")) {
+          const suffix = key.slice(1);
+          if (clean.endsWith(suffix)) {
+            return (
+              this.transliterateWord(clean.slice(0, clean.length - suffix.length)) +
+              value.replace(/^[.:]+|[.:]+$/g, '')
+            ).replace(/^:+|:+$/g, '');
+          }
         }
       }
-    }
 
-    // 11. Handle word ending variations for better matching
-    if (this.dictionary.has(clean + '.')) {
-      result = this.dictionary.get(clean + '.');
-      if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+      // 9. Always dot: Capitalized word in dict
+      if (this.dictionary.has(originalWord)) {
+        result = this.dictionary.get(originalWord);
+        if (result) return ('·' + result.replace(/^[.:]+|[.:]+$/g, '')).replace(/^:+|:+$/g, '');
+      }
+
+      // 10. Part-of-speech specific entries (word_POS) if not already checked
+      if (!pos) {
+        const posVariants = ['_VB', '_NN', '_NNS', '_JJ', '_RB'];
+        for (const p of posVariants) {
+          if (this.dictionary.has(clean + p)) {
+            result = this.dictionary.get(clean + p);
+            if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+          }
+        }
+      }
+
+      // 11. Handle word ending variations for better matching
+      if (this.dictionary.has(clean + '.')) {
+        result = this.dictionary.get(clean + '.');
+        if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+      }
     }
 
     // 12. Fallback - return original word if no transliteration found
@@ -310,16 +382,37 @@ export class ReadlexiconEngine implements TransliterationEngine {
   }
 
   addToDictionary(word: string, transliteration: string): void {
-    this.dictionary.set(word.toLowerCase(), transliteration);
+    if (this.dictionary && typeof this.dictionary.set === 'function') {
+      // Legacy Map format
+      this.dictionary.set(word.toLowerCase(), transliteration);
+    } else {
+      // New format - we can't easily add to the ReadlexDictionaryImpl structure
+      // For now, fallback to creating a Map if needed
+      if (!this.dictionary || typeof this.dictionary.set !== 'function') {
+        const tempMap = new Map();
+        tempMap.set(word.toLowerCase(), transliteration);
+        // This is a limitation - we lose POS-aware functionality for dynamically added words
+        console.warn('Adding words to POS-aware dictionary not fully supported yet');
+      }
+    }
+    
     // Also add to reverse dictionary
-    const cleanShavian = transliteration.replace(/^[.:]+|[.:]+$/g, '');
+    const transliterationStr = typeof transliteration === 'string' ? transliteration : String(transliteration);
+    const cleanShavian = transliterationStr.replace(/^[.:]+|[.:]+$/g, '');
     if (cleanShavian) {
       this.reverseDictionary.set(cleanShavian, word.toLowerCase());
     }
   }
 
   getDictionarySize(): number {
-    return this.dictionary.size;
+    if (this.dictionary && typeof this.dictionary.size === 'number') {
+      // Legacy Map format
+      return this.dictionary.size;
+    } else if (this.dictionary && this.dictionary.basic) {
+      // New format - count basic entries
+      return Object.keys(this.dictionary.basic).length;
+    }
+    return 0;
   }
 
   /**
