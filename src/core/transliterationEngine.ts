@@ -120,8 +120,8 @@ export class ReadlexiconEngine implements TransliterationEngine {
     return words.map(segment => {
       if (segment.match(/^\s+$/)) {
         return segment;
-      } else if (segment.match(/^[.,:;!?"'()\[\]{}<>-]+$/)) {
-        // Punctuation (including commas and more): do not transliterate, do not attach to previous word
+      } else if (segment.match(/^[.,:;!?"'()\[\]{}<>]+$/)) {
+        // Punctuation (excluding hyphens and ellipses): do not transliterate, do not attach to previous word
         return segment;
       } else if (segment.length > 0) {
         const result = this.transliterateWord(segment);
@@ -161,6 +161,36 @@ export class ReadlexiconEngine implements TransliterationEngine {
    * Transliterate a single word, optionally using a POS tag for heteronyms.
    */
   transliterateWord(word: string, pos?: string): string {
+    if (!word || word.trim() === '') return word;
+    const originalWord = word;
+    
+    // Handle compound words with hyphens
+    if (word.includes('-') && !word.match(/^[-]+$/)) {
+      const parts = word.split('-');
+      const transliteratedParts = parts.map(part => {
+        if (part.trim() === '') return part;
+        return this.transliterateWordInternal(part, pos);
+      });
+      return transliteratedParts.join('-');
+    }
+    
+    // Handle words with ellipses
+    if (word.includes('…')) {
+      const parts = word.split('…');
+      const transliteratedParts = parts.map(part => {
+        if (part.trim() === '') return part;
+        return this.transliterateWordInternal(part, pos);
+      });
+      return transliteratedParts.join('…');
+    }
+    
+    return this.transliterateWordInternal(word, pos);
+  }
+
+  /**
+   * Internal method to transliterate a single word part without compound handling
+   */
+  private transliterateWordInternal(word: string, pos?: string): string {
     if (!word || word.trim() === '') return word;
     const originalWord = word;
     const clean = word.toLowerCase().replace(/[^\w']/g, '');
@@ -277,8 +307,8 @@ export class ReadlexiconEngine implements TransliterationEngine {
     return words.map(segment => {
       if (segment.match(/^\s+$/)) {
         return segment;
-      } else if (segment.match(/^[.,:;!?"'()\[\]{}<>-]+$/)) {
-        // Punctuation: do not transliterate
+      } else if (segment.match(/^[.,:;!?"'()\[\]{}<>]+$/)) {
+        // Punctuation (excluding hyphens and ellipses): do not transliterate
         return segment;
       } else if (segment.length > 0) {
         return this.reverseTransliterateWord(segment);
@@ -291,6 +321,35 @@ export class ReadlexiconEngine implements TransliterationEngine {
    * Reverse transliterate (Shavian to English) a single word
    */
   reverseTransliterateWord(word: string): string {
+    if (!word || word.trim() === '') return word;
+    
+    // Handle compound words with hyphens
+    if (word.includes('-') && !word.match(/^[-]+$/)) {
+      const parts = word.split('-');
+      const transliteratedParts = parts.map(part => {
+        if (part.trim() === '') return part;
+        return this.reverseTransliterateWordInternal(part);
+      });
+      return transliteratedParts.join('-');
+    }
+    
+    // Handle words with ellipses
+    if (word.includes('…')) {
+      const parts = word.split('…');
+      const transliteratedParts = parts.map(part => {
+        if (part.trim() === '') return part;
+        return this.reverseTransliterateWordInternal(part);
+      });
+      return transliteratedParts.join('…');
+    }
+    
+    return this.reverseTransliterateWordInternal(word);
+  }
+
+  /**
+   * Internal method to reverse transliterate a single word part without compound handling
+   */
+  private reverseTransliterateWordInternal(word: string): string {
     if (!word || word.trim() === '') return word;
     
     // Remove punctuation for lookup but preserve original for fallback
