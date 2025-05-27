@@ -2,6 +2,7 @@
  * Core transliteration engine interface and factory
  */
 import type { POSTaggedToken } from './posTagger';
+import { handleWordPunctuation, isPunctuationProcessed, extractOriginalWord } from './punctuationHandler';
 
 export interface TransliterationEngine {
   transliterate(text: string): string;
@@ -116,19 +117,21 @@ export class ReadlexiconEngine implements TransliterationEngine {
     this.previousWord = '';
     this.previousPos = '';
 
+    // Split by whitespace but preserve words with attached punctuation
     const words = text.split(/(\s+)/);
     return words
       .map(segment => {
         if (segment.match(/^\s+$/)) {
           return segment;
         } else if (segment.match(/^[.,:;!?"'()\[\]{}<>]+$/)) {
-          // Punctuation (excluding hyphens and ellipses): do not transliterate, do not attach to previous word
+          // Pure punctuation (excluding hyphens and ellipses): do not transliterate
           return segment;
         } else if (segment.length > 0) {
           const result = this.transliterateWord(segment);
           // Update previous word context (only for actual words, not punctuation)
-          if (segment.match(/\w/)) {
-            this.previousWord = segment.toLowerCase();
+          // Check if result is not in punctuation{word} format before updating context
+          if (segment.match(/\w/) && !isPunctuationProcessed(result)) {
+            this.previousWord = segment.toLowerCase().replace(/[^\w']/g, '');
           }
           return result;
         }
@@ -168,6 +171,12 @@ export class ReadlexiconEngine implements TransliterationEngine {
     if (!word || word.trim() === '') return word;
     const originalWord = word;
 
+    // Check for punctuation first - if word has non-alphabetic characters, handle with punctuation handler
+    const punctuationResult = handleWordPunctuation(word);
+    if (punctuationResult !== word) {
+      return punctuationResult;
+    }
+
     // Handle compound words with hyphens
     if (word.includes('-') && !word.match(/^[-]+$/)) {
       const parts = word.split('-');
@@ -196,6 +205,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
    */
   private transliterateWordInternal(word: string, pos?: string): string {
     if (!word || word.trim() === '') return word;
+    
     const originalWord = word;
     const clean = word.toLowerCase().replace(/[^\w']/g, '');
 
@@ -338,14 +348,27 @@ export class ReadlexiconEngine implements TransliterationEngine {
   reverseTransliterateWord(word: string): string {
     if (!word || word.trim() === '') return word;
 
-    // Handle compound words with hyphens
+    // Check if word is in punctuation{word} format first - if so, extract and return original
+    if (isPunctuationProcessed(word)) {
+      return extractOriginalWord(word);
+    }
+
+    // Handle compound words with hyphens (but only if none of the parts look like punctuation format)
     if (word.includes('-') && !word.match(/^[-]+$/)) {
       const parts = word.split('-');
-      const transliteratedParts = parts.map(part => {
-        if (part.trim() === '') return part;
-        return this.reverseTransliterateWordInternal(part);
-      });
-      return transliteratedParts.join('-');
+      // Check if any part looks like malformed punctuation format - if so, don't process as compound
+      const hasPartialPunctuationFormat = parts.some(part => 
+        part.includes('{') || part.includes('}') || 
+        (part.includes('punctuation') && (word.includes('{') || word.includes('}')))
+      );
+      
+      if (!hasPartialPunctuationFormat) {
+        const transliteratedParts = parts.map(part => {
+          if (part.trim() === '') return part;
+          return this.reverseTransliterateWordInternal(part);
+        });
+        return transliteratedParts.join('-');
+      }
     }
 
     // Handle words with ellipses
@@ -366,6 +389,11 @@ export class ReadlexiconEngine implements TransliterationEngine {
    */
   private reverseTransliterateWordInternal(word: string): string {
     if (!word || word.trim() === '') return word;
+
+    // Check if this is a punctuation-processed word and extract the original
+    if (isPunctuationProcessed(word)) {
+      return extractOriginalWord(word);
+    }
 
     // Remove punctuation for lookup but preserve original for fallback
     const clean = word.replace(/^[^\u{10450}-\u{1047F}]*|[^\u{10450}-\u{1047F}]*$/gu, '');
