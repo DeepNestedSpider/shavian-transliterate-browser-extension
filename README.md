@@ -13,12 +13,14 @@ A modern browser extension that automatically transliterates English text on web
 ## ✨ Features
 
 ### 🔤 Intelligent Transliteration
+
 - **Real-time conversion**: Automatically transliterates English text to Shavian script as pages load
 - **Dynamic content support**: Monitors and transliterates content added via JavaScript using MutationObserver
 - **Smart text recognition**: Uses `Intl.Segmenter` for accurate word boundary detection
 - **Advanced transliteration engine**: Uses the readlexicon-based transliterator for accurate pronunciation-to-script conversion
 
 ### 🧠 Smart Content Detection
+
 - **Language detection**: Recognizes English content using HTML `lang` attributes and Chrome's i18n API
 - **Content filtering**: Intelligently avoids transliterating:
   - Code blocks (`<code>`, `<pre>`, `<xmp>`)
@@ -27,6 +29,7 @@ A modern browser extension that automatically transliterates English text on web
   - Non-English scripts (IPA, Turkish, etc.)
 
 ### ⚙️ Flexible Configuration
+
 - **Toggle transliteration**: Easy on/off switch via popup interface
 - **Language detection modes**:
   - HTML lang attribute detection
@@ -34,6 +37,7 @@ A modern browser extension that automatically transliterates English text on web
   - Force transliteration (override detection)
 
 ### 🎨 Modern Architecture
+
 - **Manifest V3 compliant**: Built for the latest browser extension standards
 - **TypeScript**: Full type safety and modern JavaScript features
 - **Modular design**: Clean separation of concerns with dedicated modules for different functionalities
@@ -44,6 +48,7 @@ A modern browser extension that automatically transliterates English text on web
 ### Installation
 
 #### From Release (Recommended)
+
 1. Download the latest release from the [releases page](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension/releases)
 2. Extract the `.zip` file
 3. Open Chrome/Chromium and navigate to `chrome://extensions/`
@@ -51,6 +56,7 @@ A modern browser extension that automatically transliterates English text on web
 5. Click "Load unpacked" and select the extracted folder
 
 #### Build from Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension.git
@@ -81,6 +87,7 @@ bun run build:dist
 ## 🛠️ Development
 
 ### Prerequisites
+
 - [Bun](https://bun.sh/) - JavaScript runtime and package manager
 - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 - Modern web browser (Chrome, Firefox, Edge)
@@ -179,19 +186,19 @@ bun run build:dist
 ## How It Works
 
 1. **Extension Initialization**: The browser loads the extension using `manifest.json`, which injects `content.ts` as the main content script into web pages.
-2. **Language & Content Detection**: 
+2. **Language & Content Detection**:
    - `languageDetector.ts` determines if the page (or specific elements) are in English using HTML `lang` attributes, Chrome's i18n API, and user preferences.
    - The script also checks for elements that should be excluded from transliteration (e.g., `<code>`, `<pre>`, `<input>`, `<textarea>`, `<script>`, `<style>`, `<iframe>`, etc.) using DOM queries and filtering logic in `core/domTransliterator.ts`.
 3. **User Configuration**: The popup UI (`popup.html`/`popup.ts`) allows users to toggle transliteration, select detection modes, and set per-site preferences. These settings are stored and accessed by the content script.
-4. **Transliteration Engine Selection**: 
+4. **Transliteration Engine Selection**:
    - If English content is detected and transliteration is enabled, the content script dynamically loads the main transliteration engine (`shavianTransliterator.ts`).
    - For advanced or alternative transliteration, the `readlexiconTransliterator.ts` module is used, leveraging the `dictionaries/readlex.ts` data and `core/transliterationEngine.ts` logic.
 5. **Text Processing & Replacement**:
    - The selected transliteration engine processes eligible text nodes, using `Intl.Segmenter` for accurate word boundaries and `core/posTagger.ts` for part-of-speech tagging when needed.
    - The transliterated Shavian text replaces the original content in the DOM, preserving structure and avoiding excluded elements.
-6. **Dynamic Content Handling**: 
+6. **Dynamic Content Handling**:
    - A `MutationObserver` (in `content.ts` and/or `core/domTransliterator.ts`) watches for new or changed DOM nodes, ensuring that dynamically loaded or updated content is also transliterated in real time.
-7. **Performance & Modularity**: 
+7. **Performance & Modularity**:
    - The codebase is modular, with clear separation between content detection, transliteration logic, dictionary data, and UI.
    - All processing is done locally for privacy and speed; no external requests are made during transliteration.
 
@@ -235,23 +242,26 @@ bun run test:all
 ### 🎯 High Priority (Near Term)
 
 #### Low Complexity
+
 - [ ] **UI/UX Improvements**: Enhanced popup design and user experience
 - [ ] **Better Error Handling**: Graceful fallbacks for edge cases
-- [ ] **Performance Optimization**: Reduce memory usage and improve speed
+- [x] **Performance Optimization**: Reduce memory usage and improve speed
 
 #### High Complexity
+
 - ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
-- ✅ **Readlexicon Integration**: Port Python readlexicon-transliterator to JavaScript
+- ✅ **Readlexicon Integration**: Translate Dechifro's Python shavianizer to JavaScript and Implement the Readlexicon dictionary
 
 ### 🔮 Future Vision (Long Term)
 
 #### Low Complexity
+
 - [ ] **Custom Font Support**: Allow users to specify preferred Shavian fonts
 - [ ] **Keyboard Shortcuts**: Hotkeys for quick transliteration toggle
-- [ ] **Export Features**: Save transliterated content as files
-- [ ] **Both ways transliteration**: Transliterate shavian to Latin Alphabet
+- [x] **Both ways transliteration**: Transliterate shavian to Latin Alphabet
 
 #### High Complexity
+
 - [ ] **Multi-language Support**: Extend beyond English to other languages that have alternate scripts
 - [ ] **User input transliteration (both ways)**: Share transliterated content with others
 
@@ -260,11 +270,13 @@ bun run test:all
 ### Dependencies
 
 #### Core Runtime
+
 - **Bun**: Modern JavaScript runtime and package manager
 - **TypeScript 5.x**: Type-safe JavaScript with latest features
 - **compromise**: Natural language processing library for POS tagging
 
 #### Development
+
 - **@types/chrome**: Chrome extension API type definitions
 - **@types/node**: Node.js type definitions
 - **@types/bun**: Bun runtime type definitions
@@ -288,6 +300,7 @@ bun run test:all
 We welcome contributions! Here's how you can help:
 
 ### Getting Started
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and test thoroughly
@@ -296,12 +309,14 @@ We welcome contributions! Here's how you can help:
 6. Open a Pull Request
 
 ### Code Style
+
 - Use TypeScript for all new code
 - Follow existing naming conventions
 - Add tests for new functionality
 - Update documentation as needed
 
 ### Areas for Contribution
+
 - 🐛 **Bug Fixes**: Check the issues page for known problems
 - ✨ **Features**: Implement items from the roadmap
 - 📚 **Documentation**: Improve README, add code comments
@@ -315,7 +330,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **[Shaw Alphabet](https://www.shavian.info/)**: For preserving and promoting the Shavian script
-- **[Readlexicon Project](https://readlexicon.org/)**: Inspiration for advanced transliteration techniques
+- **[Readlexicon Project](https://readlexicon.org/)**: Origin of the dictionary file
+- **[Dechifro's Transliterator](https://dechifro.org/shavian/)**: Inspiration for the custom transliteration engine
+- **[to-shavian](https://nwah.github.io/to-shavian/)**: Transliteration engine used for prototyping(Deprecated)
+
 - **Community**: Shavian alphabet enthusiasts and contributors
 
 ## 📞 Support
@@ -327,6 +345,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ on Steam Deck running Bazzite/Archlinux using NeoVim + AstronVim**
+**Made with ❤️ on a Steam Deck running Bazzite/Archlinux using NeoVim + AstronVim**
 
-*This extension is not affiliated with the Shaw Estate or any official Shavian alphabet organization.*
+_This extension is not affiliated with the Shaw Estate or any official Shavian alphabet organization._

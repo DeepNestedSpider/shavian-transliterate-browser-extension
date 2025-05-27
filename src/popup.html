@@ -12,9 +12,10 @@
         background: linear-gradient(135deg, #f8fafc 0%, #e3e9f3 100%);
         color: #222;
         border-radius: 12px;
-        box-shadow: 0 2px 16px 0 rgba(60,60,90,0.10);
+        box-shadow: 0 2px 16px 0 rgba(60, 60, 90, 0.1);
       }
-      h1, h2 {
+      h1,
+      h2 {
         font-weight: 600;
         margin-bottom: 18px;
         color: #2c3e50;
@@ -51,14 +52,17 @@
       .big-slider {
         position: absolute;
         cursor: pointer;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         background: #cfd8dc;
         transition: 0.4s;
         border-radius: 48px;
       }
       .big-slider:before {
         position: absolute;
-        content: "";
+        content: '';
         height: 40px;
         width: 40px;
         left: 4px;
@@ -66,7 +70,7 @@
         background: #fff;
         transition: 0.4s;
         border-radius: 50%;
-        box-shadow: 0 1px 4px 0 rgba(60,60,90,0.10);
+        box-shadow: 0 1px 4px 0 rgba(60, 60, 90, 0.1);
       }
       .big-switch input:checked + .big-slider {
         background: linear-gradient(90deg, #4caf50 60%, #43a047 100%);
@@ -80,15 +84,15 @@
       .big-slider.round:before {
         border-radius: 50%;
       }
-      
+
       /* Small toggle for direction */
-      .big-switch[style*="height: 32px"] .big-slider:before {
+      .big-switch[style*='height: 32px'] .big-slider:before {
         height: 24px;
         width: 24px;
         left: 4px;
         bottom: 4px;
       }
-      .big-switch[style*="height: 32px"] input:checked + .big-slider:before {
+      .big-switch[style*='height: 32px'] input:checked + .big-slider:before {
         transform: translateX(48px);
       }
       .toggle-label {
@@ -97,7 +101,8 @@
         margin-left: 18px;
         color: #222;
       }
-      #transliterationEngineSelect, #languageModeSelect {
+      #transliterationEngineSelect,
+      #languageModeSelect {
         margin: 10px 0 18px 0;
         width: 100%;
         padding: 7px 10px;
@@ -106,7 +111,7 @@
         font-size: 1em;
         background: #f7fafc;
         color: #222;
-        box-shadow: 0 1px 4px 0 rgba(60,60,90,0.04);
+        box-shadow: 0 1px 4px 0 rgba(60, 60, 90, 0.04);
       }
       button {
         background: linear-gradient(90deg, #4caf50 60%, #43a047 100%);
@@ -119,7 +124,7 @@
         margin-top: 18px;
         width: 100%;
         font-weight: 500;
-        box-shadow: 0 1px 4px 0 rgba(60,60,90,0.08);
+        box-shadow: 0 1px 4px 0 rgba(60, 60, 90, 0.08);
         transition: background 0.2s;
       }
       button:hover {
@@ -170,7 +175,7 @@
         margin-top: 2px;
         margin-bottom: 0;
       }
-      
+
       /* Direction toggle styling */
       .direction-toggle {
         display: flex;
@@ -182,13 +187,13 @@
         border-radius: 8px;
         border: 1px solid #e1e8ed;
       }
-      
+
       .direction-label {
         font-size: 0.9em;
         color: #607d8b;
         font-weight: 500;
       }
-      
+
       .small-switch {
         position: relative;
         display: inline-block;
@@ -196,25 +201,28 @@
         height: 24px;
         margin: 0 10px;
       }
-      
+
       .small-switch input {
         opacity: 0;
         width: 0;
         height: 0;
       }
-      
+
       .small-slider {
         position: absolute;
         cursor: pointer;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         background: #cfd8dc;
         transition: 0.3s;
         border-radius: 24px;
       }
-      
+
       .small-slider:before {
         position: absolute;
-        content: "";
+        content: '';
         height: 18px;
         width: 18px;
         left: 3px;
@@ -222,17 +230,17 @@
         background: #fff;
         transition: 0.3s;
         border-radius: 50%;
-        box-shadow: 0 1px 3px 0 rgba(60,60,90,0.15);
+        box-shadow: 0 1px 3px 0 rgba(60, 60, 90, 0.15);
       }
-      
+
       .small-switch input:checked + .small-slider {
         background: linear-gradient(90deg, #ff9800 60%, #f57c00 100%);
       }
-      
+
       .small-switch input:checked + .small-slider:before {
         transform: translateX(20px);
       }
-      
+
       .direction-text {
         font-size: 0.85em;
         color: #546e7a;
@@ -259,7 +267,7 @@
       <option value="htmlLang">HTML <code>lang</code> Attribute</option>
       <option value="i18nPageText">Chrome i18n Page Text Detection</option>
     </select>
-    
+
     <!-- Direction toggle -->
     <div class="direction-toggle">
       <span class="direction-label">Translation Direction:</span>
@@ -271,7 +279,16 @@
     </div>
     <button id="refreshButton">Refresh</button>
     <hr />
-    <button id="resetDefaultsButton" style="background: linear-gradient(90deg, #b0bec5 60%, #78909c 100%); color: #222; margin-top: 10px;">Reset to Default Settings</button>
+    <button
+      id="resetDefaultsButton"
+      style="
+        background: linear-gradient(90deg, #b0bec5 60%, #78909c 100%);
+        color: #222;
+        margin-top: 10px;
+      "
+    >
+      Reset to Default Settings
+    </button>
     <button id="saveButton">Save Settings</button>
     <button id="forceTransliterationButton">Force Transliteration</button>
     <p id="statusMessage" class="status-message"></p>

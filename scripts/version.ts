@@ -10,7 +10,7 @@ async function incrementVersion() {
     const manifestContent = await fs.readFile(manifestPath, 'utf8');
     const manifest = JSON.parse(manifestContent);
 
-    let currentVersion = manifest.version; // e.g., "0.0.2" 
+    let currentVersion = manifest.version; // e.g., "0.0.2"
     console.log(`Current version: ${currentVersion}`);
 
     // Split the version string (assuming X.Y.Z format)
@@ -32,7 +32,6 @@ async function incrementVersion() {
     // Write the updated manifest back to the file
     await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
     console.log(`Version updated in ${manifestPath} to ${newVersion}`);
-
   } catch (error) {
     console.error('Error incrementing version:', error);
     process.exit(1);

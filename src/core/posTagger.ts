@@ -11,7 +11,7 @@ export function posTagSentence(sentence: string): POSTaggedToken[] {
   const terms = doc.terms().json();
   return terms.map((term: any) => ({
     text: term.text,
-    pos: mapCompromiseTag(term.tags)
+    pos: mapCompromiseTag(term.tags),
   }));
 }
 

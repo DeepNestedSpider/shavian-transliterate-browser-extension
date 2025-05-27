@@ -59,7 +59,7 @@ class LanguageDetector {
   private static detectFromHtmlLang(): LanguageDetectionResult {
     const htmlElement = document.documentElement;
     const lang = htmlElement.getAttribute('lang');
-    
+
     if (lang) {
       const isEnglish = lang.toLowerCase().startsWith('en');
       if (isEnglish) {
@@ -67,7 +67,7 @@ class LanguageDetector {
       }
       return { isEnglish, detectedLang: lang };
     }
-    
+
     return { isEnglish: false, detectedLang: 'unknown' };
   }
 
@@ -83,7 +83,7 @@ class LanguageDetector {
 
     // Sample text from the page (e.g., first 500 characters of body text)
     const textContent = document.body?.innerText.substring(0, 500) || '';
-    
+
     if (textContent.length === 0) {
       console.warn('No text content found to detect language from.');
       return { isEnglish: false, detectedLang: 'unknown' };
@@ -91,27 +91,33 @@ class LanguageDetector {
 
     try {
       const detectionResult = await chrome.i18n.detectLanguage(textContent);
-      
+
       if (detectionResult?.languages.length > 0) {
         const primaryLanguage = detectionResult.languages[0];
-        
+
         if (primaryLanguage) {
-          const isEnglish = primaryLanguage.language.toLowerCase().startsWith('en') && primaryLanguage.percentage > 70;
-          
+          const isEnglish =
+            primaryLanguage.language.toLowerCase().startsWith('en') &&
+            primaryLanguage.percentage > 70;
+
           if (isEnglish) {
-            console.log(`Chrome i18n API detected English page text (${primaryLanguage.language} with ${primaryLanguage.percentage}% confidence).`);
+            console.log(
+              `Chrome i18n API detected English page text (${primaryLanguage.language} with ${primaryLanguage.percentage}% confidence).`
+            );
           } else {
-            console.log(`Chrome i18n API detected page text as ${primaryLanguage.language} (${primaryLanguage.percentage}% confidence).`);
+            console.log(
+              `Chrome i18n API detected page text as ${primaryLanguage.language} (${primaryLanguage.percentage}% confidence).`
+            );
           }
-          
+
           return {
             isEnglish,
             detectedLang: primaryLanguage.language,
-            confidence: primaryLanguage.percentage
+            confidence: primaryLanguage.percentage,
           };
         }
       }
-      
+
       console.warn('chrome.i18n.detectLanguage() returned no language.');
       return { isEnglish: false, detectedLang: 'unknown' };
     } catch (error) {
@@ -131,13 +137,20 @@ class LanguageDetector {
     // Check if chrome.storage API is available
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
       try {
-        const settings = await chrome.storage.sync.get(['languageCheckMode', 'transliterationEnabled', 'reverseMode']);
-        
+        const settings = await chrome.storage.sync.get([
+          'languageCheckMode',
+          'transliterationEnabled',
+          'reverseMode',
+        ]);
+
         // Validate and apply languageCheckMode setting
-        if (settings.languageCheckMode && Object.values(LanguageCheckMode).includes(settings.languageCheckMode)) {
+        if (
+          settings.languageCheckMode &&
+          Object.values(LanguageCheckMode).includes(settings.languageCheckMode)
+        ) {
           languageCheckMode = settings.languageCheckMode as LanguageCheckMode;
         }
-        
+
         // Apply transliterationEnabled setting
         if (typeof settings.transliterationEnabled === 'boolean') {
           transliterationEnabled = settings.transliterationEnabled;
@@ -148,7 +161,10 @@ class LanguageDetector {
           reverseMode = settings.reverseMode;
         }
       } catch (error) {
-        console.warn('Failed to retrieve settings from chrome.storage.sync. Using defaults.', error);
+        console.warn(
+          'Failed to retrieve settings from chrome.storage.sync. Using defaults.',
+          error
+        );
       }
     } else {
       console.warn('chrome.storage.sync is not available. Using default settings.');
@@ -170,10 +186,10 @@ class TransliterationManager {
    */
   async checkAndTransliterate(): Promise<void> {
     const settings = await LanguageDetector.getSettings();
-    
+
     // If transliteration is disabled by the user, exit early
     if (!settings.transliterationEnabled) {
-      console.log("Shavian transliteration is disabled by user settings.");
+      console.log('Shavian transliteration is disabled by user settings.');
       return;
     }
 
@@ -181,21 +197,27 @@ class TransliterationManager {
     if (settings.reverseMode) {
       const hasShavian = this.detectShavianContent();
       if (hasShavian) {
-        console.log("Detected Shavian script content. Initializing reverse transliteration...");
+        console.log('Detected Shavian script content. Initializing reverse transliteration...');
         await this.initializeReverseTransliteration();
       } else {
-        console.log("No Shavian script content detected. Reverse transliteration will not be initiated.");
+        console.log(
+          'No Shavian script content detected. Reverse transliteration will not be initiated.'
+        );
       }
     } else {
       // Detect document language for normal mode
       const detectionResult = await LanguageDetector.detectLanguage(settings.languageCheckMode);
-      
+
       // If English is detected, start transliteration
       if (detectionResult.isEnglish) {
-        console.log(`Detected language is English (${detectionResult.detectedLang}). Initializing Shavian transliteration...`);
+        console.log(
+          `Detected language is English (${detectionResult.detectedLang}). Initializing Shavian transliteration...`
+        );
         await this.initializeTransliteration();
       } else {
-        console.log(`Detected language is not English (${detectionResult.detectedLang}). Shavian transliteration will not be initiated.`);
+        console.log(
+          `Detected language is not English (${detectionResult.detectedLang}). Shavian transliteration will not be initiated.`
+        );
       }
     }
   }
@@ -205,13 +227,15 @@ class TransliterationManager {
    */
   async forceTransliteration(): Promise<void> {
     const settings = await LanguageDetector.getSettings();
-    
+
     if (settings.reverseMode) {
-      console.log("Force reverse transliteration requested. Initializing reverse transliteration...");
+      console.log(
+        'Force reverse transliteration requested. Initializing reverse transliteration...'
+      );
       await this.initializeReverseTransliteration();
       console.log('Forced reverse transliteration complete.');
     } else {
-      console.log("Force transliteration requested. Initializing Shavian transliteration...");
+      console.log('Force transliteration requested. Initializing Shavian transliteration...');
       await this.initializeTransliteration();
       console.log('Forced Shavian transliteration complete.');
     }
@@ -235,14 +259,14 @@ class TransliterationManager {
       // Create engine and DOM transliterator
       const engine = await TransliterationEngineFactory.getEngineFromSettings();
       this.domTransliterator = new DOMTransliterator(engine);
-      
+
       // Transliterate existing content
       await this.domTransliterator.transliteratePage();
-      
+
       // Set up DOM observation for dynamic content
       this.domObserver = new DOMObserver(this.domTransliterator);
       this.domObserver.start();
-      
+
       console.log('Shavian transliteration system initialized successfully.');
     } catch (error) {
       console.error('Failed to initialize Shavian transliteration:', error);
@@ -257,14 +281,14 @@ class TransliterationManager {
       // Create engine and reverse DOM transliterator
       const engine = await TransliterationEngineFactory.getEngineFromSettings();
       this.domTransliterator = new ReverseDOMTransliterator(engine);
-      
+
       // Reverse transliterate existing content
       await this.domTransliterator.transliteratePage();
-      
+
       // Set up DOM observation for dynamic content
       this.domObserver = new DOMObserver(this.domTransliterator);
       this.domObserver.start();
-      
+
       console.log('Reverse transliteration system initialized successfully.');
     } catch (error) {
       console.error('Failed to initialize reverse transliteration:', error);
@@ -291,12 +315,18 @@ const transliterationManager = new TransliterationManager();
 if (typeof chrome !== 'undefined' && chrome.runtime) {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'forceTransliteration') {
-      transliterationManager.forceTransliteration().then(() => {
-        sendResponse({ status: 'transliteration initiated' });
-      }).catch((error) => {
-        console.error('Force transliteration failed:', error);
-        sendResponse({ status: 'transliteration failed', error: error.message });
-      });
+      transliterationManager
+        .forceTransliteration()
+        .then(() => {
+          sendResponse({ status: 'transliteration initiated' });
+        })
+        .catch(error => {
+          console.error('Force transliteration failed:', error);
+          sendResponse({
+            status: 'transliteration failed',
+            error: error.message,
+          });
+        });
       return true; // Indicates that the response is sent asynchronously
     }
   });

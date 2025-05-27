@@ -61,8 +61,12 @@ class PopupManager {
     this.saveButton = this.getElement('saveButton') as HTMLButtonElement;
     this.statusMessage = this.getElement('statusMessage') as HTMLParagraphElement;
     this.transliterationToggle = this.getElement('transliterationToggle') as HTMLInputElement;
-    this.forceTransliterationButton = this.getElement('forceTransliterationButton') as HTMLButtonElement;
-    this.transliterationEngineSelect = this.getElement('transliterationEngineSelect') as HTMLSelectElement;
+    this.forceTransliterationButton = this.getElement(
+      'forceTransliterationButton'
+    ) as HTMLButtonElement;
+    this.transliterationEngineSelect = this.getElement(
+      'transliterationEngineSelect'
+    ) as HTMLSelectElement;
     this.refreshButton = this.getElement('refreshButton') as HTMLButtonElement;
     this.resetDefaultsButton = this.getElement('resetDefaultsButton') as HTMLButtonElement;
     this.reverseToggle = this.getElement('reverseToggle') as HTMLInputElement;
@@ -94,7 +98,7 @@ class PopupManager {
     this.transliterationToggle.addEventListener('change', () => this.saveSettings(true));
     this.reverseToggle.addEventListener('change', () => this.updateDirectionLabel());
     this.reverseToggle.addEventListener('change', () => this.saveReverseMode());
-    
+
     // Engine and mode changes
     this.transliterationEngineSelect.addEventListener('change', () => this.saveEngineSettings());
     this.languageModeSelect.addEventListener('change', () => this.saveLanguageModeSettings());
@@ -111,16 +115,18 @@ class PopupManager {
   async loadSettings(): Promise<void> {
     try {
       const settings = await chrome.storage.sync.get([
-        'languageCheckMode', 
-        'transliterationEnabled', 
+        'languageCheckMode',
+        'transliterationEnabled',
         'transliterationEngine',
-        'reverseMode'
+        'reverseMode',
       ]);
 
       // Update UI with loaded settings or defaults
-      this.languageModeSelect.value = settings.languageCheckMode || DEFAULT_SETTINGS.languageCheckMode;
+      this.languageModeSelect.value =
+        settings.languageCheckMode || DEFAULT_SETTINGS.languageCheckMode;
       this.transliterationToggle.checked = settings.transliterationEnabled !== false;
-      this.transliterationEngineSelect.value = settings.transliterationEngine || DEFAULT_SETTINGS.transliterationEngine;
+      this.transliterationEngineSelect.value =
+        settings.transliterationEngine || DEFAULT_SETTINGS.transliterationEngine;
       this.reverseToggle.checked = settings.reverseMode || DEFAULT_SETTINGS.reverseMode;
       this.updateDirectionLabel();
 
@@ -143,7 +149,7 @@ class PopupManager {
 
       await chrome.storage.sync.set(settings);
       this.showStatusMessage('Settings saved successfully!', 'success');
-      
+
       console.log('Settings saved:', settings);
 
       if (reloadPage) {
@@ -160,8 +166,8 @@ class PopupManager {
    */
   async saveEngineSettings(): Promise<void> {
     try {
-      await chrome.storage.sync.set({ 
-        transliterationEngine: this.transliterationEngineSelect.value 
+      await chrome.storage.sync.set({
+        transliterationEngine: this.transliterationEngineSelect.value,
       });
       this.showStatusMessage('Engine setting saved!', 'success');
     } catch (error) {
@@ -175,8 +181,8 @@ class PopupManager {
    */
   async saveLanguageModeSettings(): Promise<void> {
     try {
-      await chrome.storage.sync.set({ 
-        languageCheckMode: this.languageModeSelect.value 
+      await chrome.storage.sync.set({
+        languageCheckMode: this.languageModeSelect.value,
       });
       this.showStatusMessage('Language mode saved!', 'success');
     } catch (error) {
@@ -190,10 +196,15 @@ class PopupManager {
    */
   async forceTransliteration(): Promise<void> {
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
       if (tab?.id) {
-        await chrome.tabs.sendMessage(tab.id, { action: 'forceTransliteration' });
+        await chrome.tabs.sendMessage(tab.id, {
+          action: 'forceTransliteration',
+        });
         this.showStatusMessage('Forcing transliteration on current page...', 'success');
       } else {
         this.showStatusMessage('No active tab found.', 'error');
@@ -209,8 +220,11 @@ class PopupManager {
    */
   async refreshPage(): Promise<void> {
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
       if (tab?.id !== undefined) {
         await chrome.tabs.reload(tab.id);
         this.showStatusMessage('Page refreshed!', 'success');
@@ -264,8 +278,8 @@ class PopupManager {
    * Updates the direction label based on reverse toggle state
    */
   private updateDirectionLabel(): void {
-    this.directionLabel.textContent = this.reverseToggle.checked 
-      ? 'Shavian → English' 
+    this.directionLabel.textContent = this.reverseToggle.checked
+      ? 'Shavian → English'
       : 'English → Shavian';
   }
 
@@ -274,8 +288,8 @@ class PopupManager {
    */
   async saveReverseMode(): Promise<void> {
     try {
-      await chrome.storage.sync.set({ 
-        reverseMode: this.reverseToggle.checked 
+      await chrome.storage.sync.set({
+        reverseMode: this.reverseToggle.checked,
       });
       this.showStatusMessage('Direction setting saved!', 'success');
     } catch (error) {

@@ -9,12 +9,19 @@ export interface TextNodeFilter {
 
 export class DefaultTextNodeFilter implements TextNodeFilter {
   private static readonly EXCLUDED_TAGS = [
-    'SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'TEXTAREA', 
-    'INPUT', 'CODE', 'PRE', 'XMP'
+    'SCRIPT',
+    'STYLE',
+    'NOSCRIPT',
+    'IFRAME',
+    'TEXTAREA',
+    'INPUT',
+    'CODE',
+    'PRE',
+    'XMP',
   ];
-  
+
   private static readonly IPA_CLASSES = ['IPA'];
-  
+
   private static readonly IPA_PATTERN = /[ˈˌaɪeæɑɔʊŋʃʒθðʔçɾʁʀɱɲʋʤʧɡɣɬ]/u;
 
   acceptNode(node: Text): number {
@@ -37,15 +44,20 @@ export class DefaultTextNodeFilter implements TextNodeFilter {
         }
 
         // Check for IPA class names
-        if (DefaultTextNodeFilter.IPA_CLASSES.some(cls => 
-          currentNode instanceof HTMLElement && currentNode.classList.contains(cls))) {
+        if (
+          DefaultTextNodeFilter.IPA_CLASSES.some(
+            cls => currentNode instanceof HTMLElement && currentNode.classList.contains(cls)
+          )
+        ) {
           return false;
         }
 
         // Check for non-English lang attribute
         const langAttribute = currentNode.getAttribute('lang');
         if (langAttribute && !langAttribute.toLowerCase().startsWith('en')) {
-          console.log(`Skipping content with non-English lang attribute: ${langAttribute} on element <${currentNode.nodeName}>`);
+          console.log(
+            `Skipping content with non-English lang attribute: ${langAttribute} on element <${currentNode.nodeName}>`
+          );
           return false;
         }
       }
@@ -74,14 +86,14 @@ export class DOMTransliterator {
   }
 
   async transliteratePage(): Promise<boolean> {
-    console.log("Attempting to transliterate page content...");
+    console.log('Attempting to transliterate page content...');
     let changesMade = false;
 
     const walker = document.createTreeWalker(
       document.body || document.documentElement,
       NodeFilter.SHOW_TEXT,
       {
-        acceptNode: (node: Text) => this.filter.acceptNode(node)
+        acceptNode: (node: Text) => this.filter.acceptNode(node),
       }
     );
 
@@ -90,7 +102,7 @@ export class DOMTransliterator {
       if (node.nodeType === Node.TEXT_NODE && node.nodeValue !== null) {
         const originalValue = node.nodeValue;
         const transliteratedValue = this.engine.transliterate(originalValue);
-        
+
         if (transliteratedValue !== originalValue) {
           node.nodeValue = transliteratedValue;
           changesMade = true;
@@ -99,9 +111,9 @@ export class DOMTransliterator {
     }
 
     if (changesMade) {
-      console.log("Page transliteration complete. Changes were made.");
+      console.log('Page transliteration complete. Changes were made.');
     } else {
-      console.log("Page transliteration complete. No changes were made.");
+      console.log('Page transliteration complete. No changes were made.');
     }
 
     return changesMade;
@@ -130,13 +142,13 @@ export class DOMObserver {
       this.stop();
     }
 
-    this.observer = new MutationObserver((mutationsList) => {
-      const hasRelevantChanges = mutationsList.some(mutation => 
-        mutation.type === 'childList' || mutation.type === 'characterData'
+    this.observer = new MutationObserver(mutationsList => {
+      const hasRelevantChanges = mutationsList.some(
+        mutation => mutation.type === 'childList' || mutation.type === 'characterData'
       );
 
       if (hasRelevantChanges) {
-        console.log("DOM change detected, triggering transliteration...");
+        console.log('DOM change detected, triggering transliteration...');
         this.debouncedTransliterate();
       }
     });
@@ -144,10 +156,10 @@ export class DOMObserver {
     this.observer.observe(document.body || document.documentElement, {
       childList: true,
       subtree: true,
-      characterData: true
+      characterData: true,
     });
 
-    console.log("MutationObserver started for dynamic content.");
+    console.log('MutationObserver started for dynamic content.');
 
     // Also observe visibility changes
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
@@ -159,18 +171,18 @@ export class DOMObserver {
       this.observer = null;
     }
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-    console.log("MutationObserver stopped.");
+    console.log('MutationObserver stopped.');
   }
 
   private handleVisibilityChange = (): void => {
     if (document.visibilityState === 'visible') {
-      console.log("Page became visible, re-transliterating...");
+      console.log('Page became visible, re-transliterating...');
       this.debouncedTransliterate();
     }
   };
 
   private debounce<T extends (...args: any[]) => void>(
-    func: T, 
+    func: T,
     delay: number
   ): (...args: Parameters<T>) => void {
     let timeout: ReturnType<typeof setTimeout>;
@@ -185,16 +197,15 @@ export class DOMObserver {
  * ReverseDOMTransliterator - Transliterates from Shavian script back to English
  */
 export class ReverseDOMTransliterator extends DOMTransliterator {
-  
   async transliteratePage(): Promise<boolean> {
-    console.log("Attempting to reverse transliterate page content (Shavian → English)...");
+    console.log('Attempting to reverse transliterate page content (Shavian → English)...');
     let changesMade = false;
 
     const walker = document.createTreeWalker(
       document.body || document.documentElement,
       NodeFilter.SHOW_TEXT,
       {
-        acceptNode: (node: Text) => this.filter.acceptNode(node)
+        acceptNode: (node: Text) => this.filter.acceptNode(node),
       }
     );
 
@@ -204,7 +215,7 @@ export class ReverseDOMTransliterator extends DOMTransliterator {
         const originalValue = node.nodeValue;
         // Use reverse transliteration instead of normal transliteration
         const transliteratedValue = this.engine.reverseTransliterate(originalValue);
-        
+
         if (transliteratedValue !== originalValue) {
           node.nodeValue = transliteratedValue;
           changesMade = true;
@@ -213,9 +224,9 @@ export class ReverseDOMTransliterator extends DOMTransliterator {
     }
 
     if (changesMade) {
-      console.log("Reverse transliteration complete. Changes were made.");
+      console.log('Reverse transliteration complete. Changes were made.');
     } else {
-      console.log("Reverse transliteration complete. No changes were made.");
+      console.log('Reverse transliteration complete. No changes were made.');
     }
 
     return changesMade;

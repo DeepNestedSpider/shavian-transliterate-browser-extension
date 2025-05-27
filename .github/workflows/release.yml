@@ -3,7 +3,7 @@ name: Release CI
 on:
   push:
     tags:
-      - "v*.*.*" # This workflow will run whenever a tag starting with 'v' (e.g., v0.0.1) is pushed.
+      - 'v*.*.*' # This workflow will run whenever a tag starting with 'v' (e.g., v0.0.1) is pushed.
 
 jobs:
   build_and_release:

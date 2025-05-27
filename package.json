@@ -10,12 +10,22 @@
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
     "test:verbose": "bun test --verbose",
-    "clean": "rm -rf dist/ temp/ *.tmp temp_* *_backup *.backup"
+    "clean": "rm -rf dist/ temp/ *.tmp temp_* *_backup *.backup",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "code-quality": "bun run format:check && bun run lint"
   },
   "devDependencies": {
+    "@eslint/js": "^9.27.0",
     "@types/bun": "latest",
     "@types/chrome": "^0.0.323",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3"
   },
   "peerDependencies": {
     "typescript": "^5"

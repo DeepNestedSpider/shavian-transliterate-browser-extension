@@ -17,10 +17,7 @@ async function build() {
     // 2. Build TypeScript files with Bun
     console.log("Building popup.ts, content.ts into ./dist for target 'browser'...");
     await Bun.build({
-      entrypoints: [
-        path.join(srcDir, 'popup.ts'),
-        path.join(srcDir, 'content.ts'),
-      ],
+      entrypoints: [path.join(srcDir, 'popup.ts'), path.join(srcDir, 'content.ts')],
       outdir: distDir,
       target: 'browser',
       // You might add more Bun.build options here if needed, e.g., for minification
@@ -33,7 +30,9 @@ async function build() {
     for (const file of publicFiles) {
       if (file.isDirectory()) {
         // Recursively copy directories
-        await fs.cp(path.join(publicDir, file.name), path.join(distDir, file.name), { recursive: true });
+        await fs.cp(path.join(publicDir, file.name), path.join(distDir, file.name), {
+          recursive: true,
+        });
       } else {
         await fs.copyFile(path.join(publicDir, file.name), path.join(distDir, file.name));
       }
@@ -46,7 +45,6 @@ async function build() {
     console.log('popup.html copied.');
 
     console.log('Build process completed successfully!');
-
   } catch (error) {
     console.error('Build failed:', error);
     process.exit(1);
