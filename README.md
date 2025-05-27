@@ -1,4 +1,4 @@
-# 𐑖𐑱𐑝𐑾𐑯 𐑑𐑮𐑨𐑯𐑕𐑤𐑦𐑑𐑼𐑱𐑑 - Shavian Transliterate Browser Extension
+# 𐑖𐑱𐑝𐑾𐑯 𐑑𐑮𐑨𐑯𐑟𐑤𐑦𐑑𐑼𐑱𐑑 - Shavian Transliterate Browser Extension
 
 [![Version](https://img.shields.io/badge/version-0.0.3-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -170,17 +170,6 @@ bun run build:dist
 │   │   └── readlex.ts                # Readlexicon dictionary
 │   └── types/                        # TypeScript type definitions
 └── tests/                            # Test files
-    ├── basic.test.ts
-    ├── dechifro-regression.test.ts
-    ├── function-words.test.ts
-    ├── math.test.ts
-    ├── new-dechifro.test.ts
-    ├── pos-tagger-integration.test.ts
-    ├── readlexicon-regression.test.ts
-    ├── readlexicon.test.ts
-    ├── refactored.test.ts
-    ├── simple-debug.test.ts
-    └── simple-readlexicon.test.ts
 ```
 
 ## How It Works
@@ -203,15 +192,6 @@ bun run build:dist
    - All processing is done locally for privacy and speed; no external requests are made during transliteration.
 
 This architecture ensures accurate, efficient, and user-configurable transliteration of English web content into the Shavian script, while minimizing disruption to page functionality and user experience.
-
-## 🧪 Testing
-
-The project includes comprehensive tests for different transliteration scenarios:
-
-- `test-refactored.ts` - Main test suite
-- `test-readlexicon.ts` - Readlexicon transliterator tests
-- `test-function-words.ts` - Function word handling tests
-- `test-simple-*.ts` - Various simple test cases
 
 ```bash
 # Run specific test
@@ -241,7 +221,7 @@ bun run test:all
 - ✅ **Performance Optimization**: Reduce memory usage and improve speed by removing the to-shavian library
 - ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
 - ✅ **Readlexicon Integration**: Translate Dechifro's Python shavianizer to JavaScript and Implement the Readlexicon dictionary
-
+- ✅ **Both ways transliteration**: Transliterate shavian to Latin Alphabet
 
 ### 🎯 High Priority
 
@@ -253,7 +233,6 @@ bun run test:all
 - [ ] **Better Error Handling**: Graceful fallbacks for edge cases
 - [ ] **Custom Font Support**: Allow users to specify preferred Shavian fonts
 - [ ] **Keyboard Shortcuts**: Hotkeys for quick transliteration toggle
-- [x] **Both ways transliteration**: Transliterate shavian to Latin Alphabet
 
 #### High Complexity
 
