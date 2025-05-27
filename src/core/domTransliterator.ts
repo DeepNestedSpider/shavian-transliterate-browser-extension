@@ -65,8 +65,8 @@ export class DefaultTextNodeFilter implements TextNodeFilter {
 }
 
 export class DOMTransliterator {
-  private engine: TransliterationEngine;
-  private filter: TextNodeFilter;
+  protected engine: TransliterationEngine;
+  protected filter: TextNodeFilter;
 
   constructor(engine: TransliterationEngine, filter: TextNodeFilter = new DefaultTextNodeFilter()) {
     this.engine = engine;
@@ -178,5 +178,46 @@ export class DOMObserver {
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), delay);
     };
+  }
+}
+
+/**
+ * ReverseDOMTransliterator - Transliterates from Shavian script back to English
+ */
+export class ReverseDOMTransliterator extends DOMTransliterator {
+  
+  async transliteratePage(): Promise<boolean> {
+    console.log("Attempting to reverse transliterate page content (Shavian → English)...");
+    let changesMade = false;
+
+    const walker = document.createTreeWalker(
+      document.body || document.documentElement,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node: Text) => this.filter.acceptNode(node)
+      }
+    );
+
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      if (node.nodeType === Node.TEXT_NODE && node.nodeValue !== null) {
+        const originalValue = node.nodeValue;
+        // Use reverse transliteration instead of normal transliteration
+        const transliteratedValue = this.engine.reverseTransliterate(originalValue);
+        
+        if (transliteratedValue !== originalValue) {
+          node.nodeValue = transliteratedValue;
+          changesMade = true;
+        }
+      }
+    }
+
+    if (changesMade) {
+      console.log("Reverse transliteration complete. Changes were made.");
+    } else {
+      console.log("Reverse transliteration complete. No changes were made.");
+    }
+
+    return changesMade;
   }
 }

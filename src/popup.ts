@@ -27,6 +27,7 @@ interface PopupSettings {
   languageCheckMode: LanguageCheckMode;
   transliterationEnabled: boolean;
   transliterationEngine: TransliterationEngine;
+  reverseMode: boolean;
 }
 
 /**
@@ -36,6 +37,7 @@ const DEFAULT_SETTINGS: PopupSettings = {
   languageCheckMode: LanguageCheckMode.HtmlLang,
   transliterationEnabled: true,
   transliterationEngine: TransliterationEngine.Readlexicon,
+  reverseMode: false,
 };
 
 /**
@@ -50,6 +52,8 @@ class PopupManager {
   private transliterationEngineSelect: HTMLSelectElement;
   private refreshButton: HTMLButtonElement;
   private resetDefaultsButton: HTMLButtonElement;
+  private reverseToggle: HTMLInputElement;
+  private directionLabel: HTMLSpanElement;
 
   constructor() {
     // Initialize DOM element references
@@ -61,6 +65,8 @@ class PopupManager {
     this.transliterationEngineSelect = this.getElement('transliterationEngineSelect') as HTMLSelectElement;
     this.refreshButton = this.getElement('refreshButton') as HTMLButtonElement;
     this.resetDefaultsButton = this.getElement('resetDefaultsButton') as HTMLButtonElement;
+    this.reverseToggle = this.getElement('reverseToggle') as HTMLInputElement;
+    this.directionLabel = this.getElement('directionLabel') as HTMLSpanElement;
 
     this.setupEventListeners();
   }
@@ -86,6 +92,8 @@ class PopupManager {
     // Save settings
     this.saveButton.addEventListener('click', () => this.saveSettings(false));
     this.transliterationToggle.addEventListener('change', () => this.saveSettings(true));
+    this.reverseToggle.addEventListener('change', () => this.updateDirectionLabel());
+    this.reverseToggle.addEventListener('change', () => this.saveReverseMode());
     
     // Engine and mode changes
     this.transliterationEngineSelect.addEventListener('change', () => this.saveEngineSettings());
@@ -105,13 +113,16 @@ class PopupManager {
       const settings = await chrome.storage.sync.get([
         'languageCheckMode', 
         'transliterationEnabled', 
-        'transliterationEngine'
+        'transliterationEngine',
+        'reverseMode'
       ]);
 
       // Update UI with loaded settings or defaults
       this.languageModeSelect.value = settings.languageCheckMode || DEFAULT_SETTINGS.languageCheckMode;
       this.transliterationToggle.checked = settings.transliterationEnabled !== false;
       this.transliterationEngineSelect.value = settings.transliterationEngine || DEFAULT_SETTINGS.transliterationEngine;
+      this.reverseToggle.checked = settings.reverseMode || DEFAULT_SETTINGS.reverseMode;
+      this.updateDirectionLabel();
 
       console.log('Settings loaded successfully:', settings);
     } catch (error) {
@@ -223,6 +234,8 @@ class PopupManager {
       this.transliterationToggle.checked = DEFAULT_SETTINGS.transliterationEnabled;
       this.transliterationEngineSelect.value = DEFAULT_SETTINGS.transliterationEngine;
       this.languageModeSelect.value = DEFAULT_SETTINGS.languageCheckMode;
+      this.reverseToggle.checked = DEFAULT_SETTINGS.reverseMode;
+      this.updateDirectionLabel();
 
       this.showStatusMessage('Settings reset to default.', 'success');
       console.log('Settings reset to defaults:', DEFAULT_SETTINGS);
@@ -245,6 +258,30 @@ class PopupManager {
       this.statusMessage.textContent = '';
       this.statusMessage.className = '';
     }, 3000);
+  }
+
+  /**
+   * Updates the direction label based on reverse toggle state
+   */
+  private updateDirectionLabel(): void {
+    this.directionLabel.textContent = this.reverseToggle.checked 
+      ? 'Shavian → English' 
+      : 'English → Shavian';
+  }
+
+  /**
+   * Saves reverse mode setting
+   */
+  async saveReverseMode(): Promise<void> {
+    try {
+      await chrome.storage.sync.set({ 
+        reverseMode: this.reverseToggle.checked 
+      });
+      this.showStatusMessage('Direction setting saved!', 'success');
+    } catch (error) {
+      console.error('Error saving reverse mode:', error);
+      this.showStatusMessage('Error saving direction setting.', 'error');
+    }
   }
 }
 

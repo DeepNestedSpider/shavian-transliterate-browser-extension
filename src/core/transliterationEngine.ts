@@ -6,12 +6,15 @@ import type { POSTaggedToken } from './posTagger';
 export interface TransliterationEngine {
   transliterate(text: string): string;
   transliterateWord(word: string): string;
+  reverseTransliterate(text: string): string;
+  reverseTransliterateWord(word: string): string;
 }
 
 export type EngineType = 'readlexicon';
 
 export class ReadlexiconEngine implements TransliterationEngine {
   private dictionary: Map<string, string> = new Map();
+  private reverseDictionary: Map<string, string> = new Map();
   private previousWord: string = '';
   private previousPos: string = '';
 
@@ -91,6 +94,20 @@ export class ReadlexiconEngine implements TransliterationEngine {
   private loadDictionary(data: Record<string, string>): void {
     for (const [key, value] of Object.entries(data)) {
       this.dictionary.set(key.toLowerCase(), value);
+      // Build reverse dictionary for Shavian to English transliteration
+      // Clean the Shavian value and use as key
+      const cleanShavian = value.replace(/^[.:]+|[.:]+$/g, '');
+      if (cleanShavian) {
+        this.reverseDictionary.set(cleanShavian, key.toLowerCase());
+      }
+    }
+    
+    // Add function words to reverse dictionary
+    for (const [english, shavian] of Object.entries(this.functionWords)) {
+      const cleanShavian = shavian.replace(/^[.:]+|[.:]+$/g, '');
+      if (cleanShavian) {
+        this.reverseDictionary.set(cleanShavian, english);
+      }
     }
   }
 
@@ -241,10 +258,59 @@ export class ReadlexiconEngine implements TransliterationEngine {
 
   addToDictionary(word: string, transliteration: string): void {
     this.dictionary.set(word.toLowerCase(), transliteration);
+    // Also add to reverse dictionary
+    const cleanShavian = transliteration.replace(/^[.:]+|[.:]+$/g, '');
+    if (cleanShavian) {
+      this.reverseDictionary.set(cleanShavian, word.toLowerCase());
+    }
   }
 
   getDictionarySize(): number {
     return this.dictionary.size;
+  }
+
+  /**
+   * Reverse transliterate (Shavian to English) text
+   */
+  reverseTransliterate(text: string): string {
+    const words = text.split(/(\s+)/);
+    return words.map(segment => {
+      if (segment.match(/^\s+$/)) {
+        return segment;
+      } else if (segment.match(/^[.,:;!?"'()\[\]{}<>-]+$/)) {
+        // Punctuation: do not transliterate
+        return segment;
+      } else if (segment.length > 0) {
+        return this.reverseTransliterateWord(segment);
+      }
+      return segment;
+    }).join('');
+  }
+
+  /**
+   * Reverse transliterate (Shavian to English) a single word
+   */
+  reverseTransliterateWord(word: string): string {
+    if (!word || word.trim() === '') return word;
+    
+    // Remove punctuation for lookup but preserve original for fallback
+    const clean = word.replace(/^[^\u{10450}-\u{1047F}]*|[^\u{10450}-\u{1047F}]*$/gu, '');
+    
+    // Direct lookup in reverse dictionary
+    const result = this.reverseDictionary.get(clean);
+    if (result) {
+      return result;
+    }
+    
+    // Try without leading/trailing markers (·, etc.)
+    const cleanerShavian = clean.replace(/^[·‹›]+|[·‹›]+$/g, '');
+    const cleanerResult = this.reverseDictionary.get(cleanerShavian);
+    if (cleanerResult) {
+      return cleanerResult;
+    }
+    
+    // Fallback - return original word if no reverse transliteration found
+    return word;
   }
 }
 

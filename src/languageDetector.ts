@@ -5,7 +5,7 @@
  */
 
 import { TransliterationEngineFactory } from './core/transliterationEngine';
-import { DOMTransliterator, DOMObserver } from './core/domTransliterator';
+import { DOMTransliterator, DOMObserver, ReverseDOMTransliterator } from './core/domTransliterator';
 
 /**
  * Enum for different language checking modes.
@@ -31,6 +31,7 @@ interface LanguageDetectionResult {
 interface UserSettings {
   languageCheckMode: LanguageCheckMode;
   transliterationEnabled: boolean;
+  reverseMode: boolean;
 }
 
 /**
@@ -125,11 +126,12 @@ class LanguageDetector {
   static async getSettings(): Promise<UserSettings> {
     let languageCheckMode: LanguageCheckMode = LanguageCheckMode.HtmlLang;
     let transliterationEnabled: boolean = true;
+    let reverseMode: boolean = false;
 
     // Check if chrome.storage API is available
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
       try {
-        const settings = await chrome.storage.sync.get(['languageCheckMode', 'transliterationEnabled']);
+        const settings = await chrome.storage.sync.get(['languageCheckMode', 'transliterationEnabled', 'reverseMode']);
         
         // Validate and apply languageCheckMode setting
         if (settings.languageCheckMode && Object.values(LanguageCheckMode).includes(settings.languageCheckMode)) {
@@ -140,6 +142,11 @@ class LanguageDetector {
         if (typeof settings.transliterationEnabled === 'boolean') {
           transliterationEnabled = settings.transliterationEnabled;
         }
+
+        // Apply reverseMode setting
+        if (typeof settings.reverseMode === 'boolean') {
+          reverseMode = settings.reverseMode;
+        }
       } catch (error) {
         console.warn('Failed to retrieve settings from chrome.storage.sync. Using defaults.', error);
       }
@@ -147,7 +154,7 @@ class LanguageDetector {
       console.warn('chrome.storage.sync is not available. Using default settings.');
     }
 
-    return { languageCheckMode, transliterationEnabled };
+    return { languageCheckMode, transliterationEnabled, reverseMode };
   }
 }
 
@@ -170,15 +177,26 @@ class TransliterationManager {
       return;
     }
 
-    // Detect document language
-    const detectionResult = await LanguageDetector.detectLanguage(settings.languageCheckMode);
-    
-    // If English is detected, start transliteration
-    if (detectionResult.isEnglish) {
-      console.log(`Detected language is English (${detectionResult.detectedLang}). Initializing Shavian transliteration...`);
-      await this.initializeTransliteration();
+    // In reverse mode, check for Shavian content instead of English
+    if (settings.reverseMode) {
+      const hasShavian = this.detectShavianContent();
+      if (hasShavian) {
+        console.log("Detected Shavian script content. Initializing reverse transliteration...");
+        await this.initializeReverseTransliteration();
+      } else {
+        console.log("No Shavian script content detected. Reverse transliteration will not be initiated.");
+      }
     } else {
-      console.log(`Detected language is not English (${detectionResult.detectedLang}). Shavian transliteration will not be initiated.`);
+      // Detect document language for normal mode
+      const detectionResult = await LanguageDetector.detectLanguage(settings.languageCheckMode);
+      
+      // If English is detected, start transliteration
+      if (detectionResult.isEnglish) {
+        console.log(`Detected language is English (${detectionResult.detectedLang}). Initializing Shavian transliteration...`);
+        await this.initializeTransliteration();
+      } else {
+        console.log(`Detected language is not English (${detectionResult.detectedLang}). Shavian transliteration will not be initiated.`);
+      }
     }
   }
 
@@ -186,9 +204,27 @@ class TransliterationManager {
    * Forces transliteration regardless of language detection
    */
   async forceTransliteration(): Promise<void> {
-    console.log("Force transliteration requested. Initializing Shavian transliteration...");
-    await this.initializeTransliteration();
-    console.log('Forced Shavian transliteration complete.');
+    const settings = await LanguageDetector.getSettings();
+    
+    if (settings.reverseMode) {
+      console.log("Force reverse transliteration requested. Initializing reverse transliteration...");
+      await this.initializeReverseTransliteration();
+      console.log('Forced reverse transliteration complete.');
+    } else {
+      console.log("Force transliteration requested. Initializing Shavian transliteration...");
+      await this.initializeTransliteration();
+      console.log('Forced Shavian transliteration complete.');
+    }
+  }
+
+  /**
+   * Detects if the page contains Shavian script characters
+   */
+  private detectShavianContent(): boolean {
+    const textContent = document.body?.innerText || '';
+    // Shavian Unicode range: U+10450–U+1047F
+    const shavianRegex = /[\u{10450}-\u{1047F}]/u;
+    return shavianRegex.test(textContent);
   }
 
   /**
@@ -210,6 +246,28 @@ class TransliterationManager {
       console.log('Shavian transliteration system initialized successfully.');
     } catch (error) {
       console.error('Failed to initialize Shavian transliteration:', error);
+    }
+  }
+
+  /**
+   * Initializes the reverse transliteration system
+   */
+  private async initializeReverseTransliteration(): Promise<void> {
+    try {
+      // Create engine and reverse DOM transliterator
+      const engine = await TransliterationEngineFactory.getEngineFromSettings();
+      this.domTransliterator = new ReverseDOMTransliterator(engine);
+      
+      // Reverse transliterate existing content
+      await this.domTransliterator.transliteratePage();
+      
+      // Set up DOM observation for dynamic content
+      this.domObserver = new DOMObserver(this.domTransliterator);
+      this.domObserver.start();
+      
+      console.log('Reverse transliteration system initialized successfully.');
+    } catch (error) {
+      console.error('Failed to initialize reverse transliteration:', error);
     }
   }
 
