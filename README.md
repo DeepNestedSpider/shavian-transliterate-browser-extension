@@ -81,8 +81,8 @@ bun run build:dist
 3. **Configure your preferences**:
    - Toggle transliteration on/off
    - Choose language detection method
-   - Set per-site preferences
-4. **Browse English websites** - text will be automatically transliterated to Shavian!
+   - Toggle transliteration direction
+4. **Browse English websites** - text will be automatically transliterated to/from Shavian!
 
 ## 🛠️ Development
 
@@ -238,24 +238,19 @@ bun run test:all
   - Toggle transliteration on/off
   - Language detection method selection
   - Force transliteration option
+- ✅ **Performance Optimization**: Reduce memory usage and improve speed by removing the to-shavian library
+- ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
+- ✅ **Readlexicon Integration**: Translate Dechifro's Python shavianizer to JavaScript and Implement the Readlexicon dictionary
 
-### 🎯 High Priority (Near Term)
+
+### 🎯 High Priority
+
+- [ ] **Advanced Punctuation Support**: Support transliterating the punctuatuions such as "" to ‹›
 
 #### Low Complexity
 
 - [ ] **UI/UX Improvements**: Enhanced popup design and user experience
 - [ ] **Better Error Handling**: Graceful fallbacks for edge cases
-- [x] **Performance Optimization**: Reduce memory usage and improve speed
-
-#### High Complexity
-
-- ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
-- ✅ **Readlexicon Integration**: Translate Dechifro's Python shavianizer to JavaScript and Implement the Readlexicon dictionary
-
-### 🔮 Future Vision (Long Term)
-
-#### Low Complexity
-
 - [ ] **Custom Font Support**: Allow users to specify preferred Shavian fonts
 - [ ] **Keyboard Shortcuts**: Hotkeys for quick transliteration toggle
 - [x] **Both ways transliteration**: Transliterate shavian to Latin Alphabet
@@ -264,10 +259,6 @@ bun run test:all
 
 - [ ] **Multi-language Support**: Extend beyond English to other languages that have alternate scripts
 - [ ] **User input transliteration (both ways)**: Share transliterated content with others
-
-## 🏗️ Technical Details
-
-### Dependencies
 
 #### Core Runtime
 
