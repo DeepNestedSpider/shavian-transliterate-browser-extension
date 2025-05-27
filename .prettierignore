@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+bun.lockb
+
+# Build outputs
+dist/
+build/
+temp/
+shavian-transliterate-browser-extension/
+
+# Generated files
+*.min.js
+*.min.css
+
+# Dictionary files
+*.dict
+src/dictionaries/readlex.ts
+
+# Release files
+releases/
+
+# Logs
+*.log
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# Temporary files
+*.tmp
+temp_*
+*_backup
+*.backup
