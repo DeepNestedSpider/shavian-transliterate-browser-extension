@@ -107,13 +107,29 @@ export class ReadlexiconTransliterator {
 
   /**
    * Replace standard and curly quotes with Shavian equivalents ‹ and ›
+   * Handles both single and double quotes, mapping them to Shavian angle brackets.
+   * Intelligently distinguishes between apostrophes and actual quotes.
    * Logs input and output for debugging.
    */
   private replaceQuotes(text: string): string {
     // Match straight and curly double quotes
-    const quoteRegex = /["""]/g;
-    let open = true;
-    const replaced = text.replace(quoteRegex, () => ((open = !open) ? '‹' : '›'));
+    // Use Unicode escape sequences for left double quote (\u201C) and right double quote (\u201D)
+    const doubleQuoteRegex = /["\u201C\u201D]/g;
+    let doubleOpen = true;
+    let replaced = text.replace(doubleQuoteRegex, () => (doubleOpen = !doubleOpen) ? '›' : '‹');
+    
+    // Match single quotes that are likely to be actual quotes, not apostrophes
+    // This regex matches single quotes at the beginning of a word or after spaces/punctuation
+    // Use Unicode escape sequences for left single quote (\u2018) and right single quote (\u2019)
+    const singleQuoteOpeningRegex = /(?<=^|\s|[.,!?;:])[''\u2018](?=\w)/g;
+    // This regex matches single quotes at the end of a word or before spaces/punctuation
+    const singleQuoteClosingRegex = /(?<=\w)[''\u2019](?=$|\s|[.,!?;:])/g;
+    
+    // Replace opening single quotes with ‹
+    replaced = replaced.replace(singleQuoteOpeningRegex, '‹');
+    // Replace closing single quotes with ›
+    replaced = replaced.replace(singleQuoteClosingRegex, '›');
+    
     // Debug log
     if (text !== replaced) {
       console.log('[Shavian Quote Replace] Before:', text);
@@ -124,6 +140,7 @@ export class ReadlexiconTransliterator {
 
   /**
    * Replace Shavian quotes ‹ and › back with standard quotes
+   * Currently all Shavian quotes convert back to double quotes for simplicity.
    * Logs input and output for debugging.
    */
   private reverseReplaceQuotes(text: string): string {

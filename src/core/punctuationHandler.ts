@@ -18,6 +18,8 @@ export interface PunctuationProcessingResult {
 const LEADING_PUNCTUATION_PATTERN = /^([^\p{L}\s-]+)/u;
 const TRAILING_PUNCTUATION_PATTERN = /([^\p{L}\s-]+.*)$/u; // Modified to capture everything from first non-letter char
 const APOSTROPHE_CONTRACTIONS = /^(.*)'([tsdm]|re|ve|ll)$/i; // don't, it's, we're, I've, they'll
+// Quote patterns for special handling
+const QUOTE_PATTERNS = /["""''']/g;
 
 /**
  * Separates punctuation from a word

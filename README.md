@@ -18,6 +18,7 @@ A modern browser extension that automatically transliterates English text on web
 - **Dynamic content support**: Monitors and transliterates content added via JavaScript using MutationObserver
 - **Smart text recognition**: Uses `Intl.Segmenter` for accurate word boundary detection
 - **Advanced transliteration engine**: Uses the readlexicon-based transliterator for accurate pronunciation-to-script conversion
+- **Typography enhancements**: Converts quotes to Shavian angle brackets (‹›) while preserving apostrophes
 
 ### 🧠 Smart Content Detection
 
@@ -225,7 +226,7 @@ bun run test:all
 
 ### 🎯 High Priority
 
-- [ ] **Advanced Punctuation Support**: Support transliterating the punctuatuions such as "" to ‹›
+- [x] **Advanced Punctuation Support**: Support transliterating the punctuations such as "" and '' to ‹›
 
 #### Low Complexity
 
