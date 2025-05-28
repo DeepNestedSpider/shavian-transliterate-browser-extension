@@ -1,6 +1,6 @@
 # 𐑖𐑱𐑝𐑾𐑯 𐑑𐑮𐑨𐑯𐑟𐑤𐑦𐑑𐑼𐑱𐑑 - Shavian Transliterate Browser Extension
 
-[![Version](https://img.shields.io/badge/version-0.0.11-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
+[![Version](https://img.shields.io/badge/version-0.0.12-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.x-black.svg)](https://bun.sh/)
