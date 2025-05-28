@@ -141,6 +141,8 @@ bun run build:dist
 ├── build-release.sh                  # Release build script
 ├── bun.lock                          # Bun lockfile
 ├── bunfig.toml                       # Bun configuration
+├── eslint.config.js                  # ESLint configuration
+├── FORMATTING.md                     # Code formatting guidelines
 ├── github-release.sh                 # GitHub release script
 ├── package.json                      # Project metadata and scripts
 ├── README.md                         # Project documentation
@@ -151,28 +153,59 @@ bun run build:dist
 │       ├── icon-128.png
 │       ├── icon-16.png
 │       └── icon-48.png
+├── releases/                         # Release archives
+│   ├── shavian-transliterate-browser-extension.tar.gz
+│   └── shavian-transliterate-browser-extension.zip
 ├── scripts/                          # Build and utility scripts
 │   ├── build.ts
+│   ├── generate-readlex-pos.ts
+│   ├── generate-readlex.ts
 │   └── version.ts
-├── showcase/
+├── shavian-transliterate-browser-extension/  # Built extension directory
+│   ├── content.js
+│   ├── manifest.json
+│   ├── popup.html
+│   ├── popup.js
+│   └── icons/
+│       ├── icon-128.png
+│       ├── icon-16.png
+│       └── icon-48.png
+├── showcase/                         # Screenshots and demos
+│   ├── shawinfo.png
+│   ├── shawinfov0.0.14.png
 │   ├── wikipedia-video.gif
 │   └── wikipedia-video.mp4
 ├── src/                              # TypeScript source code
 │   ├── content.ts                    # Content script entry point
+│   ├── contentUtils.ts               # Content script utilities
 │   ├── languageDetector.ts           # Language detection utilities
 │   ├── popup.html                    # Extension popup UI
 │   ├── popup.ts                      # Extension popup logic
-│   ├── readlexiconTransliterator.ts  # Alternative transliterator
+│   ├── readlexiconTransliterator.ts  # Readlexicon-based transliterator
 │   ├── shavianTransliterator.ts      # Main transliterator
 │   ├── core/
 │   │   ├── domTransliterator.ts      # DOM manipulation utilities
-│   │   ├── posTagger.ts              # POS tagging utilities
-│   │   └── transliterationEngine.ts  # Main transliteration logic
-│   ├── dictionaries/
-│   │   ├── index.ts                  # Dictionary exports
-│   │   └── readlex.ts                # Readlexicon dictionary
-│   └── types/                        # TypeScript type definitions
+│   │   ├── pluralAwareEngine.ts      # Plural-aware transliteration
+│   │   ├── posTagger.ts              # Part-of-speech tagging
+│   │   ├── punctuationHandler.ts     # Punctuation processing
+│   │   ├── transliterationEngine.ts  # Main transliteration logic
+│   │   └── verbAwareEngine.ts        # Verb-aware transliteration
+│   └── dictionaries/
+│       ├── index.ts                  # Dictionary exports
+│       ├── names.ts                  # Name dictionaries
+│       ├── readlex.json              # Readlexicon dictionary data
+│       └── readlex.ts                # Readlexicon dictionary
 └── tests/                            # Test files
+    ├── pluralAware.test.ts
+    ├── posAwareTransliteration.test.ts
+    ├── possessive.test.ts
+    ├── posTagger.test.ts
+    ├── punctuationHandler.test.ts
+    ├── reference-comparison.test.ts
+    ├── wordposIntegration.test.ts
+    └── reference/
+        ├── latin.txt
+        └── shavian.txt
 ```
 
 ## How It Works
