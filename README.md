@@ -282,7 +282,7 @@ bun run test:all
 
 ### 🎯 High Priority
 
-- [x] **Advanced Punctuation Support**: Support transliterating the punctuations such as "" and '' to ‹›
+- [ ] **Advanced Punctuation Support**: Support transliterating the punctuations such as "" and '' to ‹›
 
 #### Low Complexity
 
