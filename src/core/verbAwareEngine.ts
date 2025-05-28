@@ -87,8 +87,9 @@ export class VerbAwareReadlexiconEngine extends ReadlexiconEngine {
 
     // Check if we have a direct mapping for this past tense verb
     const lowerWord = word.toLowerCase();
-    if (lowerWord in this.directPastTenseShavian) {
-      return this.directPastTenseShavian[lowerWord];
+    const directMapping = this.directPastTenseShavian[lowerWord];
+    if (directMapping) {
+      return directMapping;
     }
 
     // Try standard transliteration first
@@ -137,8 +138,9 @@ export class VerbAwareReadlexiconEngine extends ReadlexiconEngine {
     const lowercaseWord = word.toLowerCase();
 
     // Handle irregular past tense verbs
-    if (lowercaseWord in this.irregularPastTense) {
-      return this.irregularPastTense[lowercaseWord] || word;
+    const baseForm = this.irregularPastTense[lowercaseWord];
+    if (baseForm) {
+      return baseForm;
     }
 
     // Handle regular past tense verbs

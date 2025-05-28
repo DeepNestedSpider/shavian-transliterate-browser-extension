@@ -2,7 +2,7 @@
  * ReadlexiconTransliterator - A standalone transliterator using dictionary-based approach
  * This is for compatibility with existing tests and API usage
  */
-import { ReadlexiconEngine } from './core/transliterationEngine';
+import { ReadlexiconEngine, type TransliterationEngine } from './core/transliterationEngine';
 import { posTagSentence } from './core/posTagger';
 import type { POSTaggedToken } from './core/posTagger';
 

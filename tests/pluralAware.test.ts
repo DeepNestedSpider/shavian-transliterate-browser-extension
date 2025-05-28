@@ -2,7 +2,8 @@
  * Tests for the plural-aware engine
  */
 import { expect, test, describe, beforeAll } from "bun:test";
-import { ReadlexiconEngine, VerbAwareReadlexiconEngine } from "../src/core/transliterationEngine";
+import { ReadlexiconEngine } from "../src/core/transliterationEngine";
+import { VerbAwareReadlexiconEngine } from "../src/core/verbAwareEngine";
 import { PluralAwareReadlexiconEngine } from "../src/core/pluralAwareEngine";
 
 // Load dictionary once for all tests

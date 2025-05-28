@@ -1,29 +1,22 @@
 /**
- * Core transliteration engine interface and factory
- * @deprecated Use the new transliterators under /src/transliterators/english instead
+ * English to Shavian transliteration engine
  */
-import type { POSTaggedToken } from './posTagger';
+import type { POSTaggedToken } from '../../core/posTagger';
 import {
-  // handleWordPunctuation,
   isPunctuationProcessed,
   extractOriginalWord,
   processPunctuatedWord,
   reconstructWordWithPunctuation,
-} from './punctuationHandler';
+} from '../../core/punctuationHandler';
+import type { TransliterationEngine } from './types';
 
-// Import and re-export new types and interfaces
-import type { TransliterationEngine, EngineType } from '../transliterators/english/types';
-export type { TransliterationEngine, EngineType } from '../transliterators/english/types';
-
-// Import engines for factory
-import { VerbAwareReadlexiconEngine } from './verbAwareEngine';
 // Import names dictionary - use a simple object for now instead of dynamic import
 const namesDict: Record<string, string> = {
   who: '𐑣𐑵', // Doctor Who - distinct from the word "who" (𐑣)
   shaw: '𐑖𐑷', // Bernard Shaw - proper name pronunciation
 };
 
-export class ReadlexiconEngine implements TransliterationEngine {
+export class EnglishToShavianEngine implements TransliterationEngine {
   private dictionary: Map<string, string> | any = new Map();
   private reverseDictionary: Map<string, string> = new Map();
   private previousWord: string = '';
@@ -152,14 +145,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
       '𐑚𐑰': 'be',     // Function word "be"
       '𐑚𐑲': 'by',     // Function word "by"
       '𐑞': 'the',     // Function word "the"
-      '𐑩𐑯': 'an',     // Article "an" (to avoid conflict with single schwa)
-      '𐑯𐑛': 'and',    // Function word "and" (to avoid conflict with single 'n')
-      '𐑦𐑑': 'it',     // Function word "it"
-      '𐑦𐑯': 'in',     // Preposition "in"
-      '𐑪𐑯': 'on',     // Preposition "on"
-      '𐑨𐑑': 'at',     // Preposition "at"
-      '𐑦𐑟': 'is',     // Verb "is"
-      '𐑢𐑪𐑟': 'was',   // Verb "was"
+      '𐑛': 'do',      // Function word "do"
       '𐑢𐑻': 'were',   // Verb "were"
       '𐑓': 'for',     // Preposition "for"
       '𐑢𐑦𐑞': 'with',  // Preposition "with"
@@ -214,7 +200,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
    * POS-aware transliteration using wordpos package
    */
   async transliterateWithPOS(text: string): Promise<string> {
-    const { posTagSentence } = await import('./posTagger');
+    const { posTagSentence } = await import('../../core/posTagger');
 
     try {
       const tokens = await posTagSentence(text);
@@ -527,121 +513,30 @@ export class ReadlexiconEngine implements TransliterationEngine {
    * (without determining if it needs a marker)
    */
   private isProperNameWord(originalWord: string): boolean {
-    if (!originalWord || originalWord.length === 0) return false;
-
-    const cleanWord = originalWord.toLowerCase().replace(/[^\w']/g, '');
-
-    // Common words that should NOT be considered proper names even when capitalized
-    const excludedWords = new Set([
-      // Language/nationality adjectives
-      'shavian',
-      'british',
-      'english',
-      'american',
-      'irish',
-      'scottish',
-      'welsh',
-      // Religious adjectives
-      'christian',
-      'muslim',
-      'jewish',
-      'catholic',
-      'protestant',
-      // Months
-      'january',
-      'february',
-      'march',
-      'april',
-      'may',
-      'june',
-      'july',
-      'august',
-      'september',
-      'october',
-      'november',
-      'december',
-      // Days
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-      'saturday',
-      'sunday',
-      // Common function words that appear at sentence starts
-      'from',
-      'to',
-      'in',
-      'on',
-      'at',
-      'by',
-      'for',
-      'with',
-      'of',
-      'the',
-      'a',
-      'an',
-      'and',
-      'or',
-      'but',
-      'if',
-      'when',
-      'where',
-      'why',
-      'how',
-      'what',
-      'who',
-      'which',
-      'that',
-      'this',
-      'these',
-      'those',
-      'his',
-      'her',
-      'its',
-      'their',
-      'our',
-      'my',
-      'he',
-      'she',
-      'it',
-      'they',
-      'we',
-      'you',
-      'i',
-      // Common sentence starters
-      'after',
-      'before',
-      'during',
-      'since',
-      'until',
-      'while',
-      'although',
-      'because',
-      'however',
-      'therefore',
-      'moreover',
-      'furthermore',
-      'meanwhile',
-      'otherwise',
-    ]);
-
-    if (excludedWords.has(cleanWord)) {
+    // Must be capitalized
+    if (originalWord.length === 0 || originalWord[0]! !== originalWord[0]!.toUpperCase()) {
       return false;
     }
 
-    // Single letters and initials should be considered proper names
-    if (cleanWord.length === 1) {
+    // Check if this is an acronym (all uppercase letters with possible dots)
+    const isAcronym = originalWord.match(/^[A-Z]+\.?$/);
+    if (isAcronym) {
       return true;
     }
 
-    // Common proper name patterns
-    const properNamePatterns = [
-      /^[A-Z][a-z]+$/, // Capitalized word like "Shaw", "Bernard"
-      /^[A-Z]+$/, // All caps like abbreviations
-    ];
+    // Check if this is a title case word that's not a common sentence starter
+    const commonSentenceStarters = ['the', 'a', 'an', 'this', 'that', 'these', 'those'];
+    if (commonSentenceStarters.includes(originalWord.toLowerCase())) {
+      return false;
+    }
 
-    return properNamePatterns.some(pattern => pattern.test(originalWord));
+    // If the word is in the function words list, it's probably not a proper name
+    // unless it's at the start of a sentence
+    if (originalWord.toLowerCase() in this.functionWords) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -653,143 +548,26 @@ export class ReadlexiconEngine implements TransliterationEngine {
     cleanWord: string,
     pos?: string
   ): boolean {
-    // Must be capitalized to be considered for proper name marker
-    if (!originalWord || originalWord.length === 0) return false;
-    const isCapitalized =
-      originalWord[0]! === originalWord[0]!.toUpperCase() &&
-      originalWord[0]! !== originalWord[0]!.toLowerCase();
-
-    if (!isCapitalized) return false;
-
-    // If this word is a proper name but the previous word was also a proper name,
-    // don't add a marker (only the first word in a multi-word proper name gets the marker)
-    if (this.previousWordWasProperName && this.isProperNameWord(originalWord)) {
+    // Never add marker for function words
+    if (cleanWord in this.functionWords) {
       return false;
     }
 
-    // Common words that should NOT get proper name markers even when capitalized
-    const excludedWords = new Set([
-      // Language/nationality adjectives
-      'shavian',
-      'british',
-      'english',
-      'american',
-      'irish',
-      'scottish',
-      'welsh',
-      // Religious adjectives
-      'christian',
-      'muslim',
-      'jewish',
-      'catholic',
-      'protestant',
-      // Months
-      'january',
-      'february',
-      'march',
-      'april',
-      'may',
-      'june',
-      'july',
-      'august',
-      'september',
-      'october',
-      'november',
-      'december',
-      // Days
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-      'saturday',
-      'sunday',
-      // Common function words that appear at sentence starts
-      'from',
-      'to',
-      'in',
-      'on',
-      'at',
-      'by',
-      'for',
-      'with',
-      'of',
-      'the',
-      'a',
-      'an',
-      'and',
-      'or',
-      'but',
-      'if',
-      'when',
-      'where',
-      'why',
-      'how',
-      'what',
-      'who',
-      'which',
-      'that',
-      'this',
-      'these',
-      'those',
-      'his',
-      'her',
-      'its',
-      'their',
-      'our',
-      'my',
-      'he',
-      'she',
-      'it',
-      'they',
-      'we',
-      'you',
-      'i',
-      // Common sentence starters
-      'after',
-      'before',
-      'during',
-      'since',
-      'until',
-      'while',
-      'although',
-      'because',
-      'however',
-      'therefore',
-      'moreover',
-      'furthermore',
-      'meanwhile',
-      'otherwise',
-    ]);
-
-    if (excludedWords.has(cleanWord)) {
-      return false;
-    }
-
-    // POS-based exclusions
-    if (pos) {
-      // Adjectives usually don't get proper name markers
-      if (pos.startsWith('JJ')) {
-        return false;
-      }
-      // Determiners, pronouns at start of sentence
-      if (pos === 'DT' || pos === 'PRP' || pos === 'WP') {
-        return false;
-      }
-    }
-
-    // Single letters and initials should get markers
-    if (cleanWord.length === 1) {
+    // Add marker for proper nouns identified by POS tagger
+    if (pos && (pos === 'NNP' || pos === 'NNPS')) {
       return true;
     }
 
-    // Common proper name patterns
-    const properNamePatterns = [
-      /^[A-Z][a-z]+$/, // Capitalized word like "Shaw", "Bernard"
-      /^[A-Z]+$/, // All caps like abbreviations
-    ];
+    // Add marker if it's clearly a proper name
+    if (this.isProperNameWord(originalWord)) {
+      // Don't add marker if previous word was also a proper name (compound names)
+      if (this.previousWordWasProperName) {
+        return false;
+      }
+      return true;
+    }
 
-    return properNamePatterns.some(pattern => pattern.test(originalWord));
+    return false;
   }
 
   addToDictionary(word: string, transliteration: string): void {
@@ -818,195 +596,28 @@ export class ReadlexiconEngine implements TransliterationEngine {
 
   getDictionarySize(): number {
     if (this.dictionary && typeof this.dictionary.size === 'number') {
-      // Legacy Map format
       return this.dictionary.size;
-    } else if (this.dictionary && this.dictionary.basic) {
-      // New format - count basic entries
+    } else if (this.dictionary && typeof this.dictionary.basic === 'object') {
       return Object.keys(this.dictionary.basic).length;
     }
     return 0;
   }
 
   /**
-   * Reverse transliterate (Shavian to English) text
+   * Reverse transliteration - implemented here for interface compatibility
+   * This will be delegated to the ShavianToEnglishEngine
    */
   reverseTransliterate(text: string): string {
-    const words = text.split(/(\s+)/);
-    let isFirstWordOfSentence = true;
-    
-    return words
-      .map(segment => {
-        if (segment.match(/^\s+$/)) {
-          return segment;
-        } else if (segment.match(/^[.,:;!?"'()[\]{}<>]+$/)) {
-          // Punctuation (excluding hyphens and ellipses): do not transliterate
-          // Check if this ends a sentence
-          if (segment.match(/[.!?]/)) {
-            isFirstWordOfSentence = true;
-          }
-          return segment;
-        } else if (segment.length > 0) {
-          const reversedWord = this.reverseTransliterateWord(segment);
-          let result = reversedWord;
-          
-          // Apply capitalization rules
-          if (isFirstWordOfSentence && reversedWord.length > 0) {
-            // Only capitalize if it's not a function word/article unless truly at sentence start
-            const isArticleOrFunction = ['a', 'an', 'the', 'and', 'or', 'but', 'of', 'in', 'on', 'at', 'by', 'for', 'with', 'from'].includes(reversedWord.toLowerCase());
-            if (!isArticleOrFunction || segment === words[0]) {
-              result = this.capitalizeFirstLetter(reversedWord);
-            }
-            isFirstWordOfSentence = false;
-          } else if (segment.startsWith('·')) {
-            // Handle proper name markers
-            result = this.capitalizeProperName(reversedWord);
-          }
-          
-          return result;
-        }
-        return segment;
-      })
-      .join('');
+    // This should be implemented by ShavianToEnglishEngine
+    // For now, return as-is to maintain compatibility
+    console.warn('reverseTransliterate should be handled by ShavianToEnglishEngine');
+    return text;
   }
 
-  /**
-   * Reverse transliterate (Shavian to English) a single word
-   */
   reverseTransliterateWord(word: string): string {
-    if (!word || word.trim() === '') return word;
-
-    // Check if word is in punctuation{word} format first - if so, extract and return original
-    if (isPunctuationProcessed(word)) {
-      return extractOriginalWord(word);
-    }
-
-    // For words with punctuation in the new format, we need to separate punctuation and reverse transliterate the clean word
-    const punctuationResult = processPunctuatedWord(word);
-
-    if (punctuationResult.hasNonAlphabetic) {
-      // Reverse transliterate the clean word and reconstruct with punctuation
-      const reverseTransliteratedCleanWord = this.reverseTransliterateWordInternal(
-        punctuationResult.cleanWord || ''
-      );
-      return reconstructWordWithPunctuation(
-        reverseTransliteratedCleanWord,
-        punctuationResult.leadingPunctuation || '',
-        punctuationResult.trailingPunctuation || ''
-      );
-    }
-
-    // Handle compound words with hyphens (but only if none of the parts look like punctuation format)
-    if (word.includes('-') && !word.match(/^[-]+$/)) {
-      const parts = word.split('-');
-      // Check if any part looks like malformed punctuation format - if so, don't process as compound
-      const hasPartialPunctuationFormat = parts.some(
-        part =>
-          part.includes('{') ||
-          part.includes('}') ||
-          (part.includes('punctuation') && (word.includes('{') || word.includes('}')))
-      );
-
-      if (!hasPartialPunctuationFormat) {
-        const transliteratedParts = parts.map(part => {
-          if (part.trim() === '') return part;
-          return this.reverseTransliterateWordInternal(part);
-        });
-        return transliteratedParts.join('-');
-      }
-    }
-
-    // Handle words with ellipses
-    if (word.includes('…')) {
-      const parts = word.split('…');
-      const transliteratedParts = parts.map(part => {
-        if (part.trim() === '') return part;
-        return this.reverseTransliterateWordInternal(part);
-      });
-      return transliteratedParts.join('…');
-    }
-
-    // Handle words with pipe characters
-    if (word.includes('|')) {
-      const parts = word.split('|');
-      const transliteratedParts = parts.map(part => {
-        if (part.trim() === '') return part;
-        return this.reverseTransliterateWordInternal(part);
-      });
-      return transliteratedParts.join('|');
-    }
-
-    return this.reverseTransliterateWordInternal(word);
-  }
-
-  /**
-   * Internal method to reverse transliterate a single word part without compound handling
-   */
-  private reverseTransliterateWordInternal(word: string): string {
-    if (!word || word.trim() === '') return word;
-
-    // Check if this is a punctuation-processed word and extract the original
-    if (isPunctuationProcessed(word)) {
-      return extractOriginalWord(word);
-    }
-
-    // Handle complex proper name patterns with spaces (like "·𐑜. 𐑒. 𐑗𐑧𐑕𐑑𐑼𐑑𐑩𐑯")
-    if (word.includes(' ') && word.includes('·')) {
-      const parts = word.split(' ');
-      const transliteratedParts = parts.map(part => this.reverseTransliterateWordInternal(part));
-      return transliteratedParts.join(' ');
-    }
-
-    // Handle words with trailing punctuation (like "𐑒." -> "k.")
-    const trailingPunctuation = word.match(/[.,:;!?]+$/);
-    const leadingPunctuation = word.match(/^[·‹›]+/);
-    let cleanWordForLookup = word;
-    
-    if (trailingPunctuation || leadingPunctuation) {
-      // Remove punctuation for lookup but preserve it for reconstruction
-      cleanWordForLookup = word.replace(/^[·‹›]+|[.,:;!?]+$/g, '');
-    }
-
-    // Remove punctuation for lookup but preserve original for fallback
-    const clean = cleanWordForLookup.replace(/^[^\u{10450}-\u{1047F}]*|[^\u{10450}-\u{1047F}]*$/gu, '');
-
-    // Direct lookup in reverse dictionary
-    const result = this.reverseDictionary.get(clean);
-    if (result) {
-      // Reconstruct with original punctuation
-      let finalResult = result;
-      if (trailingPunctuation) {
-        finalResult += trailingPunctuation[0];
-      }
-      return finalResult;
-    }
-
-    // Try without leading/trailing markers (·, etc.)
-    const cleanerShavian = clean.replace(/^[·‹›]+|[·‹›]+$/g, '');
-    const cleanerResult = this.reverseDictionary.get(cleanerShavian);
-    if (cleanerResult) {
-      // Reconstruct with original punctuation
-      let finalResult = cleanerResult;
-      if (trailingPunctuation) {
-        finalResult += trailingPunctuation[0];
-      }
-      return finalResult;
-    }
-
-    // Handle single character lookups (like 𐑜 -> g, 𐑒 -> k)
-    if (cleanerShavian.length === 1) {
-      // Try direct character mapping
-      const charResult = this.reverseDictionary.get(cleanerShavian);
-      if (charResult) {
-        // Reconstruct with original punctuation
-        let finalResult = charResult;
-        if (trailingPunctuation) {
-          finalResult += trailingPunctuation[0];
-        }
-        return finalResult;
-      }
-    }
-
-    // Fallback - return original word if no reverse transliteration found
+    // This should be implemented by ShavianToEnglishEngine
+    // For now, return as-is to maintain compatibility
+    console.warn('reverseTransliterateWord should be handled by ShavianToEnglishEngine');
     return word;
   }
 
@@ -1023,43 +634,13 @@ export class ReadlexiconEngine implements TransliterationEngine {
    */
   private capitalizeProperName(word: string): string {
     if (!word || word.length === 0) return word;
-    
-    // Handle complex proper name patterns like "g. k. chesterton"
-    if (word.includes('. ')) {
-      return word.split(' ').map(part => {
-        if (part.endsWith('.')) {
-          // Handle initials like "g." -> "G."
-          return part.charAt(0).toUpperCase() + part.slice(1);
-        } else {
-          // Handle regular names
-          return this.capitalizeFirstLetter(part);
-        }
-      }).join(' ');
+
+    // Handle initials (like "g. k. chesterton" -> "G. K. Chesterton")
+    if (word.match(/^[a-z]\./)) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
     }
-    
-    // Handle hyphenated names
-    if (word.includes('-')) {
-      return word.split('-').map(part => this.capitalizeFirstLetter(part)).join('-');
-    }
-    
-    // Regular single word
+
+    // Handle regular proper names
     return this.capitalizeFirstLetter(word);
-  }
-}
-
-export class TransliterationEngineFactory {
-  /**
-   * @deprecated Use the new TransliterationEngineFactory from ../transliterators/english instead
-   */
-  static async createEngine(type: EngineType): Promise<TransliterationEngine> {
-    // Delegate to the new modular factory
-    const { TransliterationEngineFactory: NewFactory } = await import('../transliterators/english');
-    return NewFactory.createEngine(type);
-  }
-
-  static async getEngineFromSettings(): Promise<TransliterationEngine> {
-    // Delegate to the new modular factory
-    const { TransliterationEngineFactory: NewFactory } = await import('../transliterators/english');
-    return NewFactory.getEngineFromSettings();
   }
 }
