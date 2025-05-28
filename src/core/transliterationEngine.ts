@@ -229,6 +229,34 @@ export class ReadlexiconEngine implements TransliterationEngine {
     if (!word || word.trim() === '') return word;
     // const originalWord = word;
 
+    // Handle words separated by em-dashes FIRST, before punctuation processing
+    // This ensures that em-dashes with multi-word content are handled correctly
+    if (word.includes('—')) {
+      const parts = word.split('—');
+      const transliteratedParts = parts.map((part, index) => {
+        if (part.trim() === '') return part;
+        
+        // If the part contains multiple words (has spaces), treat it as text to transliterate
+        // rather than a single word
+        const transliteratedPart = part.includes(' ') 
+          ? this.transliterate(part) 
+          : this.transliterateWordInternal(part, pos);
+        
+        // Update context after each part for proper name tracking
+        if (part.match(/\w/)) {
+          this.previousWord = part.toLowerCase().replace(/[^\w']/g, '');
+          const isCapitalized = 
+            part.length > 0 &&
+            part[0]! === part[0]!.toUpperCase() &&
+            part[0]! !== part[0]!.toLowerCase();
+          this.previousWordWasProperName = isCapitalized && this.isProperNameWord(part);
+        }
+        
+        return transliteratedPart;
+      });
+      return transliteratedParts.join('—');
+    }
+
     // Process punctuation and separate clean word from punctuation
     const punctuationResult = processPunctuatedWord(word);
 

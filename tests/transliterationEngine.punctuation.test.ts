@@ -16,7 +16,13 @@ describe("TransliterationEngine with Punctuation Handler Integration", () => {
       "test": "𐑑𐑧𐑕𐑑",
       "word": "𐑢𐑻𐑛",
       "example": "𐑦𐑜𐑟𐑭𐑥𐑐𐑤",
-      "punctuation": "𐑐𐑳𐑙𐑒𐑑𐑿𐑱𐑖𐑩𐑯"
+      "punctuation": "𐑐𐑳𐑙𐑒𐑑𐑿𐑱𐑖𐑩𐑯",
+      "how": "𐑣𐑬",
+      "are": "𐑸",
+      "you": "you", // Will remain in English as not in dictionary
+      "this": "𐑞𐑦𐑕",
+      "is": "𐑦𐑟",
+      "a": "𐑩"
     };
     engine = new ReadlexiconEngine(testDictionary);
   });

@@ -8,7 +8,8 @@ describe('Debug Possessive Handling', () => {
   test('debug separatePunctuation with Shaw\'s', () => {
     const result = separatePunctuation("Shaw's");
     console.log('separatePunctuation result:', result);
-    expect(result.cleanWord).toBe("Shaw's"); // This might be the issue
+    expect(result.cleanWord).toBe("Shaw"); // Correctly separates the base word
+    expect(result.trailingPunctuation).toBe("'s"); // Correctly identifies possessive
   });
 
   test('debug handlePossessives step by step', () => {

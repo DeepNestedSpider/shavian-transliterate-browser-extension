@@ -78,11 +78,22 @@ describe("Plural-aware transliteration engine", () => {
       // Irregular plurals should have special handling
       expect(pluralAwareResult).not.toBe(word);
       
-      // For some already-correctly-handled words like "people", "sheep", and "fish",
-      // the standard result might already be correct
-      if (["people", "sheep", "fish"].includes(word)) {
-        expect(pluralAwareResult).toBe(standardResult);
-      }
+      // Define expected Shavian outputs for these irregular plurals
+      const expectedShavian: Record<string, string> = {
+        "children": "𐑗𐑦𐑤𐑛𐑮𐑩𐑯",
+        "women": "𐑢𐑦𐑥𐑩𐑯",
+        "men": "𐑥𐑧𐑯",
+        "teeth": "𐑑𐑰𐑔",
+        "feet": "𐑓𐑰𐑑",
+        "geese": "𐑜𐑰𐑕",
+        "mice": "𐑥𐑲𐑕",
+        "people": "𐑐𐑰𐑐𐑩𐑤",
+        "sheep": "𐑖𐑰𐑐",
+        "fish": "𐑓𐑦𐑖"
+      };
+      
+      // The plural-aware engine should produce the correct Shavian output
+      expect(pluralAwareResult).toBe(expectedShavian[word]);
       
       console.log(`${word}: "${standardResult}" (Standard) vs "${pluralAwareResult}" (Plural-Aware)`);
     });
