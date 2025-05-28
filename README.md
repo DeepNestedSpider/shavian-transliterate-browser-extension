@@ -10,8 +10,6 @@
 <summary>Showcase Video</summary>
 
 ![Video Showcase on Shaw.info](./showcase/shawinfo.gif)
-![original](./showcase/shawinfo.png)
-![stateasofcurrentrelease](./showcase/shawinfov0.0.14.png)
 
 </details>
 
