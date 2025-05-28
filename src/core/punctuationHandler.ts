@@ -80,7 +80,7 @@ export function handleContractions(word: string): {
 }
 
 /**
- * Checks if a word contains non-alphabetic characters (excluding hyphens)
+ * Checks if a word contains non-alphabetic characters (excluding hyphens and ellipses)
  * @param word - The word to check
  * @returns true if the word contains non-alphabetic characters
  */
@@ -92,6 +92,16 @@ export function hasNonAlphabeticCharacters(word: string): boolean {
 
   // Don't process pure punctuation (no letters at all)
   if (!/[a-zA-Z]/.test(word)) {
+    return false;
+  }
+
+  // Don't process words that only contain ellipses - let ellipsis handler deal with them
+  if (word.includes('…')) {
+    return false;
+  }
+
+  // Don't process words that contain pipe characters - let pipe handler deal with them
+  if (word.includes('|')) {
     return false;
   }
 

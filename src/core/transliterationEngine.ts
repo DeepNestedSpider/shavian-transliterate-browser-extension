@@ -265,6 +265,16 @@ export class ReadlexiconEngine implements TransliterationEngine {
       return transliteratedParts.join('…');
     }
 
+    // Handle words with pipe characters
+    if (word.includes('|')) {
+      const parts = word.split('|');
+      const transliteratedParts = parts.map(part => {
+        if (part.trim() === '') return part;
+        return this.transliterateWordInternal(part, pos);
+      });
+      return transliteratedParts.join('|');
+    }
+
     return this.transliterateWordInternal(word, pos);
   }
 
@@ -829,6 +839,16 @@ export class ReadlexiconEngine implements TransliterationEngine {
         return this.reverseTransliterateWordInternal(part);
       });
       return transliteratedParts.join('…');
+    }
+
+    // Handle words with pipe characters
+    if (word.includes('|')) {
+      const parts = word.split('|');
+      const transliteratedParts = parts.map(part => {
+        if (part.trim() === '') return part;
+        return this.reverseTransliterateWordInternal(part);
+      });
+      return transliteratedParts.join('|');
     }
 
     return this.reverseTransliterateWordInternal(word);
