@@ -86,71 +86,76 @@ describe("punctuationHandler", () => {
       expect(result.processedWord).toBe("hello");
     });
 
-    test("should return punctuation format for words with apostrophes, but original for hyphens", () => {
+    test("should separate punctuation correctly for words with apostrophes, but not for hyphens", () => {
       const result = processPunctuatedWord("don't");
       expect(result.hasNonAlphabetic).toBe(true);
-      expect(result.processedWord).toBe("punctuation{don't}");
+      expect(result.processedWord).toBe("don't");
+      expect(result.cleanWord).toBe("don");
+      expect(result.trailingPunctuation).toBe("'t");
+      expect(result.leadingPunctuation).toBe("");
 
       const result2 = processPunctuatedWord("hello-world");
       expect(result2.hasNonAlphabetic).toBe(false);
       expect(result2.processedWord).toBe("hello-world");
+      expect(result2.cleanWord).toBe("hello-world");
     });
 
-    test("should return punctuation format for words with punctuation", () => {
+    test("should separate punctuation correctly for words with punctuation", () => {
       const testCases = [
-        { input: "hello,", expected: "punctuation{hello,}" },
-        { input: "world!", expected: "punctuation{world!}" },
-        { input: "test?", expected: "punctuation{test?}" },
-        { input: "word.", expected: "punctuation{word.}" },
-        { input: "example:", expected: "punctuation{example:}" },
-        { input: "test;", expected: "punctuation{test;}" },
+        { input: "hello,", cleanWord: "hello", trailing: "," },
+        { input: "world!", cleanWord: "world", trailing: "!" },
+        { input: "test?", cleanWord: "test", trailing: "?" },
+        { input: "word.", cleanWord: "word", trailing: "." },
+        { input: "example:", cleanWord: "example", trailing: ":" },
+        { input: "test;", cleanWord: "test", trailing: ";" },
       ];
 
-      testCases.forEach(({ input, expected }) => {
+      testCases.forEach(({ input, cleanWord, trailing }) => {
         const result = processPunctuatedWord(input);
         expect(result.hasNonAlphabetic).toBe(true);
-        expect(result.processedWord).toBe(expected);
+        expect(result.processedWord).toBe(input);
+        expect(result.cleanWord).toBe(cleanWord);
+        expect(result.trailingPunctuation).toBe(trailing);
+        expect(result.leadingPunctuation).toBe("");
+      });
       });
     });
 
     test("should handle words with multiple punctuation marks", () => {
       const result = processPunctuatedWord("hello,!");
       expect(result.hasNonAlphabetic).toBe(true);
-      expect(result.processedWord).toBe("punctuation{hello,!}");
+      expect(result.processedWord).toBe("hello,!");
+      expect(result.cleanWord).toBe("hello");
+      expect(result.trailingPunctuation).toBe(",!");
+      expect(result.leadingPunctuation).toBe("");
     });
 
     test("should handle words with numbers", () => {
       const result = processPunctuatedWord("word123");
       expect(result.hasNonAlphabetic).toBe(true);
-      expect(result.processedWord).toBe("punctuation{word123}");
+      expect(result.processedWord).toBe("word123");
+      expect(result.cleanWord).toBe("word");
+      expect(result.trailingPunctuation).toBe("123");
     });
 
     test("should handle words with em dashes (different from hyphens)", () => {
       const result1 = processPunctuatedWord("often—");
       expect(result1.hasNonAlphabetic).toBe(true);
-      expect(result1.processedWord).toBe("punctuation{often—}");
+      expect(result1.processedWord).toBe("often—");
+      expect(result1.cleanWord).toBe("often");
+      expect(result1.trailingPunctuation).toBe("—");
 
       const result2 = processPunctuatedWord("—casting");
       expect(result2.hasNonAlphabetic).toBe(true);
-      expect(result2.processedWord).toBe("punctuation{—casting}");
+      expect(result2.processedWord).toBe("—casting");
+      expect(result2.cleanWord).toBe("casting");
+      expect(result2.leadingPunctuation).toBe("—");
 
       const result3 = processPunctuatedWord("word—another");
       expect(result3.hasNonAlphabetic).toBe(true);
-      expect(result3.processedWord).toBe("punctuation{word—another}");
-    });
-
-    test("should handle words with em dashes (different from hyphens)", () => {
-      const result1 = processPunctuatedWord("often—");
-      expect(result1.hasNonAlphabetic).toBe(true);
-      expect(result1.processedWord).toBe("punctuation{often—}");
-
-      const result2 = processPunctuatedWord("—casting");
-      expect(result2.hasNonAlphabetic).toBe(true);
-      expect(result2.processedWord).toBe("punctuation{—casting}");
-
-      const result3 = processPunctuatedWord("word—another");
-      expect(result3.hasNonAlphabetic).toBe(true);
-      expect(result3.processedWord).toBe("punctuation{word—another}");
+      expect(result3.processedWord).toBe("word—another");
+      expect(result3.cleanWord).toBe("word");
+      expect(result3.trailingPunctuation).toBe("—another");
     });
 
     test("should handle edge cases", () => {
@@ -309,4 +314,3 @@ describe("punctuationHandler", () => {
       });
     });
   });
-});

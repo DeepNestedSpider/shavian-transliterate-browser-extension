@@ -2,7 +2,7 @@
  * Core transliteration engine interface and factory
  */
 import type { POSTaggedToken } from './posTagger';
-import { handleWordPunctuation, isPunctuationProcessed, extractOriginalWord } from './punctuationHandler';
+import { handleWordPunctuation, isPunctuationProcessed, extractOriginalWord, processPunctuatedWord, reconstructWordWithPunctuation } from './punctuationHandler';
 
 export interface TransliterationEngine {
   transliterate(text: string): string;
@@ -203,10 +203,17 @@ export class ReadlexiconEngine implements TransliterationEngine {
     if (!word || word.trim() === '') return word;
     const originalWord = word;
 
-    // Check for punctuation first - if word has non-alphabetic characters, handle with punctuation handler
-    const punctuationResult = handleWordPunctuation(word);
-    if (punctuationResult !== word) {
-      return punctuationResult;
+    // Process punctuation and separate clean word from punctuation
+    const punctuationResult = processPunctuatedWord(word);
+    
+    if (punctuationResult.hasNonAlphabetic) {
+      // Transliterate the clean word and reconstruct with punctuation
+      const transliteratedCleanWord = this.transliterateWordInternal(punctuationResult.cleanWord || '', pos);
+      return reconstructWordWithPunctuation(
+        transliteratedCleanWord,
+        punctuationResult.leadingPunctuation || '',
+        punctuationResult.trailingPunctuation || ''
+      );
     }
 
     // Handle compound words with hyphens
@@ -444,6 +451,19 @@ export class ReadlexiconEngine implements TransliterationEngine {
     // Check if word is in punctuation{word} format first - if so, extract and return original
     if (isPunctuationProcessed(word)) {
       return extractOriginalWord(word);
+    }
+
+    // For words with punctuation in the new format, we need to separate punctuation and reverse transliterate the clean word
+    const punctuationResult = processPunctuatedWord(word);
+    
+    if (punctuationResult.hasNonAlphabetic) {
+      // Reverse transliterate the clean word and reconstruct with punctuation
+      const reverseTransliteratedCleanWord = this.reverseTransliterateWordInternal(punctuationResult.cleanWord || '');
+      return reconstructWordWithPunctuation(
+        reverseTransliteratedCleanWord,
+        punctuationResult.leadingPunctuation || '',
+        punctuationResult.trailingPunctuation || ''
+      );
     }
 
     // Handle compound words with hyphens (but only if none of the parts look like punctuation format)

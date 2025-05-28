@@ -1,19 +1,81 @@
 /**
  * Punctuation handler for words with attached non-alphabetic characters
  * This module handles words that have punctuation, apostrophes, dots, colons, etc. attached
+ * It separates the punctuation from the word and returns both parts for proper processing
  */
 
 export interface PunctuationProcessingResult {
   hasNonAlphabetic: boolean;
   processedWord: string;
+  cleanWord?: string;
+  leadingPunctuation?: string;
+  trailingPunctuation?: string;
 }
 
 /**
- * Regex pattern to detect non-alphabetic characters except hyphens within words
- * This includes punctuation like semicolons, dots, colons, apostrophes, etc.
- * Excludes hyphens (for compound words)
+ * Regex patterns for punctuation separation
  */
-const NON_ALPHABETIC_PATTERN = /[^a-zA-Z-]/;
+const LEADING_PUNCTUATION_PATTERN = /^([^\p{L}\s-]+)/u;
+const TRAILING_PUNCTUATION_PATTERN = /([^\p{L}\s-]+.*)$/u; // Modified to capture everything from first non-letter char
+const APOSTROPHE_CONTRACTIONS = /^(.*)'([tsdm]|re|ve|ll)$/i; // don't, it's, we're, I've, they'll
+
+/**
+ * Separates punctuation from a word
+ * @param word - The word to separate
+ * @returns Object with clean word and separated punctuation
+ */
+export function separatePunctuation(word: string): {
+  cleanWord: string;
+  leadingPunctuation: string;
+  trailingPunctuation: string;
+} {
+  let cleanWord = word;
+  let leadingPunctuation = '';
+  let trailingPunctuation = '';
+
+  // Handle leading punctuation (like quotes, parentheses)
+  const leadingMatch = cleanWord.match(LEADING_PUNCTUATION_PATTERN);
+  if (leadingMatch) {
+    leadingPunctuation = leadingMatch[1];
+    cleanWord = cleanWord.slice(leadingPunctuation.length);
+  }
+
+  // Handle trailing punctuation (like periods, commas, quotes)
+  const trailingMatch = cleanWord.match(TRAILING_PUNCTUATION_PATTERN);
+  if (trailingMatch) {
+    trailingPunctuation = trailingMatch[1];
+    cleanWord = cleanWord.slice(0, -trailingPunctuation.length);
+  }
+
+  return {
+    cleanWord,
+    leadingPunctuation,
+    trailingPunctuation
+  };
+}
+
+/**
+ * Handles contractions by separating the contraction part
+ * @param word - The word to check for contractions
+ * @returns Object with the base word and contraction part
+ */
+export function handleContractions(word: string): {
+  baseWord: string;
+  contractionPart: string;
+} {
+  const contractionMatch = word.match(APOSTROPHE_CONTRACTIONS);
+  if (contractionMatch) {
+    return {
+      baseWord: contractionMatch[1],
+      contractionPart: "'" + contractionMatch[2]
+    };
+  }
+  
+  return {
+    baseWord: word,
+    contractionPart: ''
+  };
+}
 
 /**
  * Checks if a word contains non-alphabetic characters (excluding hyphens)
@@ -32,13 +94,13 @@ export function hasNonAlphabeticCharacters(word: string): boolean {
   }
   
   // Check for non-alphabetic characters excluding hyphens
-  return NON_ALPHABETIC_PATTERN.test(word);
+  return /[^\p{L}-]/u.test(word);
 }
 
 /**
- * Processes a word with punctuation by replacing it with punctuation{word} format
+ * Processes a word with punctuation by separating the punctuation from the clean word
  * @param word - The word to process
- * @returns The processed result
+ * @returns The processed result with separated components
  */
 export function processPunctuatedWord(word: string): PunctuationProcessingResult {
   const hasNonAlphabetic = hasNonAlphabeticCharacters(word);
@@ -46,27 +108,62 @@ export function processPunctuatedWord(word: string): PunctuationProcessingResult
   if (!hasNonAlphabetic) {
     return {
       hasNonAlphabetic: false,
-      processedWord: word
+      processedWord: word,
+      cleanWord: word,
+      leadingPunctuation: '',
+      trailingPunctuation: ''
     };
   }
   
-  // Replace the word with punctuation{word} format
-  const processedWord = `punctuation{${word}}`;
+  // Separate punctuation from the word
+  const { cleanWord, leadingPunctuation, trailingPunctuation } = separatePunctuation(word);
+  
+  // Handle contractions specially
+  const { baseWord, contractionPart } = handleContractions(cleanWord);
+  
+  // If it's a contraction, process the base word and keep the contraction
+  const finalCleanWord = contractionPart ? baseWord : cleanWord;
+  const finalTrailingPunctuation = contractionPart ? contractionPart + trailingPunctuation : trailingPunctuation;
   
   return {
     hasNonAlphabetic: true,
-    processedWord
+    processedWord: word, // Keep original for now, will be updated by transliteration engine
+    cleanWord: finalCleanWord,
+    leadingPunctuation,
+    trailingPunctuation: finalTrailingPunctuation
   };
+}
+
+/**
+ * Reconstructs a word with its punctuation after transliteration
+ * @param transliteratedWord - The transliterated clean word
+ * @param leadingPunctuation - Punctuation that goes before the word
+ * @param trailingPunctuation - Punctuation that goes after the word
+ * @returns The complete word with punctuation
+ */
+export function reconstructWordWithPunctuation(
+  transliteratedWord: string,
+  leadingPunctuation: string,
+  trailingPunctuation: string
+): string {
+  return leadingPunctuation + transliteratedWord + trailingPunctuation;
 }
 
 /**
  * Main function to handle punctuation processing for transliteration
  * This function should be called whenever a word needs to be checked for punctuation
  * @param word - The word to process
- * @returns The processed word (either original or punctuation{word} format)
+ * @returns The processed word (either original or punctuation{word} format for compatibility)
  */
 export function handleWordPunctuation(word: string): string {
   const result = processPunctuatedWord(word);
+  
+  // For backward compatibility, still return punctuation{word} format for now
+  // This will be updated by the transliteration engine to use the new logic
+  if (result.hasNonAlphabetic) {
+    return `punctuation{${word}}`;
+  }
+  
   return result.processedWord;
 }
 
