@@ -15,7 +15,7 @@ export class ReadlexiconTransliterator {
   private engine: ReadlexiconEngine;
   private initializationPromise: Promise<void>;
 
-  constructor(config: ReadlexiconTransliteratorConfig = {}) {
+  constructor(_config: ReadlexiconTransliteratorConfig = {}) {
     this.engine = new ReadlexiconEngine();
     this.initializationPromise = this.loadDictionary();
   }
@@ -116,7 +116,10 @@ export class ReadlexiconTransliterator {
     // Use Unicode escape sequences for left double quote (\u201C) and right double quote (\u201D)
     const doubleQuoteRegex = /["\u201C\u201D]/g;
     let doubleOpen = true;
-    let replaced = text.replace(doubleQuoteRegex, () => (doubleOpen = !doubleOpen) ? '›' : '‹');
+    let replaced = text.replace(doubleQuoteRegex, () => {
+      doubleOpen = !doubleOpen;
+      return doubleOpen ? '›' : '‹';
+    });
     
     // Match single quotes that are likely to be actual quotes, not apostrophes
     // This regex matches single quotes at the beginning of a word or after spaces/punctuation
@@ -147,7 +150,10 @@ export class ReadlexiconTransliterator {
     // Match Shavian quotes
     const shavianQuoteRegex = /[‹›]/g;
     let open = true;
-    const replaced = text.replace(shavianQuoteRegex, () => ((open = !open) ? '"' : '"'));
+    const replaced = text.replace(shavianQuoteRegex, () => {
+      open = !open;
+      return open ? '"' : '"';
+    });
     // Debug log
     if (text !== replaced) {
       console.log('[Shavian Reverse Quote Replace] Before:', text);

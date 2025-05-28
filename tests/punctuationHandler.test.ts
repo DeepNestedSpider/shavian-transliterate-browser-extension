@@ -9,7 +9,6 @@ import {
   handleWordPunctuation,
   extractOriginalWord,
   isPunctuationProcessed,
-  type PunctuationProcessingResult
 } from "../src/core/punctuationHandler";
 
 describe("punctuationHandler", () => {

@@ -9,7 +9,7 @@
  * - The transliteration algorithm cannot predict abbreviated names' pronunciation
  *   and starting phonemes without knowing the full original names
  */
-import { expect, test, describe, beforeAll } from "bun:test";
+import { test, describe, beforeAll } from "bun:test";
 import { ReadlexiconEngine } from "../src/core/transliterationEngine";
 import { readlexDict } from "../src/dictionaries/readlex";
 import { readFileSync } from "fs";

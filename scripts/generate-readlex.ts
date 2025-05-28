@@ -10,11 +10,6 @@ const { join } = require('path');
 const DICT_PATH = join(__dirname, '../src/dictionaries/readlex.dict');
 const OUTPUT_PATH = join(__dirname, '../src/dictionaries/readlex.ts');
 
-interface DictEntry {
-  key: string;
-  value: string;
-}
-
 function parseDictFile(content: string): Record<string, string> {
   const lines = content.split('\n').filter(line => line.trim() && !line.startsWith('//'));
   const entries: Record<string, string> = {};
@@ -77,7 +72,7 @@ export const readlexDict: Record<string, string> = {
     })
     .join('\n');
 
-  return `${header  }\n${  entriesText  }\n${  footer}`;
+  return `${header}\n${entriesText}\n${footer}`;
 }
 
 function main() {

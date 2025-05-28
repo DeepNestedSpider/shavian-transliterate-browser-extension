@@ -117,7 +117,7 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
     // Check if we have a direct mapping for this plural
     const lowerWord = word.toLowerCase();
     if (lowerWord in this.directPluralShavian) {
-      return this.directPluralShavian[lowerWord];
+      return this.directPluralShavian[lowerWord] || word;
     }
 
     // Try standard transliteration from parent (verb-aware) first
@@ -136,7 +136,7 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
         }
 
         // For words like "house" -> "houses", try to get the singular form transliteration
-        const singularLower = singularForm.toLowerCase();
+        // const singularLower = singularForm.toLowerCase();
 
         // Try different POS tags to get a successful transliteration of the singular form
         const posVariants = ['NN', 'NNS', 'VB', 'JJ'];
@@ -189,7 +189,7 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
     if (lowerWord.endsWith('s') && !lowerWord.endsWith('ss')) {
       // Words ending in 'ies' usually come from words ending in 'y'
       if (lowerWord.endsWith('ies') && lowerWord.length > 3) {
-        return `${lowerWord.slice(0, -3)  }y`;
+        return `${lowerWord.slice(0, -3)}y`;
       }
 
       // Words ending in 'es'
@@ -223,7 +223,7 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
             return this.irregularPlurals[lowerWord] || word;
           }
           // Otherwise try a generic conversion from 'ves' to 'f'
-          return `${lowerWord.slice(0, -3)  }f`;
+          return `${lowerWord.slice(0, -3)}f`;
         }
 
         // Regular 'es' plural - just remove the 'es'
@@ -249,12 +249,12 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
 
     // For irregular plurals, we should already have direct mappings
     if (lowerPlural in this.directPluralShavian) {
-      return this.directPluralShavian[lowerPlural] || `${singularShavian  }𐑕`;
+      return this.directPluralShavian[lowerPlural] || `${singularShavian}𐑕`;
     }
 
     // For regular 's' plurals - add Shavian 's' (𐑕) to the singular form
     if (lowerPlural.endsWith('s') && !lowerPlural.endsWith('es')) {
-      return `${singularShavian  }𐑕`;
+      return `${singularShavian}𐑕`;
     }
 
     // For 'es' plurals - add Shavian 'ez' (𐑩𐑟) or just 'z' (𐑟) depending on pronunciation
@@ -268,20 +268,20 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
         singularEnglish.endsWith('ch') ||
         singularEnglish.endsWith('sh')
       ) {
-        return `${singularShavian  }𐑩𐑟`;
+        return `${singularShavian}𐑩𐑟`;
       }
       // Otherwise, the 'es' is just pronounced as 's'
-      return `${singularShavian  }𐑕`;
+      return `${singularShavian}𐑕`;
     }
 
     // For 'ies' plurals (from singular ending in 'y')
     if (lowerPlural.endsWith('ies') && singularEnglish.endsWith('y')) {
       // Remove the Shavian character for 'y' if present, and add 'iz' (𐑦𐑟)
       if (singularShavian.endsWith('𐑦')) {
-        return `${singularShavian.slice(0, -1)  }𐑦𐑟`;
+        return `${singularShavian.slice(0, -1)}𐑦𐑟`;
       }
       // If we can't identify the 'y' ending in Shavian, just add 'iz'
-      return `${singularShavian  }𐑦𐑟`;
+      return `${singularShavian}𐑦𐑟`;
     }
 
     // For 'ves' plurals (from singular ending in 'f' or 'fe')
@@ -291,13 +291,13 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
     ) {
       // Replace the final 'f' or 'fe' sound with 'v' and add 'z'
       if (singularShavian.endsWith('𐑓')) {
-        return `${singularShavian.slice(0, -1)  }𐑝𐑟`;
+        return `${singularShavian.slice(0, -1)}𐑝𐑟`;
       }
       // If we can't identify the 'f' ending in Shavian, just add 'vz'
-      return `${singularShavian  }𐑝𐑟`;
+      return `${singularShavian}𐑝𐑟`;
     }
 
     // Fallback - just add Shavian 's' (𐑕)
-    return `${singularShavian  }𐑕`;
+    return `${singularShavian}𐑕`;
   }
 }

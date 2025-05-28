@@ -1,6 +1,5 @@
 // scripts/version.ts
 import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
 
 const manifestPath = './public/manifest.json';
 const readmePath = './README.md';

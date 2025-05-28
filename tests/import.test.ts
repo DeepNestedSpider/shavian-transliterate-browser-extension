@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { test, expect } from "bun:test";
 
 // Test just the imports first
 test("can import bun:test", () => {

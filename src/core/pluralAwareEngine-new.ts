@@ -159,7 +159,7 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
     if (lowerWord.endsWith('s') && !lowerWord.endsWith('ss')) {
       // Words ending in 'ies' usually come from words ending in 'y'
       if (lowerWord.endsWith('ies') && lowerWord.length > 3) {
-        return `${lowerWord.slice(0, -3)  }y`;
+        return `${lowerWord.slice(0, -3)}y`;
       }
 
       // Words ending in 'es'
@@ -214,7 +214,7 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
 
     // For regular 's' plurals - add Shavian 's' (𐑕) to the singular form
     if (lowerPlural.endsWith('s') && !lowerPlural.endsWith('es')) {
-      return `${singularShavian  }𐑕`;
+      return `${singularShavian}𐑕`;
     }
 
     // For 'es' plurals - add Shavian 'ez' (𐑩𐑟) or just 'z' (𐑟) depending on pronunciation
@@ -228,23 +228,23 @@ export class PluralAwareReadlexiconEngine extends VerbAwareReadlexiconEngine {
         singularEnglish.endsWith('ch') ||
         singularEnglish.endsWith('sh')
       ) {
-        return `${singularShavian  }𐑩𐑟`;
+        return `${singularShavian}𐑩𐑟`;
       }
       // Otherwise, the 'es' is just pronounced as 's'
-      return `${singularShavian  }𐑕`;
+      return `${singularShavian}𐑕`;
     }
 
     // For 'ies' plurals (from singular ending in 'y')
     if (lowerPlural.endsWith('ies') && singularEnglish.endsWith('y')) {
       // Remove the Shavian character for 'y' if present, and add 'iz' (𐑦𐑟)
       if (singularShavian.endsWith('𐑦')) {
-        return `${singularShavian.slice(0, -1)  }𐑦𐑟`;
+        return `${singularShavian.slice(0, -1)}𐑦𐑟`;
       }
       // If we can't identify the 'y' ending in Shavian, just add 'iz'
-      return `${singularShavian  }𐑦𐑟`;
+      return `${singularShavian}𐑦𐑟`;
     }
 
     // Fallback - just add Shavian 's' (𐑕)
-    return `${singularShavian  }𐑕`;
+    return `${singularShavian}𐑕`;
   }
 }

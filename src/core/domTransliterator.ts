@@ -4,7 +4,7 @@
 import type { TransliterationEngine } from './transliterationEngine';
 
 export interface TextNodeFilter {
-  acceptNode(node: Text): number;
+  acceptNode(_node: Text): number;
 }
 
 export class DefaultTextNodeFilter implements TextNodeFilter {
@@ -184,11 +184,11 @@ export class DOMObserver {
   private debounce<T extends (...args: any[]) => void>(
     func: T,
     delay: number
-  ): (...args: Parameters<T>) => void {
+  ): (..._args: Parameters<T>) => void {
     let timeout: ReturnType<typeof setTimeout>;
-    return function (this: any, ...args: Parameters<T>) {
+    return function (this: any, ..._args: Parameters<T>) {
       clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), delay);
+      timeout = setTimeout(() => func.apply(this, _args), delay);
     };
   }
 }

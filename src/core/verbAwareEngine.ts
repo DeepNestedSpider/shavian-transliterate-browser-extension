@@ -105,7 +105,7 @@ export class VerbAwareReadlexiconEngine extends ReadlexiconEngine {
         if (baseResult !== baseForm) {
           // For past tense ending in "ed"
           if (word.endsWith('ed')) {
-            return `${baseResult  }𐑩𐑛`; // Add Shavian ending for "-ed"
+            return `${baseResult}𐑩𐑛`; // Add Shavian ending for "-ed"
           }
           // For other irregular past tense forms
           return baseResult;
@@ -145,7 +145,7 @@ export class VerbAwareReadlexiconEngine extends ReadlexiconEngine {
     if (lowercaseWord.endsWith('ed')) {
       // Special case for verbs ending in 'ied' (e.g., 'died' -> 'die')
       if (lowercaseWord.endsWith('ied')) {
-        return `${lowercaseWord.slice(0, -3)  }y`;
+        return `${lowercaseWord.slice(0, -3)}y`;
       }
 
       // Special case for "witnessed" -> "witness"

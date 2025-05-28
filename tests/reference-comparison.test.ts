@@ -4,8 +4,8 @@
  */
 import { expect, test, describe, beforeAll } from "bun:test";
 import { ReadlexiconEngine } from "../src/core/transliterationEngine";
-import { readlexDictionary } from "../src/dictionaries/readlex";
-import { readFileSync } from "fs";
+import { readlexDict } from "../src/dictionaries/readlex";
+import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 describe("Reference Comparison Tests", () => {
@@ -15,7 +15,7 @@ describe("Reference Comparison Tests", () => {
 
   beforeAll(async () => {
     // Initialize the real transliteration engine with the full dictionary
-    engine = new ReadlexiconEngine(readlexDictionary);
+    engine = new ReadlexiconEngine(readlexDict);
     
     // Read reference files
     const testsDir = join(import.meta.dir, "reference");
@@ -36,7 +36,7 @@ describe("Reference Comparison Tests", () => {
     
     // Compare line by line to identify specific issues
     const maxLines = Math.max(expectedLines.length, actualLines.length);
-    let differences = 0;
+    let totalDifferences = 0;
     
     for (let i = 0; i < maxLines; i++) {
       const expected = expectedLines[i] || "";
@@ -45,16 +45,16 @@ describe("Reference Comparison Tests", () => {
       if (expected !== actual) {
           totalDifferences++;
           console.log(`\nLine ${i + 1} DIFFERENCE:`);
-          console.log('Expected:', JSON.stringify(expectedLine));
-          console.log('Actual  :', JSON.stringify(actualLine));
+          console.log('Expected:', JSON.stringify(expected));
+          console.log('Actual  :', JSON.stringify(actual));
           
           // Compare character by character to find exact differences
-          const maxChars = Math.max(expectedLine.length, actualLine.length);
+          const maxChars = Math.max(expected.length, actual.length);
           let charDifferences = [];
           
           for (let j = 0; j < maxChars; j++) {
-            const expectedChar = expectedLine[j] || '';
-            const actualChar = actualLine[j] || '';
+            const expectedChar = expected[j] || '';
+            const actualChar = actual[j] || '';
             
             if (expectedChar !== actualChar) {
               charDifferences.push({
@@ -94,14 +94,13 @@ describe("Reference Comparison Tests", () => {
       console.log(`Character accuracy: ${accuracy.toFixed(2)}% (${correctChars}/${maxLength})`);
 
       // For debugging, save the actual output to a file
-      const outputPath = path.join(__dirname, 'reference', 'actual-output.txt');
-      fs.writeFileSync(outputPath, actualShavianText, 'utf-8');
+      const outputPath = join(import.meta.dir, 'reference', 'actual-output.txt');
+      writeFileSync(outputPath, actualShavianText, 'utf-8');
       console.log(`Actual output saved to: ${outputPath}`);
-    });
   });
 
   describe('Word-by-Word Analysis', () => {
-    test('should identify problematic words', async () => {
+    test('should identify problematic words', () => {
       // Extract unique words from the Latin text for individual testing
       const words = latinText
         .toLowerCase()
@@ -122,7 +121,7 @@ describe("Reference Comparison Tests", () => {
 
       for (const word of words.slice(0, 50)) { // Test first 50 unique words
         try {
-          const transliterated = await transliterator.transliterateWord(word);
+          const transliterated = engine.transliterate(word);
           
           // Check for common issues
           let issues: string[] = [];
@@ -191,7 +190,7 @@ describe("Reference Comparison Tests", () => {
   });
 
   describe('Specific Pattern Analysis', () => {
-    test('should analyze punctuation handling', async () => {
+    test('should analyze punctuation handling', () => {
       const testTexts = [
         'Hello, world!',
         'This is a test.',
@@ -205,12 +204,12 @@ describe("Reference Comparison Tests", () => {
       console.log('\n=== PUNCTUATION ANALYSIS ===');
       
       for (const text of testTexts) {
-        const result = await transliterator.transliterate(text);
+        const result = engine.transliterate(text);
         console.log(`"${text}" -> "${result}"`);
       }
     });
 
-    test('should analyze proper noun handling', async () => {
+    test('should analyze proper noun handling', () => {
       const properNouns = [
         'Shaw',
         'Shavian', 
@@ -227,12 +226,12 @@ describe("Reference Comparison Tests", () => {
       console.log('\n=== PROPER NOUN ANALYSIS ===');
       
       for (const noun of properNouns) {
-        const result = await transliterator.transliterateWord(noun);
+        const result = engine.transliterate(noun);
         console.log(`"${noun}" -> "${result}"`);
       }
     });
 
-    test('should analyze common function words', async () => {
+    test('should analyze common function words', () => {
       const functionWords = [
         'the', 'and', 'of', 'to', 'a', 'in', 'that', 'it', 'was', 'for',
         'on', 'are', 'as', 'with', 'his', 'they', 'be', 'at', 'one', 'have',
@@ -244,7 +243,7 @@ describe("Reference Comparison Tests", () => {
       const issues: string[] = [];
       
       for (const word of functionWords) {
-        const result = await transliterator.transliterateWord(word);
+        const result = engine.transliterate(word);
         console.log(`"${word}" -> "${result}"`);
         
         if (result === word) {

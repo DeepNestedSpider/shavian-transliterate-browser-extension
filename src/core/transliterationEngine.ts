@@ -3,7 +3,7 @@
  */
 import type { POSTaggedToken } from './posTagger';
 import {
-  handleWordPunctuation,
+  // handleWordPunctuation,
   isPunctuationProcessed,
   extractOriginalWord,
   processPunctuatedWord,
@@ -153,7 +153,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
       .map(segment => {
         if (segment.match(/^\s+$/)) {
           return segment;
-        } else if (segment.match(/^[.,:;!?"'()\[\]{}<>]+$/)) {
+        } else if (segment.match(/^[.,:;!?"'()[\]{}<>]+$/)) {
           // Pure punctuation (excluding hyphens and ellipses): do not transliterate
           return segment;
         } else if (segment.length > 0) {
@@ -227,7 +227,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
    */
   transliterateWord(word: string, pos?: string): string {
     if (!word || word.trim() === '') return word;
-    const originalWord = word;
+    // const originalWord = word;
 
     // Process punctuation and separate clean word from punctuation
     const punctuationResult = processPunctuatedWord(word);
@@ -282,7 +282,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
       const nameResult = namesDict[originalWord.toLowerCase()];
       if (nameResult) {
         return this.shouldAddProperNameMarker(originalWord, clean, pos)
-          ? `·${  nameResult}`
+          ? `·${nameResult}`
           : nameResult;
       }
     }
@@ -300,17 +300,17 @@ export class ReadlexiconEngine implements TransliterationEngine {
     // Check if we have new POS-aware dictionary format
     if (this.dictionary && typeof this.dictionary.getTransliteration === 'function') {
       // Check if this is a capitalized word for proper name marker
-      const isCapitalized =
-        originalWord.length > 0 &&
-        originalWord[0]! === originalWord[0]!.toUpperCase() &&
-        originalWord[0]! !== originalWord[0]!.toLowerCase();
+      // const isCapitalized =
+      //   originalWord.length > 0 &&
+      //   originalWord[0]! === originalWord[0]!.toUpperCase() &&
+      //   originalWord[0]! !== originalWord[0]!.toLowerCase();
 
       // 3. Try POS-specific lookup first if POS is provided
       const result = this.dictionary.getTransliteration(clean, pos);
       if (result) {
         const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
         return this.shouldAddProperNameMarker(originalWord, clean, pos)
-          ? `·${  cleanResult}`
+          ? `·${cleanResult}`
           : cleanResult;
       }
 
@@ -319,7 +319,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
       if (basicResult) {
         const cleanBasicResult = basicResult.replace(/^[.:]+|[.:]+$/g, '');
         return this.shouldAddProperNameMarker(originalWord, clean, pos)
-          ? `·${  cleanBasicResult}`
+          ? `·${cleanBasicResult}`
           : cleanBasicResult;
       }
 
@@ -328,9 +328,9 @@ export class ReadlexiconEngine implements TransliterationEngine {
         const parts = word.split("'");
         if (parts.length === 2 && parts[0] && parts[1]) {
           const base = parts[0].toLowerCase();
-          const suffix = `'${  parts[1].toLowerCase()}`;
+          const suffix = `'${parts[1].toLowerCase()}`;
           // Look for suffix pattern in basic dictionary
-          const suffixKey = `$${  suffix}`;
+          const suffixKey = `$${suffix}`;
           const suffixResult = this.dictionary.getTransliteration(suffixKey);
           if (suffixResult) {
             const baseTransliteration = this.transliterateWord(base);
@@ -347,23 +347,23 @@ export class ReadlexiconEngine implements TransliterationEngine {
     } else if (this.dictionary && typeof this.dictionary.has === 'function') {
       // Legacy Map-based dictionary format
       // 3. Prefer POS-specific dictionary entry if POS is provided
-      if (pos && this.dictionary.has(`${clean  }_${  pos}`)) {
-        const result = this.dictionary.get(`${clean  }_${  pos}`);
+      if (pos && this.dictionary.has(`${clean}_${pos}`)) {
+        const result = this.dictionary.get(`${clean}_${pos}`);
         if (result) {
           const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
           return this.shouldAddProperNameMarker(originalWord, clean, pos)
-            ? `·${  cleanResult}`
+            ? `·${cleanResult}`
             : cleanResult;
         }
       }
 
       // 4. Check for direct dictionary match first (including contractions with underscore)
-      if (this.dictionary.has(`${clean  }_`)) {
-        const result = this.dictionary.get(`${clean  }_`);
+      if (this.dictionary.has(`${clean}_`)) {
+        const result = this.dictionary.get(`${clean}_`);
         if (result) {
           const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
           return this.shouldAddProperNameMarker(originalWord, clean, pos)
-            ? `·${  cleanResult}`
+            ? `·${cleanResult}`
             : cleanResult;
         }
       }
@@ -373,7 +373,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
       if (result) {
         const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
         return this.shouldAddProperNameMarker(originalWord, clean, pos)
-          ? `·${  cleanResult}`
+          ? `·${cleanResult}`
           : cleanResult;
       }
 
@@ -382,9 +382,9 @@ export class ReadlexiconEngine implements TransliterationEngine {
         const parts = word.split("'");
         if (parts.length === 2 && parts[0] && parts[1]) {
           const base = parts[0].toLowerCase();
-          const suffix = `'${  parts[1].toLowerCase()}`;
+          const suffix = `'${parts[1].toLowerCase()}`;
           // Look for suffix pattern in dictionary
-          const suffixKey = `$${  suffix}`;
+          const suffixKey = `$${suffix}`;
           if (this.dictionary.has(suffixKey)) {
             const baseTransliteration = this.transliterateWord(base);
             const suffixTransliteration = this.dictionary.get(suffixKey)!;
@@ -425,7 +425,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
       // 9. Always dot: Capitalized word in dict
       if (this.dictionary.has(originalWord)) {
         result = this.dictionary.get(originalWord);
-        if (result) return (`·${  result.replace(/^[.:]+|[.:]+$/g, '')}`).replace(/^:+|:+$/g, '');
+        if (result) return `·${result.replace(/^[.:]+|[.:]+$/g, '')}`.replace(/^:+|:+$/g, '');
       }
 
       // 10. Part-of-speech specific entries (word_POS) if not already checked
@@ -440,8 +440,8 @@ export class ReadlexiconEngine implements TransliterationEngine {
       }
 
       // 11. Handle word ending variations for better matching
-      if (this.dictionary.has(`${clean  }.`)) {
-        result = this.dictionary.get(`${clean  }.`);
+      if (this.dictionary.has(`${clean}.`)) {
+        result = this.dictionary.get(`${clean}.`);
         if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
       }
     }
@@ -764,7 +764,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
       .map(segment => {
         if (segment.match(/^\s+$/)) {
           return segment;
-        } else if (segment.match(/^[.,:;!?"'()\[\]{}<>]+$/)) {
+        } else if (segment.match(/^[.,:;!?"'()[\]{}<>]+$/)) {
           // Punctuation (excluding hyphens and ellipses): do not transliterate
           return segment;
         } else if (segment.length > 0) {
@@ -971,7 +971,7 @@ export class VerbAwareReadlexiconEngine extends ReadlexiconEngine {
         if (baseResult !== baseForm) {
           // For past tense ending in "ed"
           if (word.endsWith('ed')) {
-            return `${baseResult  }𐑩𐑛`; // Add Shavian ending for "-ed"
+            return `${baseResult}𐑩𐑛`; // Add Shavian ending for "-ed"
           }
           // For other irregular past tense forms
           return baseResult;
@@ -1007,14 +1007,14 @@ export class VerbAwareReadlexiconEngine extends ReadlexiconEngine {
 
     // Handle irregular past tense verbs
     if (lowercaseWord in this.irregularPastTense) {
-      return this.irregularPastTense[lowercaseWord];
+      return this.irregularPastTense[lowercaseWord] || word;
     }
 
     // Handle regular past tense verbs
     if (lowercaseWord.endsWith('ed')) {
       // Special case for verbs ending in 'ied' (e.g., 'died' -> 'die')
       if (lowercaseWord.endsWith('ied')) {
-        return `${lowercaseWord.slice(0, -3)  }y`;
+        return `${lowercaseWord.slice(0, -3)}y`;
       }
 
       // Special case for "witnessed" -> "witness"

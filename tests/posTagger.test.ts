@@ -2,8 +2,8 @@
  * Tests for POS tagger functionality
  * Following Bun test standards
  */
-import { expect, test, describe, beforeAll } from "bun:test";
-import { posTagSentence, posTagSentenceSync, type POSTaggedToken } from "../src/core/posTagger";
+import { expect, test, describe } from "bun:test";
+import { posTagSentence, posTagSentenceSync } from "../src/core/posTagger";
 
 describe("POS Tagger", () => {
   describe("posTagSentenceSync (compromise fallback)", () => {
