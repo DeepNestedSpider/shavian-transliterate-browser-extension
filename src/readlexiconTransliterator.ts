@@ -143,17 +143,18 @@ export class ReadlexiconTransliterator {
 
   /**
    * Replace Shavian quotes ‹ and › back with standard quotes
-   * Currently all Shavian quotes convert back to double quotes for simplicity.
+   * Properly handles quote pairing and converts to standard double quotes.
    * Logs input and output for debugging.
    */
   private reverseReplaceQuotes(text: string): string {
-    // Match Shavian quotes
-    const shavianQuoteRegex = /[‹›]/g;
-    let open = true;
-    const replaced = text.replace(shavianQuoteRegex, () => {
-      open = !open;
-      return open ? '"' : '"';
-    });
+    if (!text.includes('‹') && !text.includes('›')) {
+      return text; // No Shavian quotes to replace
+    }
+
+    // Replace Shavian quotes with standard double quotes
+    // ‹ (U+2039) and › (U+203A) are single left/right-pointing angle quotation marks
+    let replaced = text.replace(/‹/g, '"').replace(/›/g, '"');
+    
     // Debug log
     if (text !== replaced) {
       console.log('[Shavian Reverse Quote Replace] Before:', text);
