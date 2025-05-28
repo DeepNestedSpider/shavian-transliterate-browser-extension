@@ -152,6 +152,7 @@ bun run build:dist
 ├── build-release.sh                  # Release build script
 ├── bun.lock                          # Bun lockfile
 ├── bunfig.toml                       # Bun configuration
+├── debug-simple.js                   # Debug utility script
 ├── eslint.config.js                  # ESLint configuration
 ├── FORMATTING.md                     # Code formatting guidelines
 ├── github-release.sh                 # GitHub release script
@@ -182,6 +183,7 @@ bun run build:dist
 │       ├── icon-16.png
 │       └── icon-48.png
 ├── showcase/                         # Screenshots and demos
+│   ├── shawinfo.gif
 │   ├── shawinfo.png
 │   ├── shawinfov0.0.14.png
 │   ├── wikipedia-video.gif
@@ -200,12 +202,19 @@ bun run build:dist
 │   │   ├── posTagger.ts              # Part-of-speech tagging
 │   │   ├── punctuationHandler.ts     # Punctuation processing
 │   │   ├── transliterationEngine.ts  # Main transliteration logic
+│   │   ├── transliterationEngine_new.ts # New transliteration engine
 │   │   └── verbAwareEngine.ts        # Verb-aware transliteration
-│   └── dictionaries/
-│       ├── index.ts                  # Dictionary exports
-│       ├── names.ts                  # Name dictionaries
-│       ├── readlex.json              # Readlexicon dictionary data
-│       └── readlex.ts                # Readlexicon dictionary
+│   ├── dictionaries/
+│   │   ├── index.ts                  # Dictionary exports
+│   │   ├── names.ts                  # Name dictionaries
+│   │   ├── readlex.json              # Readlexicon dictionary data
+│   │   └── readlex.ts                # Readlexicon dictionary
+│   └── transliterators/
+│       └── english/
+│           ├── englishToShavian.ts   # English to Shavian transliterator
+│           ├── index.ts              # English transliterator exports
+│           ├── shavianToEnglish.ts   # Shavian to English transliterator
+│           └── types.ts              # English transliterator types
 └── tests/                            # Test files
     ├── pluralAware.test.ts
     ├── posAwareTransliteration.test.ts
@@ -213,6 +222,7 @@ bun run build:dist
     ├── posTagger.test.ts
     ├── punctuationHandler.test.ts
     ├── reference-comparison.test.ts
+    ├── reverse-reference-comparison.test.ts
     ├── wordposIntegration.test.ts
     └── reference/
         ├── latin.txt
