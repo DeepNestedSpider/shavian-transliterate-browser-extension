@@ -5,8 +5,13 @@
  * with support for POS-specific lookups
  */
 
-const { readFileSync, writeFileSync } = require('fs');
-const { join } = require('path');
+import { readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const DICT_PATH = join(__dirname, '../src/dictionaries/readlex.json');
 const OUTPUT_PATH = join(__dirname, '../src/dictionaries/readlex.ts');
@@ -30,35 +35,35 @@ function parseReadlexJson(content) {
     const keyParts = key.split('_');
     if (keyParts.length < 3) continue;
 
-    const word = keyParts[0].toLowerCase();
-    const pos = keyParts[1];
+    const baseWord = keyParts[0].toLowerCase();
 
-    // Find the best variant (highest frequency)
-    const bestVariant = variants.reduce((best, current) => {
-      return current.freq > best.freq ? current : best;
-    }, variants[0]);
+    // Process each variant in this key
+    for (const variant of variants) {
+      if (!variant.Shaw || !variant.Latn || !variant.pos) continue;
 
-    if (!bestVariant.Shaw || !bestVariant.Latn) continue;
+      const word = variant.Latn.toLowerCase();
+      const pos = variant.pos;
+      const cleanShavian = variant.Shaw.replace(/^[.:]+|[.:]+$/g, '');
+      
+      if (!cleanShavian) continue;
 
-    const cleanShavian = bestVariant.Shaw.replace(/^[.:]+|[.:]+$/g, '');
-    if (!cleanShavian) continue;
+      totalEntries++;
 
-    totalEntries++;
+      // Store POS-specific entry
+      const posKey = `${word}_${pos}`;
+      entries.posSpecific[posKey] = cleanShavian;
+      entries.frequencies[posKey] = variant.freq;
+      posSpecificEntries++;
 
-    // Store POS-specific entry
-    const posKey = `${word}_${pos}`;
-    entries.posSpecific[posKey] = cleanShavian;
-    entries.frequencies[posKey] = bestVariant.freq;
-    posSpecificEntries++;
-
-    // For basic dictionary, use the highest frequency entry for each word
-    if (
-      !entries.basic[word] ||
-      !entries.frequencies[`${word}_basic`] ||
-      bestVariant.freq > entries.frequencies[`${word}_basic`]
-    ) {
-      entries.basic[word] = cleanShavian;
-      entries.frequencies[`${word}_basic`] = bestVariant.freq;
+      // For basic dictionary, use the highest frequency entry for each word
+      if (
+        !entries.basic[word] ||
+        !entries.frequencies[`${word}_basic`] ||
+        variant.freq > entries.frequencies[`${word}_basic`]
+      ) {
+        entries.basic[word] = cleanShavian;
+        entries.frequencies[`${word}_basic`] = variant.freq;
+      }
     }
   }
 
@@ -187,6 +192,6 @@ function main() {
   }
 }
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
