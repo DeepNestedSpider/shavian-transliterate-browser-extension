@@ -17,7 +17,7 @@ function parseReadlexJson(content) {
   const entries = {
     basic: {},
     posSpecific: {},
-    frequencies: {}
+    frequencies: {},
   };
 
   let totalEntries = 0;
@@ -25,14 +25,14 @@ function parseReadlexJson(content) {
 
   for (const [key, variants] of Object.entries(data)) {
     if (!Array.isArray(variants) || variants.length === 0) continue;
-    
+
     // Extract word and POS from key format: word_POS_shavian
     const keyParts = key.split('_');
     if (keyParts.length < 3) continue;
-    
+
     const word = keyParts[0].toLowerCase();
     const pos = keyParts[1];
-    
+
     // Find the best variant (highest frequency)
     const bestVariant = variants.reduce((best, current) => {
       return current.freq > best.freq ? current : best;
@@ -52,9 +52,11 @@ function parseReadlexJson(content) {
     posSpecificEntries++;
 
     // For basic dictionary, use the highest frequency entry for each word
-    if (!entries.basic[word] || 
-        !entries.frequencies[`${word}_basic`] || 
-        bestVariant.freq > entries.frequencies[`${word}_basic`]) {
+    if (
+      !entries.basic[word] ||
+      !entries.frequencies[`${word}_basic`] ||
+      bestVariant.freq > entries.frequencies[`${word}_basic`]
+    ) {
       entries.basic[word] = cleanShavian;
       entries.frequencies[`${word}_basic`] = bestVariant.freq;
     }

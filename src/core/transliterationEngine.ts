@@ -2,11 +2,17 @@
  * Core transliteration engine interface and factory
  */
 import type { POSTaggedToken } from './posTagger';
-import { handleWordPunctuation, isPunctuationProcessed, extractOriginalWord, processPunctuatedWord, reconstructWordWithPunctuation } from './punctuationHandler';
+import {
+  handleWordPunctuation,
+  isPunctuationProcessed,
+  extractOriginalWord,
+  processPunctuatedWord,
+  reconstructWordWithPunctuation,
+} from './punctuationHandler';
 // Import names dictionary - use a simple object for now instead of dynamic import
 const namesDict: Record<string, string> = {
-  "who": "𐑣𐑵", // Doctor Who - distinct from the word "who" (𐑣)
-  "shaw": "𐑖𐑷", // Bernard Shaw - proper name pronunciation
+  who: '𐑣𐑵', // Doctor Who - distinct from the word "who" (𐑣)
+  shaw: '𐑖𐑷', // Bernard Shaw - proper name pronunciation
 };
 
 export interface TransliterationEngine {
@@ -104,7 +110,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
     if (data && typeof data.getTransliteration === 'function') {
       // New format with POS support
       this.dictionary = data;
-      
+
       // Build reverse dictionary for Shavian to English transliteration
       this.reverseDictionary = new Map();
       for (const [key, value] of Object.entries(data.basic)) {
@@ -157,8 +163,9 @@ export class ReadlexiconEngine implements TransliterationEngine {
           if (segment.match(/\w/) && !isPunctuationProcessed(result)) {
             this.previousWord = segment.toLowerCase().replace(/[^\w']/g, '');
             // Track if this word is a proper name for the next word's context
-            const isCapitalized = segment.length > 0 && 
-              segment[0]! === segment[0]!.toUpperCase() && 
+            const isCapitalized =
+              segment.length > 0 &&
+              segment[0]! === segment[0]!.toUpperCase() &&
               segment[0]! !== segment[0]!.toLowerCase();
             this.previousWordWasProperName = isCapitalized && this.isProperNameWord(segment);
           }
@@ -174,7 +181,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
    */
   async transliterateWithPOS(text: string): Promise<string> {
     const { posTagSentence } = await import('./posTagger');
-    
+
     try {
       const tokens = await posTagSentence(text);
       return this.transliterateWithPOSTags(tokens);
@@ -202,8 +209,9 @@ export class ReadlexiconEngine implements TransliterationEngine {
             this.previousWord = token.text.toLowerCase();
             this.previousPos = token.pos;
             // Track if this word is a proper name for the next word's context
-            const isCapitalized = token.text.length > 0 && 
-              token.text[0]! === token.text[0]!.toUpperCase() && 
+            const isCapitalized =
+              token.text.length > 0 &&
+              token.text[0]! === token.text[0]!.toUpperCase() &&
               token.text[0]! !== token.text[0]!.toLowerCase();
             this.previousWordWasProperName = isCapitalized && this.isProperNameWord(token.text);
           }
@@ -223,10 +231,13 @@ export class ReadlexiconEngine implements TransliterationEngine {
 
     // Process punctuation and separate clean word from punctuation
     const punctuationResult = processPunctuatedWord(word);
-    
+
     if (punctuationResult.hasNonAlphabetic) {
       // Transliterate the clean word and reconstruct with punctuation
-      const transliteratedCleanWord = this.transliterateWordInternal(punctuationResult.cleanWord || '', pos);
+      const transliteratedCleanWord = this.transliterateWordInternal(
+        punctuationResult.cleanWord || '',
+        pos
+      );
       return reconstructWordWithPunctuation(
         transliteratedCleanWord,
         punctuationResult.leadingPunctuation || '',
@@ -262,7 +273,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
    */
   protected transliterateWordInternal(word: string, pos?: string): string {
     if (!word || word.trim() === '') return word;
-    
+
     const originalWord = word;
     const clean = word.toLowerCase().replace(/[^\w']/g, '');
 
@@ -270,8 +281,9 @@ export class ReadlexiconEngine implements TransliterationEngine {
     if (this.isProperNameWord(originalWord)) {
       const nameResult = namesDict[originalWord.toLowerCase()];
       if (nameResult) {
-        return this.shouldAddProperNameMarker(originalWord, clean, pos) ? 
-          '·' + nameResult : nameResult;
+        return this.shouldAddProperNameMarker(originalWord, clean, pos)
+          ? `·${  nameResult}`
+          : nameResult;
       }
     }
 
@@ -288,64 +300,71 @@ export class ReadlexiconEngine implements TransliterationEngine {
     // Check if we have new POS-aware dictionary format
     if (this.dictionary && typeof this.dictionary.getTransliteration === 'function') {
       // Check if this is a capitalized word for proper name marker
-      const isCapitalized = originalWord.length > 0 && 
-        originalWord[0]! === originalWord[0]!.toUpperCase() && 
+      const isCapitalized =
+        originalWord.length > 0 &&
+        originalWord[0]! === originalWord[0]!.toUpperCase() &&
         originalWord[0]! !== originalWord[0]!.toLowerCase();
-      
+
       // 3. Try POS-specific lookup first if POS is provided
       const result = this.dictionary.getTransliteration(clean, pos);
       if (result) {
         const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
-        return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanResult : cleanResult;
+        return this.shouldAddProperNameMarker(originalWord, clean, pos)
+          ? `·${  cleanResult}`
+          : cleanResult;
       }
-      
+
       // 4. Fallback to basic lookup without POS
       const basicResult = this.dictionary.getTransliteration(clean);
       if (basicResult) {
         const cleanBasicResult = basicResult.replace(/^[.:]+|[.:]+$/g, '');
-        return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanBasicResult : cleanBasicResult;
+        return this.shouldAddProperNameMarker(originalWord, clean, pos)
+          ? `·${  cleanBasicResult}`
+          : cleanBasicResult;
       }
-      
+
       // 5. Handle contractions with suffix patterns
       if (word.includes("'")) {
         const parts = word.split("'");
         if (parts.length === 2 && parts[0] && parts[1]) {
           const base = parts[0].toLowerCase();
-          const suffix = "'" + parts[1].toLowerCase();
+          const suffix = `'${  parts[1].toLowerCase()}`;
           // Look for suffix pattern in basic dictionary
-          const suffixKey = '$' + suffix;
+          const suffixKey = `$${  suffix}`;
           const suffixResult = this.dictionary.getTransliteration(suffixKey);
           if (suffixResult) {
             const baseTransliteration = this.transliterateWord(base);
             return (
-              baseTransliteration +
-              suffixResult.replace(/^[.:]+|[.:]+$/g, '').replace(/^'/, '')
+              baseTransliteration + suffixResult.replace(/^[.:]+|[.:]+$/g, '').replace(/^'/, '')
             ).replace(/^:+|:+$/g, '');
           }
         }
       }
-      
+
       // TODO: Handle prefix/suffix rules for new format
       // For now, fallback to original word
       return word;
-      
     } else if (this.dictionary && typeof this.dictionary.has === 'function') {
       // Legacy Map-based dictionary format
       // 3. Prefer POS-specific dictionary entry if POS is provided
-      if (pos && this.dictionary.has(clean + '_' + pos)) {
-        const result = this.dictionary.get(clean + '_' + pos);
+      if (pos && this.dictionary.has(`${clean  }_${  pos}`)) {
+        const result = this.dictionary.get(`${clean  }_${  pos}`);
         if (result) {
           const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
-          return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanResult : cleanResult;
+          return this.shouldAddProperNameMarker(originalWord, clean, pos)
+            ? `·${  cleanResult}`
+            : cleanResult;
         }
       }
 
       // 4. Check for direct dictionary match first (including contractions with underscore)
-      if (this.dictionary.has(clean + '_')) {
-        const result = this.dictionary.get(clean + '_');
+      if (this.dictionary.has(`${clean  }_`)) {
+        const result = this.dictionary.get(`${clean  }_`);
         if (result) {
           const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
-          return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanResult : cleanResult;
+          return this.shouldAddProperNameMarker(originalWord, clean, pos)
+            ? `·${  cleanResult}`
+            : cleanResult;
         }
       }
 
@@ -353,7 +372,9 @@ export class ReadlexiconEngine implements TransliterationEngine {
       let result = this.dictionary.get(clean);
       if (result) {
         const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
-        return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanResult : cleanResult;
+        return this.shouldAddProperNameMarker(originalWord, clean, pos)
+          ? `·${  cleanResult}`
+          : cleanResult;
       }
 
       // 6. Handle contractions with suffix patterns from dictionary
@@ -361,9 +382,9 @@ export class ReadlexiconEngine implements TransliterationEngine {
         const parts = word.split("'");
         if (parts.length === 2 && parts[0] && parts[1]) {
           const base = parts[0].toLowerCase();
-          const suffix = "'" + parts[1].toLowerCase();
+          const suffix = `'${  parts[1].toLowerCase()}`;
           // Look for suffix pattern in dictionary
-          const suffixKey = '$' + suffix;
+          const suffixKey = `$${  suffix}`;
           if (this.dictionary.has(suffixKey)) {
             const baseTransliteration = this.transliterateWord(base);
             const suffixTransliteration = this.dictionary.get(suffixKey)!;
@@ -404,7 +425,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
       // 9. Always dot: Capitalized word in dict
       if (this.dictionary.has(originalWord)) {
         result = this.dictionary.get(originalWord);
-        if (result) return ('·' + result.replace(/^[.:]+|[.:]+$/g, '')).replace(/^:+|:+$/g, '');
+        if (result) return (`·${  result.replace(/^[.:]+|[.:]+$/g, '')}`).replace(/^:+|:+$/g, '');
       }
 
       // 10. Part-of-speech specific entries (word_POS) if not already checked
@@ -419,8 +440,8 @@ export class ReadlexiconEngine implements TransliterationEngine {
       }
 
       // 11. Handle word ending variations for better matching
-      if (this.dictionary.has(clean + '.')) {
-        result = this.dictionary.get(clean + '.');
+      if (this.dictionary.has(`${clean  }.`)) {
+        result = this.dictionary.get(`${clean  }.`);
         if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
       }
     }
@@ -435,28 +456,102 @@ export class ReadlexiconEngine implements TransliterationEngine {
    */
   private isProperNameWord(originalWord: string): boolean {
     if (!originalWord || originalWord.length === 0) return false;
-    
+
     const cleanWord = originalWord.toLowerCase().replace(/[^\w']/g, '');
-    
+
     // Common words that should NOT be considered proper names even when capitalized
     const excludedWords = new Set([
       // Language/nationality adjectives
-      'shavian', 'british', 'english', 'american', 'irish', 'scottish', 'welsh',
-      // Religious adjectives  
-      'christian', 'muslim', 'jewish', 'catholic', 'protestant',
+      'shavian',
+      'british',
+      'english',
+      'american',
+      'irish',
+      'scottish',
+      'welsh',
+      // Religious adjectives
+      'christian',
+      'muslim',
+      'jewish',
+      'catholic',
+      'protestant',
       // Months
-      'january', 'february', 'march', 'april', 'may', 'june', 
-      'july', 'august', 'september', 'october', 'november', 'december',
+      'january',
+      'february',
+      'march',
+      'april',
+      'may',
+      'june',
+      'july',
+      'august',
+      'september',
+      'october',
+      'november',
+      'december',
       // Days
-      'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday',
       // Common function words that appear at sentence starts
-      'from', 'to', 'in', 'on', 'at', 'by', 'for', 'with', 'of', 'the', 'a', 'an',
-      'and', 'or', 'but', 'if', 'when', 'where', 'why', 'how', 'what', 'who', 'which',
-      'that', 'this', 'these', 'those', 'his', 'her', 'its', 'their', 'our', 'my',
-      'he', 'she', 'it', 'they', 'we', 'you', 'i',
+      'from',
+      'to',
+      'in',
+      'on',
+      'at',
+      'by',
+      'for',
+      'with',
+      'of',
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'if',
+      'when',
+      'where',
+      'why',
+      'how',
+      'what',
+      'who',
+      'which',
+      'that',
+      'this',
+      'these',
+      'those',
+      'his',
+      'her',
+      'its',
+      'their',
+      'our',
+      'my',
+      'he',
+      'she',
+      'it',
+      'they',
+      'we',
+      'you',
+      'i',
       // Common sentence starters
-      'after', 'before', 'during', 'since', 'until', 'while', 'although', 'because',
-      'however', 'therefore', 'moreover', 'furthermore', 'meanwhile', 'otherwise',
+      'after',
+      'before',
+      'during',
+      'since',
+      'until',
+      'while',
+      'although',
+      'because',
+      'however',
+      'therefore',
+      'moreover',
+      'furthermore',
+      'meanwhile',
+      'otherwise',
     ]);
 
     if (excludedWords.has(cleanWord)) {
@@ -470,8 +565,8 @@ export class ReadlexiconEngine implements TransliterationEngine {
 
     // Common proper name patterns
     const properNamePatterns = [
-      /^[A-Z][a-z]+$/,  // Capitalized word like "Shaw", "Bernard"
-      /^[A-Z]+$/,       // All caps like abbreviations
+      /^[A-Z][a-z]+$/, // Capitalized word like "Shaw", "Bernard"
+      /^[A-Z]+$/, // All caps like abbreviations
     ];
 
     return properNamePatterns.some(pattern => pattern.test(originalWord));
@@ -481,12 +576,17 @@ export class ReadlexiconEngine implements TransliterationEngine {
    * Determine if a word should get a proper name marker (·)
    * Based on capitalization and linguistic patterns
    */
-  private shouldAddProperNameMarker(originalWord: string, cleanWord: string, pos?: string): boolean {
+  private shouldAddProperNameMarker(
+    originalWord: string,
+    cleanWord: string,
+    pos?: string
+  ): boolean {
     // Must be capitalized to be considered for proper name marker
     if (!originalWord || originalWord.length === 0) return false;
-    const isCapitalized = originalWord[0]! === originalWord[0]!.toUpperCase() && 
+    const isCapitalized =
+      originalWord[0]! === originalWord[0]!.toUpperCase() &&
       originalWord[0]! !== originalWord[0]!.toLowerCase();
-    
+
     if (!isCapitalized) return false;
 
     // If this word is a proper name but the previous word was also a proper name,
@@ -498,22 +598,96 @@ export class ReadlexiconEngine implements TransliterationEngine {
     // Common words that should NOT get proper name markers even when capitalized
     const excludedWords = new Set([
       // Language/nationality adjectives
-      'shavian', 'british', 'english', 'american', 'irish', 'scottish', 'welsh',
-      // Religious adjectives  
-      'christian', 'muslim', 'jewish', 'catholic', 'protestant',
+      'shavian',
+      'british',
+      'english',
+      'american',
+      'irish',
+      'scottish',
+      'welsh',
+      // Religious adjectives
+      'christian',
+      'muslim',
+      'jewish',
+      'catholic',
+      'protestant',
       // Months
-      'january', 'february', 'march', 'april', 'may', 'june', 
-      'july', 'august', 'september', 'october', 'november', 'december',
+      'january',
+      'february',
+      'march',
+      'april',
+      'may',
+      'june',
+      'july',
+      'august',
+      'september',
+      'october',
+      'november',
+      'december',
       // Days
-      'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday',
       // Common function words that appear at sentence starts
-      'from', 'to', 'in', 'on', 'at', 'by', 'for', 'with', 'of', 'the', 'a', 'an',
-      'and', 'or', 'but', 'if', 'when', 'where', 'why', 'how', 'what', 'who', 'which',
-      'that', 'this', 'these', 'those', 'his', 'her', 'its', 'their', 'our', 'my',
-      'he', 'she', 'it', 'they', 'we', 'you', 'i',
+      'from',
+      'to',
+      'in',
+      'on',
+      'at',
+      'by',
+      'for',
+      'with',
+      'of',
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'if',
+      'when',
+      'where',
+      'why',
+      'how',
+      'what',
+      'who',
+      'which',
+      'that',
+      'this',
+      'these',
+      'those',
+      'his',
+      'her',
+      'its',
+      'their',
+      'our',
+      'my',
+      'he',
+      'she',
+      'it',
+      'they',
+      'we',
+      'you',
+      'i',
       // Common sentence starters
-      'after', 'before', 'during', 'since', 'until', 'while', 'although', 'because',
-      'however', 'therefore', 'moreover', 'furthermore', 'meanwhile', 'otherwise',
+      'after',
+      'before',
+      'during',
+      'since',
+      'until',
+      'while',
+      'although',
+      'because',
+      'however',
+      'therefore',
+      'moreover',
+      'furthermore',
+      'meanwhile',
+      'otherwise',
     ]);
 
     if (excludedWords.has(cleanWord)) {
@@ -539,8 +713,8 @@ export class ReadlexiconEngine implements TransliterationEngine {
 
     // Common proper name patterns
     const properNamePatterns = [
-      /^[A-Z][a-z]+$/,  // Capitalized word like "Shaw", "Bernard"
-      /^[A-Z]+$/,       // All caps like abbreviations
+      /^[A-Z][a-z]+$/, // Capitalized word like "Shaw", "Bernard"
+      /^[A-Z]+$/, // All caps like abbreviations
     ];
 
     return properNamePatterns.some(pattern => pattern.test(originalWord));
@@ -560,9 +734,10 @@ export class ReadlexiconEngine implements TransliterationEngine {
         console.warn('Adding words to POS-aware dictionary not fully supported yet');
       }
     }
-    
+
     // Also add to reverse dictionary
-    const transliterationStr = typeof transliteration === 'string' ? transliteration : String(transliteration);
+    const transliterationStr =
+      typeof transliteration === 'string' ? transliteration : String(transliteration);
     const cleanShavian = transliterationStr.replace(/^[.:]+|[.:]+$/g, '');
     if (cleanShavian) {
       this.reverseDictionary.set(cleanShavian, word.toLowerCase());
@@ -613,10 +788,12 @@ export class ReadlexiconEngine implements TransliterationEngine {
 
     // For words with punctuation in the new format, we need to separate punctuation and reverse transliterate the clean word
     const punctuationResult = processPunctuatedWord(word);
-    
+
     if (punctuationResult.hasNonAlphabetic) {
       // Reverse transliterate the clean word and reconstruct with punctuation
-      const reverseTransliteratedCleanWord = this.reverseTransliterateWordInternal(punctuationResult.cleanWord || '');
+      const reverseTransliteratedCleanWord = this.reverseTransliterateWordInternal(
+        punctuationResult.cleanWord || ''
+      );
       return reconstructWordWithPunctuation(
         reverseTransliteratedCleanWord,
         punctuationResult.leadingPunctuation || '',
@@ -628,11 +805,13 @@ export class ReadlexiconEngine implements TransliterationEngine {
     if (word.includes('-') && !word.match(/^[-]+$/)) {
       const parts = word.split('-');
       // Check if any part looks like malformed punctuation format - if so, don't process as compound
-      const hasPartialPunctuationFormat = parts.some(part => 
-        part.includes('{') || part.includes('}') || 
-        (part.includes('punctuation') && (word.includes('{') || word.includes('}')))
+      const hasPartialPunctuationFormat = parts.some(
+        part =>
+          part.includes('{') ||
+          part.includes('}') ||
+          (part.includes('punctuation') && (word.includes('{') || word.includes('}')))
       );
-      
+
       if (!hasPartialPunctuationFormat) {
         const transliteratedParts = parts.map(part => {
           if (part.trim() === '') return part;
@@ -695,177 +874,182 @@ export class VerbAwareReadlexiconEngine extends ReadlexiconEngine {
    * Irregular past tense verb mapping
    */
   private irregularPastTense: Record<string, string> = {
-    'came': 'come',
-    'wrote': 'write',
-    'made': 'make',
-    'built': 'build',
-    'bought': 'buy',
-    'caught': 'catch',
-    'stood': 'stand',
-    'said': 'say',
-    'did': 'do',
-    'gave': 'give',
-    'went': 'go',
-    'had': 'have',
-    'heard': 'hear',
-    'kept': 'keep',
-    'knew': 'know',
-    'laid': 'lay',
-    'led': 'lead',
-    'left': 'leave',
-    'lost': 'lose',
-    'met': 'meet',
-    'paid': 'pay',
-    'put': 'put',
-    'ran': 'run',
-    'saw': 'see',
-    'sold': 'sell',
-    'sent': 'send',
-    'set': 'set',
-    'sat': 'sit',
-    'spoke': 'speak',
-    'spent': 'spend',
-    'took': 'take',
-    'taught': 'teach',
-    'told': 'tell',
-    'thought': 'think',
-    'understood': 'understand',
-    'wore': 'wear',
-    'won': 'win',
-    'witnessed': 'witness',
-    'became': 'become',
-    'grew': 'grow',
-    'fell': 'fall',
-    'felt': 'feel',
-    'slept': 'sleep',
-    'meant': 'mean',
-    'read': 'read', // same spelling but different pronunciation
-    'found': 'find',
-    'got': 'get',
-    'held': 'hold',
+    came: 'come',
+    wrote: 'write',
+    made: 'make',
+    built: 'build',
+    bought: 'buy',
+    caught: 'catch',
+    stood: 'stand',
+    said: 'say',
+    did: 'do',
+    gave: 'give',
+    went: 'go',
+    had: 'have',
+    heard: 'hear',
+    kept: 'keep',
+    knew: 'know',
+    laid: 'lay',
+    led: 'lead',
+    left: 'leave',
+    lost: 'lose',
+    met: 'meet',
+    paid: 'pay',
+    put: 'put',
+    ran: 'run',
+    saw: 'see',
+    sold: 'sell',
+    sent: 'send',
+    set: 'set',
+    sat: 'sit',
+    spoke: 'speak',
+    spent: 'spend',
+    took: 'take',
+    taught: 'teach',
+    told: 'tell',
+    thought: 'think',
+    understood: 'understand',
+    wore: 'wear',
+    won: 'win',
+    witnessed: 'witness',
+    became: 'become',
+    grew: 'grow',
+    fell: 'fall',
+    felt: 'feel',
+    slept: 'sleep',
+    meant: 'mean',
+    read: 'read', // same spelling but different pronunciation
+    found: 'find',
+    got: 'get',
+    held: 'hold',
   };
 
   /**
    * Irregular past tense verb endings - used to preserve the correct Shavian endings
    */
   private irregularPastTenseShavian: Record<string, string> = {
-    'wrote': '𐑮𐑴𐑑',
-    'made': '𐑥𐑱𐑛',
-    'came': '𐑒𐑱𐑥',
-    'said': '𐑕𐑧𐑛',
-    'saw': '𐑕𐑷',
-    'went': '𐑢𐑧𐑯𐑑',
-    'witnessed': '𐑢𐑦𐑑𐑯𐑩𐑕𐑑',
-    'died': '𐑛𐑲𐑛',
-    'represented': '𐑮𐑰𐑐𐑮𐑦𐑟𐑧𐑯𐑑𐑩𐑛',
-    'allowed': '𐑩𐑤𐑬𐑩𐑛',
+    wrote: '𐑮𐑴𐑑',
+    made: '𐑥𐑱𐑛',
+    came: '𐑒𐑱𐑥',
+    said: '𐑕𐑧𐑛',
+    saw: '𐑕𐑷',
+    went: '𐑢𐑧𐑯𐑑',
+    witnessed: '𐑢𐑦𐑑𐑯𐑩𐑕𐑑',
+    died: '𐑛𐑲𐑛',
+    represented: '𐑮𐑰𐑐𐑮𐑦𐑟𐑧𐑯𐑑𐑩𐑛',
+    allowed: '𐑩𐑤𐑬𐑩𐑛',
   };
-  
+
   /**
    * Override the transliterate word internal to handle verb tenses
    */
   protected transliterateWordInternal(word: string, pos?: string): string {
     if (!word || word.trim() === '') return word;
-    
+
     // Check for direct Shavian mappings for past tense verbs
     const lowerWord = word.toLowerCase();
     if (lowerWord in this.irregularPastTenseShavian) {
       return this.irregularPastTenseShavian[lowerWord] || word;
     }
-    
+
     // Try standard transliteration first
     const standardResult = super.transliterateWordInternal(word, pos);
-    
+
     // If the result is unchanged and might be a past tense verb, try to transliterate its base form
     if (standardResult === word && this.mightBePastTenseVerb(word)) {
       // Special case for "witnessed" and similar words
       if (lowerWord === 'witnessed') {
         return '𐑢𐑦𐑑𐑯𐑩𐑕𐑑';
       }
-      
+
       const baseForm = this.getBaseVerbForm(word);
       if (baseForm && baseForm !== word) {
         // For past tense, we'll use the VVI part of speech tag (base form of lexical verb)
         const baseResult = super.transliterateWordInternal(baseForm, 'VVI');
-        
+
         // If the base form was successfully transliterated, use that plus the appropriate ending
         if (baseResult !== baseForm) {
           // For past tense ending in "ed"
           if (word.endsWith('ed')) {
-            return baseResult + '𐑩𐑛'; // Add Shavian ending for "-ed"
+            return `${baseResult  }𐑩𐑛`; // Add Shavian ending for "-ed"
           }
           // For other irregular past tense forms
           return baseResult;
         }
       }
     }
-    
+
     return standardResult;
   }
-  
+
   /**
    * Detect if a word might be a past tense verb
    */
   private mightBePastTenseVerb(word: string): boolean {
-    return word.endsWith('ed') || 
-           this.isIrregularPastTenseVerb(word);
+    return word.endsWith('ed') || this.isIrregularPastTenseVerb(word);
   }
-  
+
   /**
    * Check if the word is an irregular past tense verb
    */
   private isIrregularPastTenseVerb(word: string): boolean {
-    return word.toLowerCase() in this.irregularPastTense || 
-           word.toLowerCase() in this.irregularPastTenseShavian;
+    return (
+      word.toLowerCase() in this.irregularPastTense ||
+      word.toLowerCase() in this.irregularPastTenseShavian
+    );
   }
-  
+
   /**
    * Get the base form of a verb from its past tense
    */
   private getBaseVerbForm(word: string): string {
     const lowercaseWord = word.toLowerCase();
-    
+
     // Handle irregular past tense verbs
     if (lowercaseWord in this.irregularPastTense) {
       return this.irregularPastTense[lowercaseWord];
     }
-    
+
     // Handle regular past tense verbs
     if (lowercaseWord.endsWith('ed')) {
       // Special case for verbs ending in 'ied' (e.g., 'died' -> 'die')
       if (lowercaseWord.endsWith('ied')) {
-        return lowercaseWord.slice(0, -3) + 'y';
+        return `${lowercaseWord.slice(0, -3)  }y`;
       }
-      
-      // Special case for "witnessed" -> "witness" 
+
+      // Special case for "witnessed" -> "witness"
       if (lowercaseWord === 'witnessed') {
         return 'witness';
       }
-      
+
       // Handle words ending in -ssed or -ssing (e.g. 'witnessed', 'missed')
       if (lowercaseWord.length > 5 && lowercaseWord.endsWith('ssed')) {
         return lowercaseWord.slice(0, -3);
       }
-      
+
       // Handle doubled consonants
-      if (lowercaseWord.length > 4 && 
-          lowercaseWord.slice(-4, -2) === lowercaseWord.slice(-4, -3).repeat(2) &&
-          !['a', 'e', 'i', 'o', 'u'].includes(lowercaseWord.slice(-4, -3))) {
+      if (
+        lowercaseWord.length > 4 &&
+        lowercaseWord.slice(-4, -2) === lowercaseWord.slice(-4, -3).repeat(2) &&
+        !['a', 'e', 'i', 'o', 'u'].includes(lowercaseWord.slice(-4, -3))
+      ) {
         return lowercaseWord.slice(0, -3);
       }
-      
+
       // Handle consonant + e pattern (e.g., 'loved' -> 'love')
-      if (lowercaseWord.length > 3 && 
-          lowercaseWord.endsWith('ed') && 
-          !['a', 'e', 'i', 'o', 'u'].includes(lowercaseWord.slice(-3, -2)) &&
-          lowercaseWord.slice(-4, -3) === 'e') {
+      if (
+        lowercaseWord.length > 3 &&
+        lowercaseWord.endsWith('ed') &&
+        !['a', 'e', 'i', 'o', 'u'].includes(lowercaseWord.slice(-3, -2)) &&
+        lowercaseWord.slice(-4, -3) === 'e'
+      ) {
         return lowercaseWord.slice(0, -2);
       }
-      
+
       // Regular case
       return lowercaseWord.slice(0, -2);
     }
-    
+
     return word;
   }
 }
@@ -884,7 +1068,7 @@ export class TransliterationEngineFactory {
           this.readlexiconInstance = new ReadlexiconEngine(readlexDict);
         }
         return this.readlexiconInstance;
-        
+
       case 'verb-aware-readlexicon':
         if (!this.verbAwareReadlexiconInstance) {
           // Dynamically import dictionary data
@@ -892,7 +1076,7 @@ export class TransliterationEngineFactory {
           this.verbAwareReadlexiconInstance = new VerbAwareReadlexiconEngine(readlexDict);
         }
         return this.verbAwareReadlexiconInstance;
-        
+
       case 'plural-aware-readlexicon':
         if (!this.pluralAwareReadlexiconInstance) {
           // Dynamically import dictionary data

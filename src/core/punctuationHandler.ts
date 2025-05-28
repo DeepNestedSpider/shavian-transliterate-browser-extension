@@ -50,7 +50,7 @@ export function separatePunctuation(word: string): {
   return {
     cleanWord,
     leadingPunctuation,
-    trailingPunctuation
+    trailingPunctuation,
   };
 }
 
@@ -67,13 +67,13 @@ export function handleContractions(word: string): {
   if (contractionMatch) {
     return {
       baseWord: contractionMatch[1],
-      contractionPart: "'" + contractionMatch[2]
+      contractionPart: `'${  contractionMatch[2]}`,
     };
   }
-  
+
   return {
     baseWord: word,
-    contractionPart: ''
+    contractionPart: '',
   };
 }
 
@@ -87,12 +87,12 @@ export function hasNonAlphabeticCharacters(word: string): boolean {
   if (!word || word.trim() === '') {
     return false;
   }
-  
+
   // Don't process pure punctuation (no letters at all)
   if (!/[a-zA-Z]/.test(word)) {
     return false;
   }
-  
+
   // Check for non-alphabetic characters excluding hyphens
   return /[^\p{L}-]/u.test(word);
 }
@@ -104,33 +104,35 @@ export function hasNonAlphabeticCharacters(word: string): boolean {
  */
 export function processPunctuatedWord(word: string): PunctuationProcessingResult {
   const hasNonAlphabetic = hasNonAlphabeticCharacters(word);
-  
+
   if (!hasNonAlphabetic) {
     return {
       hasNonAlphabetic: false,
       processedWord: word,
       cleanWord: word,
       leadingPunctuation: '',
-      trailingPunctuation: ''
+      trailingPunctuation: '',
     };
   }
-  
+
   // Separate punctuation from the word
   const { cleanWord, leadingPunctuation, trailingPunctuation } = separatePunctuation(word);
-  
+
   // Handle contractions specially
   const { baseWord, contractionPart } = handleContractions(cleanWord);
-  
+
   // If it's a contraction, process the base word and keep the contraction
   const finalCleanWord = contractionPart ? baseWord : cleanWord;
-  const finalTrailingPunctuation = contractionPart ? contractionPart + trailingPunctuation : trailingPunctuation;
-  
+  const finalTrailingPunctuation = contractionPart
+    ? contractionPart + trailingPunctuation
+    : trailingPunctuation;
+
   return {
     hasNonAlphabetic: true,
     processedWord: word, // Keep original for now, will be updated by transliteration engine
     cleanWord: finalCleanWord,
     leadingPunctuation,
-    trailingPunctuation: finalTrailingPunctuation
+    trailingPunctuation: finalTrailingPunctuation,
   };
 }
 
@@ -157,13 +159,13 @@ export function reconstructWordWithPunctuation(
  */
 export function handleWordPunctuation(word: string): string {
   const result = processPunctuatedWord(word);
-  
+
   // For backward compatibility, still return punctuation{word} format for now
   // This will be updated by the transliteration engine to use the new logic
   if (result.hasNonAlphabetic) {
     return `punctuation{${word}}`;
   }
-  
+
   return result.processedWord;
 }
 
@@ -175,11 +177,11 @@ export function handleWordPunctuation(word: string): string {
 export function extractOriginalWord(processedWord: string): string {
   const punctuationPattern = /^punctuation\{(.*)\}$/;
   const match = processedWord.match(punctuationPattern);
-  
+
   if (match) {
     return match[1] || ''; // Handle undefined by returning empty string
   }
-  
+
   return processedWord;
 }
 

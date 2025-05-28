@@ -44,7 +44,7 @@ describe("POS-Aware Transliteration", () => {
         "present_AJ0": "𐑮𐑦𐑟𐑧𐑯𐑑", // adjective "present"
         "present_VVI": "𐑮𐑦𐑟𐑧𐑯𐑑" // verb "present"
       },
-      getTransliteration: function(word: string, pos?: string): string | undefined {
+      getTransliteration(word: string, pos?: string): string | undefined {
         const cleanWord = word.toLowerCase();
         
         if (pos) {
@@ -56,12 +56,12 @@ describe("POS-Aware Transliteration", () => {
         
         return this.basic[cleanWord];
       },
-      getAllVariants: function(word: string): Array<{ pos: string; transliteration: string; key: string }> {
+      getAllVariants(word: string): Array<{ pos: string; transliteration: string; key: string }> {
         const cleanWord = word.toLowerCase();
         const variants: Array<{ pos: string; transliteration: string; key: string }> = [];
         
         for (const [key, transliteration] of Object.entries(this.posSpecific)) {
-          if (key.startsWith(cleanWord + '_')) {
+          if (key.startsWith(`${cleanWord  }_`)) {
             const pos = key.substring(cleanWord.length + 1);
             variants.push({ pos, transliteration, key });
           }

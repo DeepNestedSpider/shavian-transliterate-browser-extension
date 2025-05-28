@@ -11,7 +11,7 @@ async function incrementVersion() {
     const manifestContent = await fs.readFile(manifestPath, 'utf8');
     const manifest = JSON.parse(manifestContent);
 
-    let currentVersion = manifest.version; // e.g., "0.0.2"
+    const currentVersion = manifest.version; // e.g., "0.0.2"
     console.log(`Current version: ${currentVersion}`);
 
     // Split the version string (assuming X.Y.Z format)
@@ -47,11 +47,12 @@ async function updateReadmeVersionBadge(newVersion: string) {
   try {
     // Read the README file
     const readmeContent = await fs.readFile(readmePath, 'utf8');
-    
+
     // Replace the version badge using regex
-    const versionBadgeRegex = /(\[!\[Version\]\(https:\/\/img\.shields\.io\/badge\/version-)[^-]+(-blue\.svg\)\])/;
+    const versionBadgeRegex =
+      /(\[!\[Version\]\(https:\/\/img\.shields\.io\/badge\/version-)[^-]+(-blue\.svg\)\])/;
     const updatedContent = readmeContent.replace(versionBadgeRegex, `$1${newVersion}$2`);
-    
+
     // Write the updated README back to the file
     await fs.writeFile(readmePath, updatedContent, 'utf8');
   } catch (error) {

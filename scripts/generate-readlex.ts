@@ -77,7 +77,7 @@ export const readlexDict: Record<string, string> = {
     })
     .join('\n');
 
-  return header + '\n' + entriesText + '\n' + footer;
+  return `${header  }\n${  entriesText  }\n${  footer}`;
 }
 
 function main() {

@@ -9,7 +9,7 @@ console.log('=== Testing New Punctuation Implementation ===\n');
 const examples = [
   { input: 'hello,', expected: 'transliterated_hello + ,' },
   { input: 'world!', expected: 'transliterated_world + !' },
-  { input: "don't", expected: 'transliterated_don + \'t' },
+  { input: "don't", expected: "transliterated_don + 't" },
   { input: 'test.', expected: 'transliterated_test + .' },
   { input: '(example)', expected: '( + transliterated_example + )' },
 ];
@@ -21,7 +21,7 @@ examples.forEach(example => {
 
 console.log('\n=== What we achieved ===');
 console.log('✅ Punctuation is now properly separated from words');
-console.log('✅ Words are transliterated without punctuation');  
+console.log('✅ Words are transliterated without punctuation');
 console.log('✅ Punctuation is preserved and attached to transliterated word');
 console.log('✅ Contractions like "don\'t" are handled as "do" + "\'t"');
 console.log('✅ No more "punctuation{word}" format - actual proper transliteration!');
