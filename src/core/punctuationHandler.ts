@@ -38,14 +38,14 @@ export function separatePunctuation(word: string): {
   // Handle leading punctuation (like quotes, parentheses)
   const leadingMatch = cleanWord.match(LEADING_PUNCTUATION_PATTERN);
   if (leadingMatch) {
-    leadingPunctuation = leadingMatch[1];
+    leadingPunctuation = leadingMatch[1] ?? '';
     cleanWord = cleanWord.slice(leadingPunctuation.length);
   }
 
   // Handle trailing punctuation (like periods, commas, quotes)
   const trailingMatch = cleanWord.match(TRAILING_PUNCTUATION_PATTERN);
   if (trailingMatch) {
-    trailingPunctuation = trailingMatch[1];
+    trailingPunctuation = trailingMatch[1] ?? '';
     cleanWord = cleanWord.slice(0, -trailingPunctuation.length);
   }
 
@@ -68,7 +68,7 @@ export function handleContractions(word: string): {
   const contractionMatch = word.match(APOSTROPHE_CONTRACTIONS);
   if (contractionMatch) {
     return {
-      baseWord: contractionMatch[1],
+      baseWord: contractionMatch[1] ?? '',
       contractionPart: `'${  contractionMatch[2]}`,
     };
   }
