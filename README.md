@@ -6,7 +6,7 @@
 [![Bun](https://img.shields.io/badge/Bun-1.x-black.svg)](https://bun.sh/)
 [![GitHub](https://img.shields.io/badge/GitHub-DeepNestedSpider-blue.svg)](https://github.com/DeepNestedSpider/shavian-transliterate-browser-extension)
 
-![Video Showcase on wikipedia](./showcase/wikipedia-video.gif)
+![Video Showcase on Shaw.info](./showcase/shawinfo.gif)
 ![original](./showcase/shawinfo.png)
 ![stateasofcurrentrelease](./showcase/shawinfov0.0.14.png)
 
