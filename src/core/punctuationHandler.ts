@@ -18,6 +18,9 @@ export interface PunctuationProcessingResult {
 const LEADING_PUNCTUATION_PATTERN = /^([^\p{L}\s-]+)/u;
 const TRAILING_PUNCTUATION_PATTERN = /([^\p{L}\s-]+.*)$/u; // Modified to capture everything from first non-letter char
 const APOSTROPHE_CONTRACTIONS = /^(.*)'([tsdm]|re|ve|ll)$/i; // don't, it's, we're, I've, they'll
+const POSSESSIVE_PATTERN = /^(.+)'s$/i; // possessive forms like "Shaw's", "John's"
+// List of common contraction words that end in 's to exclude from possessive handling
+const CONTRACTION_WORDS_ENDING_S = ['it', 'that', 'what', 'let', 'here', 'there', 'where'];
 // Quote patterns for special handling
 // const QUOTE_PATTERNS = /["""''']/g;
 
@@ -80,6 +83,62 @@ export function handleContractions(word: string): {
 }
 
 /**
+ * Handles possessive forms by converting "'s" to Shavian "𐑟"
+ * Also handles possessives inside quotes like "Shaw's" 
+ * @param word - The word to check for possessive form
+ * @returns Object with the base word and possessive part
+ */
+export function handlePossessives(word: string): {
+  baseWord: string;
+  possessivePart: string;
+} {
+  // First try direct possessive match
+  const possessiveMatch = word.match(POSSESSIVE_PATTERN);
+  if (possessiveMatch) {
+    const baseWord = possessiveMatch[1] ?? '';
+    
+    // Check if this is actually a contraction (like "it's", "that's", "let's")
+    if (CONTRACTION_WORDS_ENDING_S.includes(baseWord.toLowerCase())) {
+      return {
+        baseWord: word,
+        possessivePart: '',
+      };
+    }
+    
+    return {
+      baseWord,
+      possessivePart: '𐑟', // Convert "'s" to Shavian /z/ sound
+    };
+  }
+
+  // Handle possessives inside quotes like "Shaw's"
+  const quotedPossessiveMatch = word.match(/^(["']?)(.+)'s(["']?)$/i);
+  if (quotedPossessiveMatch) {
+    const leadingQuote = quotedPossessiveMatch[1] ?? '';
+    const baseWord = quotedPossessiveMatch[2] ?? '';
+    const trailingQuote = quotedPossessiveMatch[3] ?? '';
+    
+    // Check if this is actually a contraction
+    if (CONTRACTION_WORDS_ENDING_S.includes(baseWord.toLowerCase())) {
+      return {
+        baseWord: word,
+        possessivePart: '',
+      };
+    }
+    
+    return {
+      baseWord: leadingQuote + baseWord + trailingQuote,
+      possessivePart: '𐑟',
+    };
+  }
+
+  return {
+    baseWord: word,
+    possessivePart: '',
+  };
+}
+
+/**
  * Checks if a word contains non-alphabetic characters (excluding hyphens and ellipses)
  * @param word - The word to check
  * @returns true if the word contains non-alphabetic characters
@@ -127,14 +186,30 @@ export function processPunctuatedWord(word: string): PunctuationProcessingResult
     };
   }
 
-  // Separate punctuation from the word
-  const { cleanWord, leadingPunctuation, trailingPunctuation } = separatePunctuation(word);
+  // Check for possessives FIRST, before any punctuation separation
+  const { baseWord: possessiveBase, possessivePart } = handlePossessives(word);
+  
+  if (possessivePart) {
+    // It's a possessive form, now separate any additional punctuation from the base word
+    const { cleanWord: finalCleanWord, leadingPunctuation, trailingPunctuation } = separatePunctuation(possessiveBase);
+    
+    return {
+      hasNonAlphabetic: true,
+      processedWord: word,
+      cleanWord: finalCleanWord,
+      leadingPunctuation,
+      trailingPunctuation: possessivePart + trailingPunctuation,
+    };
+  }
 
-  // Handle contractions specially
-  const { baseWord, contractionPart } = handleContractions(cleanWord);
+  // If not possessive, separate punctuation normally
+  const { cleanWord: wordWithoutExternalPunctuation, leadingPunctuation, trailingPunctuation } = separatePunctuation(word);
+
+  // Handle contractions if it's not a possessive
+  const { baseWord, contractionPart } = handleContractions(wordWithoutExternalPunctuation);
 
   // If it's a contraction, process the base word and keep the contraction
-  const finalCleanWord = contractionPart ? baseWord : cleanWord;
+  const finalCleanWord = contractionPart ? baseWord : wordWithoutExternalPunctuation;
   const finalTrailingPunctuation = contractionPart
     ? contractionPart + trailingPunctuation
     : trailingPunctuation;
