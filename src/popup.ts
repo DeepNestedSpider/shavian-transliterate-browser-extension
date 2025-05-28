@@ -279,8 +279,8 @@ class PopupManager {
    */
   private updateDirectionLabel(): void {
     this.directionLabel.textContent = this.reverseToggle.checked
-      ? 'Shavian → English'
-      : 'English → Shavian';
+      ? 'Shaw → EN'
+      : 'EN → Shaw';
   }
 
   /**

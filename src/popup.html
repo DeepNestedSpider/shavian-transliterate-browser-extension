@@ -3,212 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Language Mode Settings</title>
+    <title>Shavian Transliteration</title>
     <style>
       body {
         font-family: 'Segoe UI', Arial, sans-serif;
-        padding: 24px 18px 18px 18px;
-        min-width: 270px;
+        padding: 16px 14px;
+        min-width: 260px;
+        max-width: 280px;
         background: linear-gradient(135deg, #f8fafc 0%, #e3e9f3 100%);
-        color: #222;
-        border-radius: 12px;
-        box-shadow: 0 2px 16px 0 rgba(60, 60, 90, 0.1);
+        color: #2c3e50;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px 0 rgba(60, 60, 90, 0.1);
+        margin: 0;
       }
-      h1,
+
       h2 {
         font-weight: 600;
-        margin-bottom: 18px;
+        margin: 0 0 12px 0;
         color: #2c3e50;
-        letter-spacing: 0.5px;
-      }
-      h1 {
-        font-size: 1.18em;
-        margin-bottom: 10px;
-      }
-      h2 {
-        font-size: 1.05em;
-        margin-bottom: 10px;
-      }
-      .big-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 18px;
-        width: 100%;
-      }
-      .big-switch {
-        position: relative;
-        display: inline-block;
-        width: 100%;
-        max-width: 220px;
-        height: 48px;
-        margin: 0 auto;
-      }
-      .big-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .big-slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: #cfd8dc;
-        transition: 0.4s;
-        border-radius: 48px;
-      }
-      .big-slider:before {
-        position: absolute;
-        content: '';
-        height: 40px;
-        width: 40px;
-        left: 4px;
-        bottom: 4px;
-        background: #fff;
-        transition: 0.4s;
-        border-radius: 50%;
-        box-shadow: 0 1px 4px 0 rgba(60, 60, 90, 0.1);
-      }
-      .big-switch input:checked + .big-slider {
-        background: linear-gradient(90deg, #4caf50 60%, #43a047 100%);
-      }
-      .big-switch input:checked + .big-slider:before {
-        transform: translateX(88px);
-      }
-      .big-slider.round {
-        border-radius: 48px;
-      }
-      .big-slider.round:before {
-        border-radius: 50%;
-      }
-
-      /* Small toggle for direction */
-      .big-switch[style*='height: 32px'] .big-slider:before {
-        height: 24px;
-        width: 24px;
-        left: 4px;
-        bottom: 4px;
-      }
-      .big-switch[style*='height: 32px'] input:checked + .big-slider:before {
-        transform: translateX(48px);
-      }
-      .toggle-label {
-        font-size: 1.13em;
-        font-weight: 500;
-        margin-left: 18px;
-        color: #222;
-      }
-      #transliterationEngineSelect,
-      #languageModeSelect {
-        margin: 10px 0 18px 0;
-        width: 100%;
-        padding: 7px 10px;
-        border-radius: 6px;
-        border: 1px solid #b0bec5;
-        font-size: 1em;
-        background: #f7fafc;
-        color: #222;
-        box-shadow: 0 1px 4px 0 rgba(60, 60, 90, 0.04);
-      }
-      button {
-        background: linear-gradient(90deg, #4caf50 60%, #43a047 100%);
-        color: white;
-        padding: 10px 0;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 1em;
-        margin-top: 18px;
-        width: 100%;
-        font-weight: 500;
-        box-shadow: 0 1px 4px 0 rgba(60, 60, 90, 0.08);
-        transition: background 0.2s;
-      }
-      button:hover {
-        background: linear-gradient(90deg, #43a047 60%, #388e3c 100%);
-      }
-      #forceTransliterationButton {
-        background: linear-gradient(90deg, #1976d2 60%, #1565c0 100%);
-        margin-top: 10px;
-      }
-      #forceTransliterationButton:hover {
-        background: linear-gradient(90deg, #1565c0 60%, #0d47a1 100%);
-      }
-      #refreshButton {
-        background: linear-gradient(90deg, #ff9800 60%, #f57c00 100%);
-        margin-top: 10px;
-      }
-      #refreshButton:hover {
-        background: linear-gradient(90deg, #f57c00 60%, #e65100 100%);
-      }
-      #resetDefaultsButton {
-        background: linear-gradient(90deg, #b0bec5 60%, #78909c 100%);
-        color: #222;
-        margin-top: 10px;
-      }
-      #resetDefaultsButton:hover {
-        background: linear-gradient(90deg, #78909c 60%, #546e7a 100%);
-      }
-      .status-message {
-        margin-top: 15px;
-        font-size: 0.97em;
+        font-size: 1.1em;
         text-align: center;
-        color: #388e3c;
-        min-height: 1.2em;
-      }
-      .status-message.error {
-        color: #e74c3c;
-      }
-      hr {
-        border: 0;
-        height: 1px;
-        background: #e0e0e0;
-        margin: 18px 0 18px 0;
-      }
-      .desc {
-        font-size: 0.93em;
-        color: #607d8b;
-        margin-left: 30px;
-        margin-top: 2px;
-        margin-bottom: 0;
+        letter-spacing: 0.3px;
       }
 
-      /* Direction toggle styling */
-      .direction-toggle {
+      /* Main toggle styling */
+      .main-toggle {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin: 15px 0;
-        padding: 10px 12px;
-        background: #f7fafc;
-        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 8px 10px;
+        background: #ffffff;
+        border-radius: 6px;
         border: 1px solid #e1e8ed;
+        box-shadow: 0 1px 3px rgba(60, 60, 90, 0.05);
       }
 
-      .direction-label {
-        font-size: 0.9em;
-        color: #607d8b;
+      .toggle-label {
+        font-size: 0.95em;
         font-weight: 500;
+        color: #2c3e50;
       }
 
-      .small-switch {
+      .main-switch {
         position: relative;
         display: inline-block;
-        width: 44px;
-        height: 24px;
-        margin: 0 10px;
+        width: 48px;
+        height: 26px;
       }
 
-      .small-switch input {
+      .main-switch input {
         opacity: 0;
         width: 0;
         height: 0;
       }
 
-      .small-slider {
+      .main-slider {
         position: absolute;
         cursor: pointer;
         top: 0;
@@ -217,80 +67,277 @@
         bottom: 0;
         background: #cfd8dc;
         transition: 0.3s;
-        border-radius: 24px;
+        border-radius: 26px;
       }
 
-      .small-slider:before {
+      .main-slider:before {
         position: absolute;
         content: '';
-        height: 18px;
-        width: 18px;
+        height: 20px;
+        width: 20px;
         left: 3px;
         bottom: 3px;
         background: #fff;
         transition: 0.3s;
         border-radius: 50%;
-        box-shadow: 0 1px 3px 0 rgba(60, 60, 90, 0.15);
+        box-shadow: 0 1px 3px rgba(60, 60, 90, 0.2);
       }
 
-      .small-switch input:checked + .small-slider {
-        background: linear-gradient(90deg, #ff9800 60%, #f57c00 100%);
+      .main-switch input:checked + .main-slider {
+        background: linear-gradient(90deg, #4caf50 60%, #43a047 100%);
       }
 
-      .small-switch input:checked + .small-slider:before {
-        transform: translateX(20px);
+      .main-switch input:checked + .main-slider:before {
+        transform: translateX(22px);
+      }
+
+      /* Select boxes styling */
+      .select-group {
+        margin-bottom: 10px;
+      }
+
+      .select-label {
+        font-size: 0.8em;
+        color: #607d8b;
+        margin-bottom: 4px;
+        display: block;
+        font-weight: 500;
+      }
+
+      #transliterationEngineSelect,
+      #languageModeSelect {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 4px;
+        border: 1px solid #b0bec5;
+        font-size: 0.9em;
+        background: #ffffff;
+        color: #2c3e50;
+        box-shadow: 0 1px 2px rgba(60, 60, 90, 0.04);
+        margin-bottom: 8px;
+      }
+
+      /* Enhanced direction toggle */
+      .direction-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 10px 0;
+        padding: 8px 10px;
+        background: #ffffff;
+        border-radius: 6px;
+        border: 1px solid #e1e8ed;
+        box-shadow: 0 1px 3px rgba(60, 60, 90, 0.05);
+      }
+
+      .direction-label {
+        font-size: 0.85em;
+        color: #607d8b;
+        font-weight: 500;
+      }
+
+      .direction-switch {
+        position: relative;
+        display: inline-block;
+        width: 54px;
+        height: 28px;
+        margin: 0 8px;
+      }
+
+      .direction-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .direction-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, #2196f3 0%, #1976d2 100%);
+        transition: all 0.3s ease;
+        border-radius: 28px;
+        box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+      }
+
+      .direction-slider:before {
+        position: absolute;
+        content: '';
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background: #fff;
+        transition: all 0.3s ease;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .direction-switch input:checked + .direction-slider {
+        background: linear-gradient(90deg, #ff9800 0%, #f57c00 100%);
+        box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
+      }
+
+      .direction-switch input:checked + .direction-slider:before {
+        transform: translateX(26px);
       }
 
       .direction-text {
-        font-size: 0.85em;
+        font-size: 0.8em;
         color: #546e7a;
-        min-width: 100px;
+        min-width: 90px;
         text-align: center;
         font-weight: 500;
+      }
+
+      /* Button styling */
+      .button-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      button {
+        padding: 7px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85em;
+        font-weight: 500;
+        box-shadow: 0 1px 3px rgba(60, 60, 90, 0.1);
+        transition: all 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(60, 60, 90, 0.15);
+      }
+
+      #refreshButton {
+        background: linear-gradient(90deg, #e0e0e0 60%, #bdbdbd 100%);
+        color: #424242;
+      }
+
+      #refreshButton:hover {
+        background: linear-gradient(90deg, #bdbdbd 60%, #9e9e9e 100%);
+      }
+
+      #forceTransliterationButton {
+        background: linear-gradient(90deg, #1976d2 60%, #1565c0 100%);
+        color: white;
+        grid-column: 1 / -1;
+        margin-top: 4px;
+      }
+
+      #forceTransliterationButton:hover {
+        background: linear-gradient(90deg, #1565c0 60%, #0d47a1 100%);
+      }
+
+      .bottom-buttons {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      #saveButton {
+        background: linear-gradient(90deg, #4caf50 60%, #43a047 100%);
+        color: white;
+        flex: 1;
+      }
+
+      #saveButton:hover {
+        background: linear-gradient(90deg, #43a047 60%, #388e3c 100%);
+      }
+
+      #resetDefaultsButton {
+        background: linear-gradient(90deg, #f44336 60%, #d32f2f 100%);
+        color: white;
+        flex: 1;
+      }
+
+      #resetDefaultsButton:hover {
+        background: linear-gradient(90deg, #d32f2f 60%, #b71c1c 100%);
+      }
+
+      .status-message {
+        margin-top: 8px;
+        font-size: 0.8em;
+        text-align: center;
+        color: #4caf50;
+        min-height: 1em;
+        font-weight: 500;
+      }
+
+      .status-message.error {
+        color: #e74c3c;
+      }
+
+      .divider {
+        border: 0;
+        height: 1px;
+        background: #e0e0e0;
+        margin: 8px 0;
       }
     </style>
   </head>
   <body>
-    <h2>Shavian Transliteration Extension</h2>
-    <div class="big-toggle">
-      <label class="big-switch">
-        <input type="checkbox" id="transliterationToggle" />
-        <span class="big-slider round"></span>
-      </label>
+    <h2>Shavian Transliteration</h2>
+    
+    <!-- Main transliteration toggle -->
+    <div class="main-toggle">
       <span class="toggle-label">Enable Transliteration</span>
-    </div>
-    <select id="transliterationEngineSelect">
-      <option value="readlexicon">Shavian (Readlexicon)</option>
-      <option value="coming-soon" disabled>More script dictionaries coming soon</option>
-    </select>
-    <select id="languageModeSelect">
-      <option value="htmlLang">HTML <code>lang</code> Attribute</option>
-      <option value="i18nPageText">Chrome i18n Page Text Detection</option>
-    </select>
-
-    <!-- Direction toggle -->
-    <div class="direction-toggle">
-      <span class="direction-label">Translation Direction:</span>
-      <label class="small-switch">
-        <input type="checkbox" id="reverseToggle" />
-        <span class="small-slider"></span>
+      <label class="main-switch">
+        <input type="checkbox" id="transliterationToggle" />
+        <span class="main-slider"></span>
       </label>
-      <span id="directionLabel" class="direction-text">English → Shavian</span>
     </div>
-    <button id="refreshButton">Refresh</button>
-    <hr />
-    <button
-      id="resetDefaultsButton"
-      style="
-        background: linear-gradient(90deg, #b0bec5 60%, #78909c 100%);
-        color: #222;
-        margin-top: 10px;
-      "
-    >
-      Reset to Default Settings
-    </button>
-    <button id="saveButton">Save Settings</button>
-    <button id="forceTransliterationButton">Force Transliteration</button>
+
+    <!-- Engine selection -->
+    <div class="select-group">
+      <label class="select-label">Engine:</label>
+      <select id="transliterationEngineSelect">
+        <option value="readlexicon">Shavian (Readlexicon)</option>
+        <option value="coming-soon" disabled>More coming soon...</option>
+      </select>
+    </div>
+
+    <!-- Language detection mode -->
+    <div class="select-group">
+      <label class="select-label">Language Detection:</label>
+      <select id="languageModeSelect">
+        <option value="htmlLang">HTML lang attribute</option>
+        <option value="i18nPageText">Chrome i18n detection</option>
+      </select>
+    </div>
+
+    <!-- Direction toggle with enhanced styling -->
+    <div class="direction-toggle">
+      <span class="direction-label">Direction:</span>
+      <label class="direction-switch">
+        <input type="checkbox" id="reverseToggle" />
+        <span class="direction-slider"></span>
+      </label>
+      <span id="directionLabel" class="direction-text">EN → Shaw</span>
+    </div>
+
+    <!-- Action buttons in grid -->
+    <div class="button-grid">
+      <button id="refreshButton">Refresh</button>
+      <button id="forceTransliterationButton">Force Apply</button>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Bottom buttons -->
+    <div class="bottom-buttons">
+      <button id="saveButton">Save</button>
+      <button id="resetDefaultsButton">Reset</button>
+    </div>
+
     <p id="statusMessage" class="status-message"></p>
     <script src="popup.js"></script>
   </body>
