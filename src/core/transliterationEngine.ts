@@ -3,6 +3,11 @@
  */
 import type { POSTaggedToken } from './posTagger';
 import { handleWordPunctuation, isPunctuationProcessed, extractOriginalWord, processPunctuatedWord, reconstructWordWithPunctuation } from './punctuationHandler';
+// Import names dictionary - use a simple object for now instead of dynamic import
+const namesDict: Record<string, string> = {
+  "who": "𐑣𐑵", // Doctor Who - distinct from the word "who" (𐑣)
+  "shaw": "𐑖𐑷", // Bernard Shaw - proper name pronunciation
+};
 
 export interface TransliterationEngine {
   transliterate(text: string): string;
@@ -19,6 +24,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
   private reverseDictionary: Map<string, string> = new Map();
   private previousWord: string = '';
   private previousPos: string = '';
+  private previousWordWasProperName: boolean = false;
 
   // Function word heuristics from original Python code
   // These handle pronunciation changes based on context
@@ -133,6 +139,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
     // Reset context at the beginning of each transliteration
     this.previousWord = '';
     this.previousPos = '';
+    this.previousWordWasProperName = false;
 
     // Split by whitespace but preserve words with attached punctuation
     const words = text.split(/(\s+)/);
@@ -149,6 +156,11 @@ export class ReadlexiconEngine implements TransliterationEngine {
           // Check if result is not in punctuation{word} format before updating context
           if (segment.match(/\w/) && !isPunctuationProcessed(result)) {
             this.previousWord = segment.toLowerCase().replace(/[^\w']/g, '');
+            // Track if this word is a proper name for the next word's context
+            const isCapitalized = segment.length > 0 && 
+              segment[0]! === segment[0]!.toUpperCase() && 
+              segment[0]! !== segment[0]!.toLowerCase();
+            this.previousWordWasProperName = isCapitalized && this.isProperNameWord(segment);
           }
           return result;
         }
@@ -179,6 +191,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
   transliterateWithPOSTags(tokens: POSTaggedToken[]): string {
     this.previousWord = '';
     this.previousPos = '';
+    this.previousWordWasProperName = false;
     return tokens
       .map(token => {
         if (token.text.match(/^\s+$/)) {
@@ -188,6 +201,11 @@ export class ReadlexiconEngine implements TransliterationEngine {
           if (token.text.match(/\w/)) {
             this.previousWord = token.text.toLowerCase();
             this.previousPos = token.pos;
+            // Track if this word is a proper name for the next word's context
+            const isCapitalized = token.text.length > 0 && 
+              token.text[0]! === token.text[0]!.toUpperCase() && 
+              token.text[0]! !== token.text[0]!.toLowerCase();
+            this.previousWordWasProperName = isCapitalized && this.isProperNameWord(token.text);
           }
           return result;
         }
@@ -248,28 +266,44 @@ export class ReadlexiconEngine implements TransliterationEngine {
     const originalWord = word;
     const clean = word.toLowerCase().replace(/[^\w']/g, '');
 
-    // 1. Function words check (highest priority)
+    // 1. Check names dictionary only for proper nouns (highest priority for proper names)
+    if (this.isProperNameWord(originalWord)) {
+      const nameResult = namesDict[originalWord.toLowerCase()];
+      if (nameResult) {
+        return this.shouldAddProperNameMarker(originalWord, clean, pos) ? 
+          '·' + nameResult : nameResult;
+      }
+    }
+
+    // 2. Function words check (highest priority for non-proper names)
     if (clean in this.functionWords) {
       return this.functionWords[clean]!.replace(/^:+|:+$/g, '');
     }
 
-    // 2. Handle "to" after specific function words (befto logic)
+    // 3. Handle "to" after specific function words (befto logic)
     if (clean === 'to' && this.previousWord in this.beftoMap) {
       return this.beftoMap[this.previousWord]!.replace(/^:+|:+$/g, '');
     }
 
     // Check if we have new POS-aware dictionary format
     if (this.dictionary && typeof this.dictionary.getTransliteration === 'function') {
+      // Check if this is a capitalized word for proper name marker
+      const isCapitalized = originalWord.length > 0 && 
+        originalWord[0]! === originalWord[0]!.toUpperCase() && 
+        originalWord[0]! !== originalWord[0]!.toLowerCase();
+      
       // 3. Try POS-specific lookup first if POS is provided
       const result = this.dictionary.getTransliteration(clean, pos);
       if (result) {
-        return result.replace(/^[.:]+|[.:]+$/g, '');
+        const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
+        return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanResult : cleanResult;
       }
       
       // 4. Fallback to basic lookup without POS
       const basicResult = this.dictionary.getTransliteration(clean);
       if (basicResult) {
-        return basicResult.replace(/^[.:]+|[.:]+$/g, '');
+        const cleanBasicResult = basicResult.replace(/^[.:]+|[.:]+$/g, '');
+        return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanBasicResult : cleanBasicResult;
       }
       
       // 5. Handle contractions with suffix patterns
@@ -300,19 +334,26 @@ export class ReadlexiconEngine implements TransliterationEngine {
       // 3. Prefer POS-specific dictionary entry if POS is provided
       if (pos && this.dictionary.has(clean + '_' + pos)) {
         const result = this.dictionary.get(clean + '_' + pos);
-        if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+        if (result) {
+          const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
+          return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanResult : cleanResult;
+        }
       }
 
       // 4. Check for direct dictionary match first (including contractions with underscore)
       if (this.dictionary.has(clean + '_')) {
         const result = this.dictionary.get(clean + '_');
-        if (result) return result.replace(/^[.:]+|[.:]+$/g, '');
+        if (result) {
+          const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
+          return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanResult : cleanResult;
+        }
       }
 
       // 5. Check direct dictionary match
       let result = this.dictionary.get(clean);
       if (result) {
-        return result.replace(/^[.:]+|[.:]+$/g, '');
+        const cleanResult = result.replace(/^[.:]+|[.:]+$/g, '');
+        return this.shouldAddProperNameMarker(originalWord, clean, pos) ? '·' + cleanResult : cleanResult;
       }
 
       // 6. Handle contractions with suffix patterns from dictionary
@@ -386,6 +427,123 @@ export class ReadlexiconEngine implements TransliterationEngine {
 
     // 12. Fallback - return original word if no transliteration found
     return word;
+  }
+
+  /**
+   * Helper method to check if a word should be considered a proper name
+   * (without determining if it needs a marker)
+   */
+  private isProperNameWord(originalWord: string): boolean {
+    if (!originalWord || originalWord.length === 0) return false;
+    
+    const cleanWord = originalWord.toLowerCase().replace(/[^\w']/g, '');
+    
+    // Common words that should NOT be considered proper names even when capitalized
+    const excludedWords = new Set([
+      // Language/nationality adjectives
+      'shavian', 'british', 'english', 'american', 'irish', 'scottish', 'welsh',
+      // Religious adjectives  
+      'christian', 'muslim', 'jewish', 'catholic', 'protestant',
+      // Months
+      'january', 'february', 'march', 'april', 'may', 'june', 
+      'july', 'august', 'september', 'october', 'november', 'december',
+      // Days
+      'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+      // Common function words that appear at sentence starts
+      'from', 'to', 'in', 'on', 'at', 'by', 'for', 'with', 'of', 'the', 'a', 'an',
+      'and', 'or', 'but', 'if', 'when', 'where', 'why', 'how', 'what', 'who', 'which',
+      'that', 'this', 'these', 'those', 'his', 'her', 'its', 'their', 'our', 'my',
+      'he', 'she', 'it', 'they', 'we', 'you', 'i',
+      // Common sentence starters
+      'after', 'before', 'during', 'since', 'until', 'while', 'although', 'because',
+      'however', 'therefore', 'moreover', 'furthermore', 'meanwhile', 'otherwise',
+    ]);
+
+    if (excludedWords.has(cleanWord)) {
+      return false;
+    }
+
+    // Single letters and initials should be considered proper names
+    if (cleanWord.length === 1) {
+      return true;
+    }
+
+    // Common proper name patterns
+    const properNamePatterns = [
+      /^[A-Z][a-z]+$/,  // Capitalized word like "Shaw", "Bernard"
+      /^[A-Z]+$/,       // All caps like abbreviations
+    ];
+
+    return properNamePatterns.some(pattern => pattern.test(originalWord));
+  }
+
+  /**
+   * Determine if a word should get a proper name marker (·)
+   * Based on capitalization and linguistic patterns
+   */
+  private shouldAddProperNameMarker(originalWord: string, cleanWord: string, pos?: string): boolean {
+    // Must be capitalized to be considered for proper name marker
+    if (!originalWord || originalWord.length === 0) return false;
+    const isCapitalized = originalWord[0]! === originalWord[0]!.toUpperCase() && 
+      originalWord[0]! !== originalWord[0]!.toLowerCase();
+    
+    if (!isCapitalized) return false;
+
+    // If this word is a proper name but the previous word was also a proper name,
+    // don't add a marker (only the first word in a multi-word proper name gets the marker)
+    if (this.previousWordWasProperName && this.isProperNameWord(originalWord)) {
+      return false;
+    }
+
+    // Common words that should NOT get proper name markers even when capitalized
+    const excludedWords = new Set([
+      // Language/nationality adjectives
+      'shavian', 'british', 'english', 'american', 'irish', 'scottish', 'welsh',
+      // Religious adjectives  
+      'christian', 'muslim', 'jewish', 'catholic', 'protestant',
+      // Months
+      'january', 'february', 'march', 'april', 'may', 'june', 
+      'july', 'august', 'september', 'october', 'november', 'december',
+      // Days
+      'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+      // Common function words that appear at sentence starts
+      'from', 'to', 'in', 'on', 'at', 'by', 'for', 'with', 'of', 'the', 'a', 'an',
+      'and', 'or', 'but', 'if', 'when', 'where', 'why', 'how', 'what', 'who', 'which',
+      'that', 'this', 'these', 'those', 'his', 'her', 'its', 'their', 'our', 'my',
+      'he', 'she', 'it', 'they', 'we', 'you', 'i',
+      // Common sentence starters
+      'after', 'before', 'during', 'since', 'until', 'while', 'although', 'because',
+      'however', 'therefore', 'moreover', 'furthermore', 'meanwhile', 'otherwise',
+    ]);
+
+    if (excludedWords.has(cleanWord)) {
+      return false;
+    }
+
+    // POS-based exclusions
+    if (pos) {
+      // Adjectives usually don't get proper name markers
+      if (pos.startsWith('JJ')) {
+        return false;
+      }
+      // Determiners, pronouns at start of sentence
+      if (pos === 'DT' || pos === 'PRP' || pos === 'WP') {
+        return false;
+      }
+    }
+
+    // Single letters and initials should get markers
+    if (cleanWord.length === 1) {
+      return true;
+    }
+
+    // Common proper name patterns
+    const properNamePatterns = [
+      /^[A-Z][a-z]+$/,  // Capitalized word like "Shaw", "Bernard"
+      /^[A-Z]+$/,       // All caps like abbreviations
+    ];
+
+    return properNamePatterns.some(pattern => pattern.test(originalWord));
   }
 
   addToDictionary(word: string, transliteration: string): void {

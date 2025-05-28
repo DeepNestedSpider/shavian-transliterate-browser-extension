@@ -51,12 +51,20 @@ function parseReadlexJson(content) {
     entries.frequencies[posKey] = bestVariant.freq;
     posSpecificEntries++;
 
-    // For basic dictionary, use the highest frequency entry for each word
-    if (!entries.basic[word] || 
+    // For basic dictionary, prefer the variant that exactly matches the word
+    // If no exact match, fall back to highest frequency
+    const exactMatch = variants.find(variant => 
+      variant.Latn && variant.Latn.toLowerCase() === word
+    );
+    
+    const basicVariant = exactMatch || bestVariant;
+    const basicShavian = basicVariant.Shaw.replace(/^[.:]+|[.:]+$/g, '');
+    
+    if (basicShavian && (!entries.basic[word] || 
         !entries.frequencies[`${word}_basic`] || 
-        bestVariant.freq > entries.frequencies[`${word}_basic`]) {
-      entries.basic[word] = cleanShavian;
-      entries.frequencies[`${word}_basic`] = bestVariant.freq;
+        basicVariant.freq > entries.frequencies[`${word}_basic`])) {
+      entries.basic[word] = basicShavian;
+      entries.frequencies[`${word}_basic`] = basicVariant.freq;
     }
   }
 
