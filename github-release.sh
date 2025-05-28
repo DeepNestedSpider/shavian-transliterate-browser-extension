@@ -87,13 +87,13 @@ fi
 
 # 5. Add all changes to staging (excluding releases folder since it's in .gitignore)
 echo "📋 Adding changes to Git staging..."
-git add ./public/manifest.json
+git add ./public/manifest.json ./README.md
 
 # 6. Commit the version bump
 echo "💾 Committing version v$NEW_VERSION..."
 git commit -m "Release v$NEW_VERSION
 
-- Bump version to v$NEW_VERSION"
+- Bump version to v$NEW_VERSION in manifest.json and README.md"
 
 # 7. Create a Git tag
 echo "🏷️  Creating Git tag v$NEW_VERSION..."
