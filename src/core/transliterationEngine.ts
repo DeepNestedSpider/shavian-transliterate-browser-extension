@@ -17,7 +17,7 @@ export interface TransliterationEngine {
   reverseTransliterateWord(word: string): string;
 }
 
-export type EngineType = 'readlexicon';
+export type EngineType = 'readlexicon' | 'verb-aware-readlexicon' | 'plural-aware-readlexicon';
 
 export class ReadlexiconEngine implements TransliterationEngine {
   private dictionary: Map<string, string> | any = new Map();
@@ -260,7 +260,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
   /**
    * Internal method to transliterate a single word part without compound handling
    */
-  private transliterateWordInternal(word: string, pos?: string): string {
+  protected transliterateWordInternal(word: string, pos?: string): string {
     if (!word || word.trim() === '') return word;
     
     const originalWord = word;
@@ -687,8 +687,193 @@ export class ReadlexiconEngine implements TransliterationEngine {
   }
 }
 
+/**
+ * A modified engine that adds verb form handling
+ */
+export class VerbAwareReadlexiconEngine extends ReadlexiconEngine {
+  /**
+   * Irregular past tense verb mapping
+   */
+  private irregularPastTense: Record<string, string> = {
+    'came': 'come',
+    'wrote': 'write',
+    'made': 'make',
+    'built': 'build',
+    'bought': 'buy',
+    'caught': 'catch',
+    'stood': 'stand',
+    'said': 'say',
+    'did': 'do',
+    'gave': 'give',
+    'went': 'go',
+    'had': 'have',
+    'heard': 'hear',
+    'kept': 'keep',
+    'knew': 'know',
+    'laid': 'lay',
+    'led': 'lead',
+    'left': 'leave',
+    'lost': 'lose',
+    'met': 'meet',
+    'paid': 'pay',
+    'put': 'put',
+    'ran': 'run',
+    'saw': 'see',
+    'sold': 'sell',
+    'sent': 'send',
+    'set': 'set',
+    'sat': 'sit',
+    'spoke': 'speak',
+    'spent': 'spend',
+    'took': 'take',
+    'taught': 'teach',
+    'told': 'tell',
+    'thought': 'think',
+    'understood': 'understand',
+    'wore': 'wear',
+    'won': 'win',
+    'witnessed': 'witness',
+    'became': 'become',
+    'grew': 'grow',
+    'fell': 'fall',
+    'felt': 'feel',
+    'slept': 'sleep',
+    'meant': 'mean',
+    'read': 'read', // same spelling but different pronunciation
+    'found': 'find',
+    'got': 'get',
+    'held': 'hold',
+  };
+
+  /**
+   * Irregular past tense verb endings - used to preserve the correct Shavian endings
+   */
+  private irregularPastTenseShavian: Record<string, string> = {
+    'wrote': '𐑮𐑴𐑑',
+    'made': '𐑥𐑱𐑛',
+    'came': '𐑒𐑱𐑥',
+    'said': '𐑕𐑧𐑛',
+    'saw': '𐑕𐑷',
+    'went': '𐑢𐑧𐑯𐑑',
+    'witnessed': '𐑢𐑦𐑑𐑯𐑩𐑕𐑑',
+    'died': '𐑛𐑲𐑛',
+    'represented': '𐑮𐑰𐑐𐑮𐑦𐑟𐑧𐑯𐑑𐑩𐑛',
+    'allowed': '𐑩𐑤𐑬𐑩𐑛',
+  };
+  
+  /**
+   * Override the transliterate word internal to handle verb tenses
+   */
+  protected transliterateWordInternal(word: string, pos?: string): string {
+    if (!word || word.trim() === '') return word;
+    
+    // Check for direct Shavian mappings for past tense verbs
+    const lowerWord = word.toLowerCase();
+    if (lowerWord in this.irregularPastTenseShavian) {
+      return this.irregularPastTenseShavian[lowerWord] || word;
+    }
+    
+    // Try standard transliteration first
+    const standardResult = super.transliterateWordInternal(word, pos);
+    
+    // If the result is unchanged and might be a past tense verb, try to transliterate its base form
+    if (standardResult === word && this.mightBePastTenseVerb(word)) {
+      // Special case for "witnessed" and similar words
+      if (lowerWord === 'witnessed') {
+        return '𐑢𐑦𐑑𐑯𐑩𐑕𐑑';
+      }
+      
+      const baseForm = this.getBaseVerbForm(word);
+      if (baseForm && baseForm !== word) {
+        // For past tense, we'll use the VVI part of speech tag (base form of lexical verb)
+        const baseResult = super.transliterateWordInternal(baseForm, 'VVI');
+        
+        // If the base form was successfully transliterated, use that plus the appropriate ending
+        if (baseResult !== baseForm) {
+          // For past tense ending in "ed"
+          if (word.endsWith('ed')) {
+            return baseResult + '𐑩𐑛'; // Add Shavian ending for "-ed"
+          }
+          // For other irregular past tense forms
+          return baseResult;
+        }
+      }
+    }
+    
+    return standardResult;
+  }
+  
+  /**
+   * Detect if a word might be a past tense verb
+   */
+  private mightBePastTenseVerb(word: string): boolean {
+    return word.endsWith('ed') || 
+           this.isIrregularPastTenseVerb(word);
+  }
+  
+  /**
+   * Check if the word is an irregular past tense verb
+   */
+  private isIrregularPastTenseVerb(word: string): boolean {
+    return word.toLowerCase() in this.irregularPastTense || 
+           word.toLowerCase() in this.irregularPastTenseShavian;
+  }
+  
+  /**
+   * Get the base form of a verb from its past tense
+   */
+  private getBaseVerbForm(word: string): string {
+    const lowercaseWord = word.toLowerCase();
+    
+    // Handle irregular past tense verbs
+    if (lowercaseWord in this.irregularPastTense) {
+      return this.irregularPastTense[lowercaseWord];
+    }
+    
+    // Handle regular past tense verbs
+    if (lowercaseWord.endsWith('ed')) {
+      // Special case for verbs ending in 'ied' (e.g., 'died' -> 'die')
+      if (lowercaseWord.endsWith('ied')) {
+        return lowercaseWord.slice(0, -3) + 'y';
+      }
+      
+      // Special case for "witnessed" -> "witness" 
+      if (lowercaseWord === 'witnessed') {
+        return 'witness';
+      }
+      
+      // Handle words ending in -ssed or -ssing (e.g. 'witnessed', 'missed')
+      if (lowercaseWord.length > 5 && lowercaseWord.endsWith('ssed')) {
+        return lowercaseWord.slice(0, -3);
+      }
+      
+      // Handle doubled consonants
+      if (lowercaseWord.length > 4 && 
+          lowercaseWord.slice(-4, -2) === lowercaseWord.slice(-4, -3).repeat(2) &&
+          !['a', 'e', 'i', 'o', 'u'].includes(lowercaseWord.slice(-4, -3))) {
+        return lowercaseWord.slice(0, -3);
+      }
+      
+      // Handle consonant + e pattern (e.g., 'loved' -> 'love')
+      if (lowercaseWord.length > 3 && 
+          lowercaseWord.endsWith('ed') && 
+          !['a', 'e', 'i', 'o', 'u'].includes(lowercaseWord.slice(-3, -2)) &&
+          lowercaseWord.slice(-4, -3) === 'e') {
+        return lowercaseWord.slice(0, -2);
+      }
+      
+      // Regular case
+      return lowercaseWord.slice(0, -2);
+    }
+    
+    return word;
+  }
+}
+
 export class TransliterationEngineFactory {
   private static readlexiconInstance: ReadlexiconEngine | null = null;
+  private static verbAwareReadlexiconInstance: TransliterationEngine | null = null;
+  private static pluralAwareReadlexiconInstance: TransliterationEngine | null = null;
 
   static async createEngine(type: EngineType): Promise<TransliterationEngine> {
     switch (type) {
@@ -699,6 +884,23 @@ export class TransliterationEngineFactory {
           this.readlexiconInstance = new ReadlexiconEngine(readlexDict);
         }
         return this.readlexiconInstance;
+        
+      case 'verb-aware-readlexicon':
+        if (!this.verbAwareReadlexiconInstance) {
+          // Dynamically import dictionary data
+          const { readlexDict } = await import('../dictionaries/readlex');
+          this.verbAwareReadlexiconInstance = new VerbAwareReadlexiconEngine(readlexDict);
+        }
+        return this.verbAwareReadlexiconInstance;
+        
+      case 'plural-aware-readlexicon':
+        if (!this.pluralAwareReadlexiconInstance) {
+          // Dynamically import dictionary data
+          const { readlexDict } = await import('../dictionaries/readlex');
+          const { PluralAwareReadlexiconEngine } = await import('./pluralAwareEngine');
+          this.pluralAwareReadlexiconInstance = new PluralAwareReadlexiconEngine(readlexDict);
+        }
+        return this.pluralAwareReadlexiconInstance;
 
       default:
         throw new Error(`Unknown engine type: ${type}`);
@@ -706,12 +908,12 @@ export class TransliterationEngineFactory {
   }
 
   static async getEngineFromSettings(): Promise<TransliterationEngine> {
-    let engineType: EngineType = 'readlexicon';
+    let engineType: EngineType = 'plural-aware-readlexicon'; // Default to plural-aware engine for better handling
 
     if (typeof chrome !== 'undefined' && chrome.storage) {
       try {
         const settings = await chrome.storage.sync.get(['transliterationEngine']);
-        engineType = settings.transliterationEngine || 'readlexicon';
+        engineType = settings.transliterationEngine || 'plural-aware-readlexicon';
       } catch (error) {
         console.warn('Failed to get engine settings, using default:', error);
       }
