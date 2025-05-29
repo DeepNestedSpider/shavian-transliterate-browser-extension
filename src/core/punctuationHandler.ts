@@ -84,7 +84,7 @@ export function handleContractions(word: string): {
 
 /**
  * Handles possessive forms by converting "'s" to Shavian "𐑟"
- * Also handles possessives inside quotes like "Shaw's" 
+ * Also handles possessives inside quotes like "Shaw's"
  * @param word - The word to check for possessive form
  * @returns Object with the base word and possessive part
  */
@@ -96,7 +96,7 @@ export function handlePossessives(word: string): {
   const possessiveMatch = word.match(POSSESSIVE_PATTERN);
   if (possessiveMatch) {
     const baseWord = possessiveMatch[1] ?? '';
-    
+
     // Check if this is actually a contraction (like "it's", "that's", "let's")
     if (CONTRACTION_WORDS_ENDING_S.includes(baseWord.toLowerCase())) {
       return {
@@ -104,7 +104,7 @@ export function handlePossessives(word: string): {
         possessivePart: '',
       };
     }
-    
+
     return {
       baseWord,
       possessivePart: '𐑟', // Convert "'s" to Shavian /z/ sound
@@ -117,7 +117,7 @@ export function handlePossessives(word: string): {
     const leadingQuote = quotedPossessiveMatch[1] ?? '';
     const baseWord = quotedPossessiveMatch[2] ?? '';
     const trailingQuote = quotedPossessiveMatch[3] ?? '';
-    
+
     // Check if this is actually a contraction
     if (CONTRACTION_WORDS_ENDING_S.includes(baseWord.toLowerCase())) {
       return {
@@ -125,7 +125,7 @@ export function handlePossessives(word: string): {
         possessivePart: '',
       };
     }
-    
+
     return {
       baseWord: leadingQuote + baseWord + trailingQuote,
       possessivePart: '𐑟',
@@ -188,11 +188,15 @@ export function processPunctuatedWord(word: string): PunctuationProcessingResult
 
   // Check for possessives FIRST, before any punctuation separation
   const { baseWord: possessiveBase, possessivePart } = handlePossessives(word);
-  
+
   if (possessivePart) {
     // It's a possessive form, now separate any additional punctuation from the base word
-    const { cleanWord: finalCleanWord, leadingPunctuation, trailingPunctuation } = separatePunctuation(possessiveBase);
-    
+    const {
+      cleanWord: finalCleanWord,
+      leadingPunctuation,
+      trailingPunctuation,
+    } = separatePunctuation(possessiveBase);
+
     return {
       hasNonAlphabetic: true,
       processedWord: word,
@@ -203,7 +207,11 @@ export function processPunctuatedWord(word: string): PunctuationProcessingResult
   }
 
   // If not possessive, separate punctuation normally
-  const { cleanWord: wordWithoutExternalPunctuation, leadingPunctuation, trailingPunctuation } = separatePunctuation(word);
+  const {
+    cleanWord: wordWithoutExternalPunctuation,
+    leadingPunctuation,
+    trailingPunctuation,
+  } = separatePunctuation(word);
 
   // Handle contractions if it's not a possessive
   const { baseWord, contractionPart } = handleContractions(wordWithoutExternalPunctuation);

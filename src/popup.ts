@@ -131,7 +131,6 @@ class PopupManager {
       this.reverseToggle.checked = settings.reverseMode || DEFAULT_SETTINGS.reverseMode;
       this.updateDirectionLabel();
 
-      console.log('Settings loaded successfully:', settings);
     } catch (error) {
       console.error('Error loading settings:', error);
       this.showStatusMessage('Error loading settings.', 'error');
@@ -150,8 +149,6 @@ class PopupManager {
 
       await chrome.storage.sync.set(settings);
       this.showStatusMessage('Settings saved successfully!', 'success');
-
-      console.log('Settings saved:', settings);
 
       if (reloadPage) {
         await this.refreshPage();
@@ -253,7 +250,6 @@ class PopupManager {
       this.updateDirectionLabel();
 
       this.showStatusMessage('Settings reset to default.', 'success');
-      console.log('Settings reset to defaults:', DEFAULT_SETTINGS);
     } catch (error) {
       console.error('Error resetting settings:', error);
       this.showStatusMessage('Error resetting settings.', 'error');

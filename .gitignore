@@ -51,3 +51,16 @@ temp_*
 # Releases and builds
 releases
 shavian-transliterate-browser-extension
+
+# Test files and temporary scripts
+test-*.js
+test-*.ts
+demo_*.js
+debug-*.js
+
+# macOS
+.DS_Store
+
+# Package manager lock files (keep bun.lock, ignore others)
+package-lock.json
+yarn.lock

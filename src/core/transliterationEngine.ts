@@ -140,34 +140,34 @@ export class ReadlexiconEngine implements TransliterationEngine {
 
     // Add specific reverse mappings to handle problematic cases
     const specificReverseMappings: Record<string, string> = {
-      '𐑑': 'to',  // Ensure "𐑑" maps to "to" not "two"
+      '𐑑': 'to', // Ensure "𐑑" maps to "to" not "two"
       '𐑮𐑰𐑛': 'read', // Ensure "𐑮𐑰𐑛" maps to "read" not "reed"
       '𐑘𐑻': 'year', // Ensure "𐑘𐑻" maps to "year" not "yr"
       '𐑣𐑽': 'hear', // Ensure "𐑣𐑽" maps to "hear" not "heir"
-      '𐑸': 'are',   // Ensure "𐑸" maps to "are" correctly
-      '𐑹': 'or',    // Ensure "𐑹" maps to "or" not "ore"
+      '𐑸': 'are', // Ensure "𐑸" maps to "are" correctly
+      '𐑹': 'or', // Ensure "𐑹" maps to "or" not "ore"
       '𐑥𐑱𐑛': 'made', // Ensure "𐑥𐑱𐑛" maps to "made" not "maid"
       '𐑒𐑪𐑟': 'cause', // Ensure "𐑒𐑪𐑟" maps to "cause" not "caws"
-      '𐑣𐑵': 'who',     // Function word "who" (to avoid conflict with single 'h')
-      '𐑚𐑰': 'be',     // Function word "be"
-      '𐑚𐑲': 'by',     // Function word "by"
-      '𐑞': 'the',     // Function word "the"
-      '𐑩𐑯': 'an',     // Article "an" (to avoid conflict with single schwa)
-      '𐑯𐑛': 'and',    // Function word "and" (to avoid conflict with single 'n')
-      '𐑦𐑑': 'it',     // Function word "it"
-      '𐑦𐑯': 'in',     // Preposition "in"
-      '𐑪𐑯': 'on',     // Preposition "on"
-      '𐑨𐑑': 'at',     // Preposition "at"
-      '𐑦𐑟': 'is',     // Verb "is"
-      '𐑢𐑪𐑟': 'was',   // Verb "was"
-      '𐑢𐑻': 'were',   // Verb "were"
-      '𐑓': 'for',     // Preposition "for"
-      '𐑢𐑦𐑞': 'with',  // Preposition "with"
+      '𐑣𐑵': 'who', // Function word "who" (to avoid conflict with single 'h')
+      '𐑚𐑰': 'be', // Function word "be"
+      '𐑚𐑲': 'by', // Function word "by"
+      '𐑞': 'the', // Function word "the"
+      '𐑩𐑯': 'an', // Article "an" (to avoid conflict with single schwa)
+      '𐑯𐑛': 'and', // Function word "and" (to avoid conflict with single 'n')
+      '𐑦𐑑': 'it', // Function word "it"
+      '𐑦𐑯': 'in', // Preposition "in"
+      '𐑪𐑯': 'on', // Preposition "on"
+      '𐑨𐑑': 'at', // Preposition "at"
+      '𐑦𐑟': 'is', // Verb "is"
+      '𐑢𐑪𐑟': 'was', // Verb "was"
+      '𐑢𐑻': 'were', // Verb "were"
+      '𐑓': 'for', // Preposition "for"
+      '𐑢𐑦𐑞': 'with', // Preposition "with"
       '𐑓𐑮𐑪𐑥': 'from', // Preposition "from"
       // Single character mappings for better accuracy
-      '𐑜': 'g',       // Single 'g' character
-      '𐑒': 'k',       // Single 'k' character
-      '𐑩': 'a',       // Article "a" (single schwa should be "a" not capitalized)
+      '𐑜': 'g', // Single 'g' character
+      '𐑒': 'k', // Single 'k' character
+      '𐑩': 'a', // Article "a" (single schwa should be "a" not capitalized)
     };
 
     for (const [shavian, english] of Object.entries(specificReverseMappings)) {
@@ -269,23 +269,23 @@ export class ReadlexiconEngine implements TransliterationEngine {
       const parts = word.split('—');
       const transliteratedParts = parts.map((part, index) => {
         if (part.trim() === '') return part;
-        
+
         // If the part contains multiple words (has spaces), treat it as text to transliterate
         // rather than a single word
-        const transliteratedPart = part.includes(' ') 
-          ? this.transliterate(part) 
+        const transliteratedPart = part.includes(' ')
+          ? this.transliterate(part)
           : this.transliterateWordInternal(part, pos);
-        
+
         // Update context after each part for proper name tracking
         if (part.match(/\w/)) {
           this.previousWord = part.toLowerCase().replace(/[^\w']/g, '');
-          const isCapitalized = 
+          const isCapitalized =
             part.length > 0 &&
             part[0]! === part[0]!.toUpperCase() &&
             part[0]! !== part[0]!.toLowerCase();
           this.previousWordWasProperName = isCapitalized && this.isProperNameWord(part);
         }
-        
+
         return transliteratedPart;
       });
       return transliteratedParts.join('—');
@@ -833,7 +833,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
   reverseTransliterate(text: string): string {
     const words = text.split(/(\s+)/);
     let isFirstWordOfSentence = true;
-    
+
     return words
       .map(segment => {
         if (segment.match(/^\s+$/)) {
@@ -848,11 +848,26 @@ export class ReadlexiconEngine implements TransliterationEngine {
         } else if (segment.length > 0) {
           const reversedWord = this.reverseTransliterateWord(segment);
           let result = reversedWord;
-          
+
           // Apply capitalization rules
           if (isFirstWordOfSentence && reversedWord.length > 0) {
             // Only capitalize if it's not a function word/article unless truly at sentence start
-            const isArticleOrFunction = ['a', 'an', 'the', 'and', 'or', 'but', 'of', 'in', 'on', 'at', 'by', 'for', 'with', 'from'].includes(reversedWord.toLowerCase());
+            const isArticleOrFunction = [
+              'a',
+              'an',
+              'the',
+              'and',
+              'or',
+              'but',
+              'of',
+              'in',
+              'on',
+              'at',
+              'by',
+              'for',
+              'with',
+              'from',
+            ].includes(reversedWord.toLowerCase());
             if (!isArticleOrFunction || segment === words[0]) {
               result = this.capitalizeFirstLetter(reversedWord);
             }
@@ -861,7 +876,7 @@ export class ReadlexiconEngine implements TransliterationEngine {
             // Handle proper name markers
             result = this.capitalizeProperName(reversedWord);
           }
-          
+
           return result;
         }
         return segment;
@@ -960,14 +975,17 @@ export class ReadlexiconEngine implements TransliterationEngine {
     const trailingPunctuation = word.match(/[.,:;!?]+$/);
     const leadingPunctuation = word.match(/^[·‹›]+/);
     let cleanWordForLookup = word;
-    
+
     if (trailingPunctuation || leadingPunctuation) {
       // Remove punctuation for lookup but preserve it for reconstruction
       cleanWordForLookup = word.replace(/^[·‹›]+|[.,:;!?]+$/g, '');
     }
 
     // Remove punctuation for lookup but preserve original for fallback
-    const clean = cleanWordForLookup.replace(/^[^\u{10450}-\u{1047F}]*|[^\u{10450}-\u{1047F}]*$/gu, '');
+    const clean = cleanWordForLookup.replace(
+      /^[^\u{10450}-\u{1047F}]*|[^\u{10450}-\u{1047F}]*$/gu,
+      ''
+    );
 
     // Direct lookup in reverse dictionary
     const result = this.reverseDictionary.get(clean);
@@ -1023,25 +1041,31 @@ export class ReadlexiconEngine implements TransliterationEngine {
    */
   private capitalizeProperName(word: string): string {
     if (!word || word.length === 0) return word;
-    
+
     // Handle complex proper name patterns like "g. k. chesterton"
     if (word.includes('. ')) {
-      return word.split(' ').map(part => {
-        if (part.endsWith('.')) {
-          // Handle initials like "g." -> "G."
-          return part.charAt(0).toUpperCase() + part.slice(1);
-        } else {
-          // Handle regular names
-          return this.capitalizeFirstLetter(part);
-        }
-      }).join(' ');
+      return word
+        .split(' ')
+        .map(part => {
+          if (part.endsWith('.')) {
+            // Handle initials like "g." -> "G."
+            return part.charAt(0).toUpperCase() + part.slice(1);
+          } else {
+            // Handle regular names
+            return this.capitalizeFirstLetter(part);
+          }
+        })
+        .join(' ');
     }
-    
+
     // Handle hyphenated names
     if (word.includes('-')) {
-      return word.split('-').map(part => this.capitalizeFirstLetter(part)).join('-');
+      return word
+        .split('-')
+        .map(part => this.capitalizeFirstLetter(part))
+        .join('-');
     }
-    
+
     // Regular single word
     return this.capitalizeFirstLetter(word);
   }

@@ -28,7 +28,7 @@ A modern browser extension that automatically transliterates English text on web
 ### 🔤 Intelligent Transliteration
 
 - **Real-time conversion**: Automatically transliterates English text to Shavian script or IPA as pages load
-- **Multiple transliteration engines**: 
+- **Multiple transliteration engines**:
   - **English to Shavian**: Uses the readlexicon-based transliterator for accurate pronunciation-to-script conversion
   - **English to IPA**: Converts English text to International Phonetic Alphabet pronunciation (125,000+ word dictionary)
 - **Dynamic content support**: Monitors and transliterates content added via JavaScript using MutationObserver

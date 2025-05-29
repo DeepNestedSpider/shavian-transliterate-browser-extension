@@ -1,6 +1,6 @@
 /**
  * IPA (International Phonetic Alphabet) Dictionary for English (US)
- * 
+ *
  * This dictionary maps English words to their IPA pronunciations.
  * Used for phonetic-based transliteration to Shavian script.
  */
@@ -24,21 +24,24 @@ const ipaDictionary: IPADictionaryEntry = (ipaData as IPADictionary).en_US[0] ||
  * @param format - How to format multiple pronunciations: 'all' (default), 'primary', or 'formatted'
  * @returns IPA pronunciation string or null if not found
  */
-export function getIPAPronunciation(word: string, format: 'all' | 'primary' | 'formatted' = 'formatted'): string | null {
+export function getIPAPronunciation(
+  word: string,
+  format: 'all' | 'primary' | 'formatted' = 'formatted'
+): string | null {
   const normalizedWord = word.toLowerCase().trim();
   const pronunciation = ipaDictionary[normalizedWord];
-  
+
   if (!pronunciation) {
     return null;
   }
-  
+
   // Handle different formatting options
   switch (format) {
     case 'primary':
       // Return only the first pronunciation
       const firstPronunciation = pronunciation.split(', ')[0];
       return firstPronunciation || null;
-    
+
     case 'formatted':
       // Format multiple pronunciations clearly
       const pronunciations = pronunciation.split(', ');
@@ -47,7 +50,7 @@ export function getIPAPronunciation(word: string, format: 'all' | 'primary' | 'f
       }
       // Format as: word[pronunciation1|pronunciation2|...]
       return `${normalizedWord}[${pronunciations.join('|')}]`;
-    
+
     case 'all':
     default:
       // Return the original string with all pronunciations
@@ -88,9 +91,7 @@ export function getDictionarySize(): number {
  */
 export function searchByPrefix(prefix: string): string[] {
   const normalizedPrefix = prefix.toLowerCase().trim();
-  return Object.keys(ipaDictionary).filter(word => 
-    word.startsWith(normalizedPrefix)
-  );
+  return Object.keys(ipaDictionary).filter(word => word.startsWith(normalizedPrefix));
 }
 
 export { ipaDictionary };

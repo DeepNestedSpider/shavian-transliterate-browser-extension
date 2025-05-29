@@ -12,15 +12,15 @@ export interface ContentScriptAPI {
   // Storage utilities
   getStorageItem(key: string): Promise<any>;
   setStorageItem(key: string, value: any): Promise<void>;
-  
+
   // DOM utilities
   waitForElement(selector: string, timeout?: number): Promise<Element>;
   observeElementChanges(element: Element, callback: MutationCallback): MutationObserver;
-  
+
   // Communication utilities
   sendMessage(message: ExtensionMessage): Promise<any>;
   onMessage(callback: (message: ExtensionMessage) => void): void;
-  
+
   // Page utilities
   getPageLanguage(): string | null;
   isPageVisible(): boolean;
@@ -43,8 +43,8 @@ export class ContentScriptHelper implements ContentScriptAPI {
    * Get item from extension storage
    */
   async getStorageItem(key: string): Promise<any> {
-    return new Promise((resolve) => {
-      chrome.storage.sync.get([key], (result) => {
+    return new Promise(resolve => {
+      chrome.storage.sync.get([key], result => {
         resolve(result[key]);
       });
     });
@@ -54,7 +54,7 @@ export class ContentScriptHelper implements ContentScriptAPI {
    * Set item in extension storage
    */
   async setStorageItem(key: string, value: any): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       chrome.storage.sync.set({ [key]: value }, () => {
         resolve();
       });
@@ -72,7 +72,7 @@ export class ContentScriptHelper implements ContentScriptAPI {
         return;
       }
 
-      const observer = new MutationObserver((mutations) => {
+      const observer = new MutationObserver(mutations => {
         const element = document.querySelector(selector);
         if (element) {
           observer.disconnect();
@@ -82,7 +82,7 @@ export class ContentScriptHelper implements ContentScriptAPI {
 
       observer.observe(document.body, {
         childList: true,
-        subtree: true
+        subtree: true,
       });
 
       setTimeout(() => {
@@ -100,7 +100,7 @@ export class ContentScriptHelper implements ContentScriptAPI {
     observer.observe(element, {
       childList: true,
       subtree: true,
-      characterData: true
+      characterData: true,
     });
     return observer;
   }
@@ -110,7 +110,7 @@ export class ContentScriptHelper implements ContentScriptAPI {
    */
   async sendMessage(message: ExtensionMessage): Promise<any> {
     return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage(message, (response) => {
+      chrome.runtime.sendMessage(message, response => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
@@ -158,7 +158,7 @@ export class ContentScriptHelper implements ContentScriptAPI {
    * Wait for page to be fully loaded
    */
   async waitForPageLoad(): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (document.readyState === 'complete') {
         resolve();
       } else {
@@ -193,7 +193,7 @@ export class ContentScriptHelper implements ContentScriptAPI {
       if (!inThrottle) {
         func.apply(this, args);
         inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
+        setTimeout(() => (inThrottle = false), limit);
       }
     };
   }
@@ -211,7 +211,7 @@ export class ContentScriptHelper implements ContentScriptAPI {
   scrollToElement(element: Element): void {
     element.scrollIntoView({
       behavior: 'smooth',
-      block: 'center'
+      block: 'center',
     });
   }
 
@@ -248,9 +248,9 @@ export class ContentScriptHelper implements ContentScriptAPI {
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       transition: opacity 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
       notification.style.opacity = '0';
       setTimeout(() => {
@@ -305,14 +305,10 @@ export const ContentUtils = {
    */
   findTextNodes(searchText: string, container: Element = document.body): Text[] {
     const textNodes: Text[] = [];
-    const walker = document.createTreeWalker(
-      container,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
 
     let node;
-    while (node = walker.nextNode()) {
+    while ((node = walker.nextNode())) {
       if (node.textContent && node.textContent.includes(searchText)) {
         textNodes.push(node as Text);
       }
@@ -335,7 +331,7 @@ export const ContentUtils = {
           new RegExp(text, 'gi'),
           `<span class="${className}">$&</span>`
         );
-        
+
         if (highlightedContent !== content) {
           const wrapper = document.createElement('span');
           wrapper.innerHTML = highlightedContent;
@@ -346,5 +342,5 @@ export const ContentUtils = {
     });
 
     return count;
-  }
+  },
 };

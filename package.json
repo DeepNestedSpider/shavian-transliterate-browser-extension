@@ -7,6 +7,7 @@
     "build:dist": "bun run scripts/build.ts",
     "increment-version": "bun run scripts/version.ts",
     "test": "bun test",
+    "test:all": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
     "test:verbose": "bun test --verbose",
@@ -32,8 +33,6 @@
   },
   "dependencies": {
     "compromise": "^14.14.4",
-    "node": "^22.16.0",
-    "ts-node": "^10.9.2",
     "wordpos": "^2.1.0"
   }
 }
