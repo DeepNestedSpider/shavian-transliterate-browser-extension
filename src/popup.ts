@@ -18,6 +18,7 @@ enum LanguageCheckMode {
  */
 enum TransliterationEngine {
   Readlexicon = 'readlexicon',
+  EnglishToIPA = 'english-to-ipa',
 }
 
 /**

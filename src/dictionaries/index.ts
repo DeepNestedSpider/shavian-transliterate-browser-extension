@@ -1,13 +1,15 @@
 // Dictionary exports
-// Only readlex dictionary is used in the application
+// Available dictionaries: readlex (Shavian), ipa (IPA pronunciation)
 
 import { readlexDict } from './readlex';
 import { namesDict } from './names';
+import { ipaDictionary } from './ipa';
 
-export { readlexDict, namesDict };
+export { readlexDict, namesDict, ipaDictionary };
 
-export type DictionaryName = 'readlex';
+export type DictionaryName = 'readlex' | 'ipa';
 
 export const dictionaries = {
   readlex: readlexDict,
+  ipa: ipaDictionary,
 } as const;

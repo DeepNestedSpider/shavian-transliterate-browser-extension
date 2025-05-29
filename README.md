@@ -27,10 +27,12 @@ A modern browser extension that automatically transliterates English text on web
 
 ### 🔤 Intelligent Transliteration
 
-- **Real-time conversion**: Automatically transliterates English text to Shavian script as pages load
+- **Real-time conversion**: Automatically transliterates English text to Shavian script or IPA as pages load
+- **Multiple transliteration engines**: 
+  - **English to Shavian**: Uses the readlexicon-based transliterator for accurate pronunciation-to-script conversion
+  - **English to IPA**: Converts English text to International Phonetic Alphabet pronunciation (125,000+ word dictionary)
 - **Dynamic content support**: Monitors and transliterates content added via JavaScript using MutationObserver
 - **Smart text recognition**: Uses `Intl.Segmenter` for accurate word boundary detection
-- **Advanced transliteration engine**: Uses the readlexicon-based transliterator for accurate pronunciation-to-script conversion
 - **Typography enhancements**: Converts quotes to Shavian angle brackets (‹›) while preserving apostrophes
 
 ### 🧠 Smart Content Detection
@@ -45,6 +47,9 @@ A modern browser extension that automatically transliterates English text on web
 ### ⚙️ Flexible Configuration
 
 - **Toggle transliteration**: Easy on/off switch via popup interface
+- **Transliteration engine selection**: Choose between:
+  - Shavian (Readlexicon-based)
+  - IPA (International Phonetic Alphabet)
 - **Language detection modes**:
   - HTML lang attribute detection
   - Chrome i18n page detection
@@ -94,9 +99,10 @@ bun run build:dist
 2. **Click the extension icon** in your browser toolbar to open the popup
 3. **Configure your preferences**:
    - Toggle transliteration on/off
+   - Choose transliteration engine (Shavian or IPA)
    - Choose language detection method
    - Toggle transliteration direction
-4. **Browse English websites** - text will be automatically transliterated to/from Shavian!
+4. **Browse English websites** - text will be automatically transliterated to Shavian or IPA!
 
 ## 🛠️ Development
 
@@ -206,16 +212,20 @@ bun run build:dist
 │   │   └── verbAwareEngine.ts        # Verb-aware transliteration
 │   ├── dictionaries/
 │   │   ├── index.ts                  # Dictionary exports
+│   │   ├── ipa-en_US.json            # IPA dictionary data (125,000+ entries)
+│   │   ├── ipa.ts                    # IPA dictionary interface
 │   │   ├── names.ts                  # Name dictionaries
 │   │   ├── readlex.json              # Readlexicon dictionary data
 │   │   └── readlex.ts                # Readlexicon dictionary
 │   └── transliterators/
 │       └── english/
+│           ├── englishToIPA.ts       # English to IPA transliterator
 │           ├── englishToShavian.ts   # English to Shavian transliterator
 │           ├── index.ts              # English transliterator exports
 │           ├── shavianToEnglish.ts   # Shavian to English transliterator
 │           └── types.ts              # English transliterator types
 └── tests/                            # Test files
+    ├── englishToIPA.test.ts
     ├── pluralAware.test.ts
     ├── posAwareTransliteration.test.ts
     ├── possessive.test.ts
@@ -279,6 +289,7 @@ bun run test:all
 - ✅ **Modular Transliteration System**: Plugin-based architecture for multiple engines
 - ✅ **Readlexicon Integration**: Translate Dechifro's Python shavianizer to JavaScript and Implement the Readlexicon dictionary
 - ✅ **Both ways transliteration**: Transliterate shavian to Latin Alphabet
+- ✅ **IPA Support**: English to International Phonetic Alphabet (IPA) transliteration with 125,000+ word dictionary
 
 ### 🎯 High Priority
 

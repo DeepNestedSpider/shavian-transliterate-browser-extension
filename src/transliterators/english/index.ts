@@ -66,6 +66,7 @@ export class TransliterationEngineFactory {
   private static readlexiconInstance: CombinedTransliterationEngine | null = null;
   private static verbAwareReadlexiconInstance: TransliterationEngine | null = null;
   private static pluralAwareReadlexiconInstance: TransliterationEngine | null = null;
+  private static englishToIPAInstance: TransliterationEngine | null = null;
 
   static async createEngine(type: EngineType): Promise<TransliterationEngine> {
     switch (type) {
@@ -95,6 +96,14 @@ export class TransliterationEngineFactory {
         }
         return this.pluralAwareReadlexiconInstance;
 
+      case 'english-to-ipa':
+        if (!this.englishToIPAInstance) {
+          // Dynamically import IPA engine
+          const { EnglishToIPAEngine } = await import('./englishToIPA');
+          this.englishToIPAInstance = new EnglishToIPAEngine();
+        }
+        return this.englishToIPAInstance;
+
       default:
         throw new Error(`Unknown engine type: ${type}`);
     }
@@ -119,4 +128,5 @@ export class TransliterationEngineFactory {
 // Export individual engines for direct use
 export { EnglishToShavianEngine } from './englishToShavian';
 export { ShavianToEnglishEngine } from './shavianToEnglish';
-export type { TransliterationEngine, EngineType } from './types';
+export { EnglishToIPAEngine } from './englishToIPA';
+export type { TransliterationEngine, EngineType, TransliterationResult } from './types';

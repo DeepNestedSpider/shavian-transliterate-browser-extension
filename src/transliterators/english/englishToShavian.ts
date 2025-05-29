@@ -327,10 +327,44 @@ export class EnglishToShavianEngine implements TransliterationEngine {
   }
 
   /**
+   * Check if a word is already in Shavian script or IPA format
+   */
+  private isAlreadyTransliterated(word: string): boolean {
+    // Check for Shavian script first (Unicode range: U+10450–U+1047F)
+    const shavianRegex = /[\u{10450}-\u{1047F}]/u;
+    if (shavianRegex.test(word)) {
+      return true;
+    }
+    
+    // Check for formatted IPA: word[/pronunciation1/|/pronunciation2/]
+    if (/\w+\[\/[^\/]+\/(\|\/[^\/]+\/)*\]/.test(word)) {
+      return true;
+    }
+    
+    // Check for simple IPA notation: /pronunciation/
+    if (/^\/[^\/]+\/$/.test(word.trim())) {
+      return true;
+    }
+    
+    // Check for IPA phonetic characters (common IPA symbols)
+    const ipaChars = /[ˈˌːˑəɚɛɪɒɔʊʌʃʒθðŋɑæɜɝɨɵɞɤɯɞʏʎɢʁχʕʔˤʷʲˠˀˈˌ]/;
+    if (ipaChars.test(word)) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
    * Internal method to transliterate a single word part without compound handling
    */
   protected transliterateWordInternal(word: string, pos?: string): string {
     if (!word || word.trim() === '') return word;
+
+    // Check if word is already transliterated (Shavian or IPA)
+    if (this.isAlreadyTransliterated(word)) {
+      return word; // Return as-is if already transliterated
+    }
 
     const originalWord = word;
     const clean = word.toLowerCase().replace(/[^\w']/g, '');
