@@ -141,6 +141,7 @@ class LanguageDetector {
           'languageCheckMode',
           'transliterationEnabled',
           'reverseMode',
+          'perSiteSettings',
         ]);
 
         // Validate and apply languageCheckMode setting
@@ -159,6 +160,16 @@ class LanguageDetector {
         // Apply reverseMode setting
         if (typeof settings.reverseMode === 'boolean') {
           reverseMode = settings.reverseMode;
+        }
+
+        // Check per-site setting and override global setting if needed
+        const currentDomain = window.location.hostname;
+        if (settings.perSiteSettings && typeof settings.perSiteSettings === 'object') {
+          const perSiteEnabled = settings.perSiteSettings[currentDomain];
+          if (typeof perSiteEnabled === 'boolean') {
+            transliterationEnabled = transliterationEnabled && perSiteEnabled;
+            console.log(`Per-site setting for ${currentDomain}: ${perSiteEnabled ? 'enabled' : 'disabled'}`);
+          }
         }
       } catch (error) {
         console.warn(

@@ -55,6 +55,8 @@ class PopupManager {
   private resetDefaultsButton: HTMLButtonElement;
   private reverseToggle: HTMLInputElement;
   private directionLabel: HTMLSpanElement;
+  private perSiteToggle: HTMLInputElement;
+  private currentDomain: string | null = null;
 
   constructor() {
     // Initialize DOM element references
@@ -72,8 +74,10 @@ class PopupManager {
     this.resetDefaultsButton = this.getElement('resetDefaultsButton') as HTMLButtonElement;
     this.reverseToggle = this.getElement('reverseToggle') as HTMLInputElement;
     this.directionLabel = this.getElement('directionLabel') as HTMLSpanElement;
+    this.perSiteToggle = this.getElement('perSiteToggle') as HTMLInputElement;
 
     this.setupEventListeners();
+    this.initPerSite();
   }
 
   /**
@@ -108,6 +112,38 @@ class PopupManager {
     this.forceTransliterationButton.addEventListener('click', () => this.forceTransliteration());
     this.refreshButton.addEventListener('click', () => this.refreshPage());
     this.resetDefaultsButton.addEventListener('click', () => this.resetToDefaults());
+  }
+
+  private async initPerSite() {
+    // Get current tab's domain
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.url) return;
+    try {
+      const url = new URL(tab.url);
+      this.currentDomain = url.hostname;
+      await this.loadPerSiteSetting();
+    } catch (e) {
+      this.currentDomain = null;
+    }
+  }
+
+  private async loadPerSiteSetting() {
+    if (!this.currentDomain) return;
+    const data = await chrome.storage.sync.get(['perSiteSettings']);
+    const perSiteSettings = data.perSiteSettings || {};
+    const enabled = perSiteSettings[this.currentDomain];
+    this.perSiteToggle.checked = enabled !== false; // default to true
+    this.perSiteToggle.disabled = false;
+    this.perSiteToggle.addEventListener('change', () => this.savePerSiteSetting());
+  }
+
+  private async savePerSiteSetting() {
+    if (!this.currentDomain) return;
+    const data = await chrome.storage.sync.get(['perSiteSettings']);
+    const perSiteSettings = data.perSiteSettings || {};
+    perSiteSettings[this.currentDomain] = this.perSiteToggle.checked;
+    await chrome.storage.sync.set({ perSiteSettings });
+    this.showStatusMessage('Per-site setting saved!', 'success');
   }
 
   /**
